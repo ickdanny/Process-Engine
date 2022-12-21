@@ -1,0 +1,10 @@
+*.xml
+*.iml
+*.png
+*.mid
+*.cfg
+*.zip
+*.dlg
+.idea/
+cmake-build-debug/
+CMakeLists.txt
