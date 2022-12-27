@@ -8,8 +8,9 @@
 #include <fstream>
 #include "windowsInclude.h"
 
-/*
-#include "Game\Config.h"
+
+#include "GameConfig.h"
+ /*
 #include "Game\GameLoop.h"
 #include "Game\Resources\ResourceMasterStorage.h"
 #include "Game\WindowModes.h"
@@ -22,16 +23,17 @@
 #include "Sound\MidiHub.h"
 #include "Adaptor\ComLibraryGuard.h"
 #include "Game/Game.h"
-#include "Game/Settings.h"
-*/
+ */
+#include "Settings.h"
+
 
 //debug
 #include "ConsoleOutput.h"
 #include "Logging.h"
-/*
-using namespace wasp;
-using namespace wasp::game;
 
+using namespace process;
+using namespace process::game;
+/*
 using window::getPrimaryMonitorInfo;
 using window::getWindowBorderWidthPadding;
 using window::getWindowBorderHeightPadding;
@@ -46,12 +48,15 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
         wasp::debug::initConsoleOutput();
         wasp::debug::log("test");
 
-        /*
+
         //read settings
-        Settings settings{
-                settings::readOrCreateSettingsFromFile(config::mainConfigPath)
+        wasp::game::Settings settings{
+                wasp::game::settings::readOrCreateSettingsFromFile(
+                        config::mainConfigPath
+                )
         };
 
+         /*
         //init COM
         windowsadaptor::ComLibraryGuard comLibraryGuard{ COINIT_APARTMENTTHREADED };
 
@@ -215,9 +220,15 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 
 void pumpMessages() {
     MSG msg = { };
-    while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
+    while (PeekMessage(
+            &msg,
+            nullptr,
+            0,
+            0,
+            PM_NOREMOVE
+            ))
     {
-        int result{ GetMessage(&msg, NULL, 0, 0) };
+        int result{ GetMessage(&msg, nullptr, 0, 0) };
 
         if (result == -1) {
             throw std::runtime_error{ "Error message pump failed to get message" };
