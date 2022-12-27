@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include "windowsInclude.h"
+
 /*
 #include "Game\Config.h"
 #include "Game\GameLoop.h"
@@ -23,6 +24,7 @@
 #include "Game/Game.h"
 #include "Game/Settings.h"
 */
+
 //debug
 #include "ConsoleOutput.h"
 #include "Logging.h"
@@ -39,9 +41,8 @@ using window::getWindowBorderHeightPadding;
 void pumpMessages();
 
 #pragma warning(suppress : 28251) //suppress inconsistent annotation warning
-int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode){
+int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode) {
     try {
-
         wasp::debug::initConsoleOutput();
         wasp::debug::log("test");
 
