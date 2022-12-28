@@ -8,22 +8,23 @@
 #include <fstream>
 #include "windowsInclude.h"
 
-
-#include "GameConfig.h"
+#include "MainConfig.h"
  /*
 #include "Game\GameLoop.h"
 #include "Game\Resources\ResourceMasterStorage.h"
+  */
 #include "Game\WindowModes.h"
 #include "Window\WindowUtil.h"
 #include "Window\BaseWindow.h"
+ /*
 #include "Window\MainWindow.h"
 #include "Graphics\BitmapConstructor.h"
 #include "Graphics\RenderScheduler.h"
 #include "Input\KeyInputTable.h"
 #include "Sound\MidiHub.h"
-#include "Adaptor\ComLibraryGuard.h"
-#include "Game/Game.h"
- */
+  */
+#include "ComLibraryGuard.h"
+//#include "Game/Game.h"
 #include "Settings.h"
 
 
@@ -33,11 +34,11 @@
 
 using namespace process;
 using namespace process::game;
-/*
-using window::getPrimaryMonitorInfo;
-using window::getWindowBorderWidthPadding;
-using window::getWindowBorderHeightPadding;
- */
+
+using wasp::window::getPrimaryMonitorInfo;
+using wasp::window::getWindowBorderWidthPadding;
+using wasp::window::getWindowBorderHeightPadding;
+
 
 //forward declarations
 void pumpMessages();
@@ -56,10 +57,12 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
                 )
         };
 
-         /*
         //init COM
-        windowsadaptor::ComLibraryGuard comLibraryGuard{ COINIT_APARTMENTTHREADED };
+        wasp::windowsadaptor::ComLibraryGuard comLibraryGuard{
+            tagCOINIT::COINIT_APARTMENTTHREADED
+        };
 
+          /*
         //init Resources : WIC graphics
         resources::ResourceMasterStorage resourceMasterStorage{};
 
@@ -125,8 +128,8 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
         //init midi
         sound::midi::MidiHub midiHub{ settings.muted };
 
-        //init game
-        Game game{
+        //init Game
+        Game Game{
                 &settings,
                 &resourceMasterStorage,
                 &window.getWindowPainter(),
@@ -134,7 +137,7 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
                 &midiHub
         };
 
-        game.setUpdateFullscreenCallback(
+        Game.setUpdateFullscreenCallback(
                 [&]() {
                     if (settings.fullscreen) {
                         window.changeWindowMode(windowmodes::fullscreen);
@@ -145,7 +148,7 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
                 }
         );
 
-        game.setWriteSettingsCallback(
+        Game.setWriteSettingsCallback(
                 [&]() {
                     settings::writeSettingsToFile(settings, config::mainConfigPath);
                 }
@@ -154,7 +157,7 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
         //init gameloop
         graphics::RendererScheduler::RenderCallback renderCallback{
                 [&](float deltaTime) {
-                    game.render(deltaTime);
+                    Game.render(deltaTime);
                 }
         };
 
@@ -163,7 +166,7 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
                 config::maxUpdatesWithoutFrame,
                 //update function
                 [&] {
-                    game.update();
+                    Game.update();
                     pumpMessages();
                 },
                 //draw function
@@ -178,13 +181,13 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
         auto stopGameLoopCallback{ [&] { gameLoop.stop(); } };
 
         window.setDestroyCallback(stopGameLoopCallback);
-        game.setExitCallback(stopGameLoopCallback);
+        Game.setExitCallback(stopGameLoopCallback);
 
-        //make the game visible and begin running
+        //make the Game visible and begin running
         window.show(windowShowMode);
         gameLoop.run();
 
-        //after the game has ended, write settings and exit
+        //after the Game has ended, write settings and exit
         settings::writeSettingsToFile(settings, config::mainConfigPath);
 
          */
