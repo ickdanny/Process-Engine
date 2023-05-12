@@ -127,7 +127,7 @@ namespace wasp::window {
 
             HWND windowHandle = CreateWindowEx(
                 extraWindowStyle,       // Optional window styles.
-                className,              // Window class
+                reinterpret_cast<LPCSTR>(className),              // Window class
                 windowName,             // Window text
                 windowStyle,            // Window style
                 x, y, width, height,    // Size and position

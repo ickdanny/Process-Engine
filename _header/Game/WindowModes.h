@@ -1,7 +1,7 @@
 #pragma once
 
-#include "WindowMode.h"
-#include "WindowUtil.h"
+#include "Window\WindowMode.h"
+#include "Window\WindowUtil.h"
 #include "MainConfig.h"
 
 namespace process::game::windowmodes {
