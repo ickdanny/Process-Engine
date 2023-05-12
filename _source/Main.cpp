@@ -16,8 +16,9 @@
 #include "Game\WindowModes.h"
 #include "Window\WindowUtil.h"
 #include "Window\BaseWindow.h"
- /*
+
 #include "Window\MainWindow.h"
+  /*
 #include "Graphics\BitmapConstructor.h"
 #include "Graphics\RenderScheduler.h"
 #include "Input\KeyInputTable.h"
@@ -38,7 +39,6 @@ using namespace process::game;
 using wasp::window::getPrimaryMonitorInfo;
 using wasp::window::getWindowBorderWidthPadding;
 using wasp::window::getWindowBorderHeightPadding;
-
 
 //forward declarations
 void pumpMessages();
@@ -76,7 +76,17 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
                 }
         };
         resourceLoader.loadFile({ config::mainManifestPath });
-
+           */
+        //init window
+        window::MainWindow window{
+                settings.fullscreen ? windowmodes::fullscreen : windowmodes::windowed,
+                instanceHandle,
+                config::className,
+                config::windowName,
+                config::graphicsWidth,
+                config::graphicsHeight
+        };
+/*
         //init window and Direct 2D
         window::MainWindow window{
                 settings.fullscreen ? windowmodes::fullscreen : windowmodes::windowed,
@@ -192,6 +202,7 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 
          */
 #ifdef _DEBUG
+        window.show(windowShowMode);
         while(true) {
             //spin so can see debug
         }

@@ -1,9 +1,13 @@
 #pragma once
 
+#ifndef UNICODE
+#define UNICODE
+#endif
+
 #include "windowsInclude.h" //includes window.h and others
 #include <stdexcept>
 
-namespace wasp::window {
+namespace process::window {
     template<class DerivedClass>
     class BaseWindow {
 
@@ -127,7 +131,7 @@ namespace wasp::window {
 
             HWND windowHandle = CreateWindowEx(
                 extraWindowStyle,       // Optional window styles.
-                reinterpret_cast<LPCSTR>(className),              // Window class
+                reinterpret_cast<LPCWSTR>(className),              // Window class
                 windowName,             // Window text
                 windowStyle,            // Window style
                 x, y, width, height,    // Size and position
