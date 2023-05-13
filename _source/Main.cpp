@@ -240,8 +240,7 @@ void pumpMessages() {
             0,
             0,
             PM_NOREMOVE
-            ))
-    {
+    )) {
         int result{ GetMessage(&msg, nullptr, 0, 0) };
 
         if (result == -1) {

@@ -27,8 +27,7 @@ namespace process::window {
             if (messageCode == WM_NCCREATE){
                 CREATESTRUCT* createStructPointer = (CREATESTRUCT*)lParam;
 
-                derivedInstancePointer 
-                    = (DerivedClass*)createStructPointer->lpCreateParams;
+                derivedInstancePointer = (DerivedClass*)createStructPointer->lpCreateParams;
 
                 SetWindowLongPtr(
                     windowHandle, 
