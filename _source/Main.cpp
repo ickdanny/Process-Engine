@@ -9,21 +9,21 @@
 #include "windowsInclude.h"
 
 #include "MainConfig.h"
- /*
+/*
 #include "Game\GameLoop.h"
 #include "Game\Resources\ResourceMasterStorage.h"
-  */
+ */
 #include "Game\WindowModes.h"
 #include "Window\WindowUtil.h"
 #include "Window\BaseWindow.h"
 
 #include "Window\MainWindow.h"
-  /*
+/*
 #include "Graphics\BitmapConstructor.h"
 #include "Graphics\RenderScheduler.h"
 #include "Input\KeyInputTable.h"
 #include "Sound\MidiHub.h"
-  */
+*/
 #include "ComLibraryGuard.h"
 //#include "Game/Game.h"
 #include "Settings.h"
@@ -44,6 +44,7 @@ using wasp::window::getWindowBorderHeightPadding;
 void pumpMessages();
 
 #pragma warning(suppress : 28251) //suppress inconsistent annotation warning
+
 int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode) {
     try {
         wasp::debug::initConsoleOutput();
@@ -51,40 +52,40 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 
 
         //read settings
-        wasp::game::Settings settings{
-                wasp::game::settings::readOrCreateSettingsFromFile(
-                        config::mainConfigPath
-                )
+        wasp::game::Settings settings {
+            wasp::game::settings::readOrCreateSettingsFromFile(
+                config::mainConfigPath
+            )
         };
 
         //init COM
-        wasp::windowsadaptor::ComLibraryGuard comLibraryGuard{
+        wasp::windowsadaptor::ComLibraryGuard comLibraryGuard {
             tagCOINIT::COINIT_APARTMENTTHREADED
         };
 
-          /*
-        //init Resources : WIC graphics
-        resources::ResourceMasterStorage resourceMasterStorage{};
+        /*
+      //init Resources : WIC graphics
+      resources::ResourceMasterStorage resourceMasterStorage{};
 
-        resource::ResourceLoader resourceLoader{
-                std::array<resource::Loadable*, 5>{
-                        &resourceMasterStorage.directoryStorage,
-                        &resourceMasterStorage.manifestStorage,
-                        &resourceMasterStorage.bitmapStorage,
-                        &resourceMasterStorage.midiSequenceStorage,
-                        &resourceMasterStorage.dialogueStorage
-                }
-        };
-        resourceLoader.loadFile({ config::mainManifestPath });
-           */
+      resource::ResourceLoader resourceLoader{
+              std::array<resource::Loadable*, 5>{
+                      &resourceMasterStorage.directoryStorage,
+                      &resourceMasterStorage.manifestStorage,
+                      &resourceMasterStorage.bitmapStorage,
+                      &resourceMasterStorage.midiSequenceStorage,
+                      &resourceMasterStorage.dialogueStorage
+              }
+      };
+      resourceLoader.loadFile({ config::mainManifestPath });
+         */
         //init window
-        window::MainWindow window{
-                settings.fullscreen ? windowmodes::fullscreen : windowmodes::windowed,
-                instanceHandle,
-                config::className,
-                config::windowName,
-                config::graphicsWidth,
-                config::graphicsHeight
+        window::MainWindow window {
+            settings.fullscreen ? windowmodes::fullscreen : windowmodes::windowed,
+            instanceHandle,
+            config::className,
+            config::windowName,
+            config::graphicsWidth,
+            config::graphicsHeight
         };
 /*
         //init window and Direct 2D
@@ -203,26 +204,26 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
          */
 #ifdef _DEBUG
         window.show(windowShowMode);
-        while(true) {
+        while ( true ) {
             //spin so can see debug
         }
 #endif
         return 0;
     }
 #ifdef _DEBUG
-        catch (std::exception& exception) {
+    catch ( std::exception&exception ) {
         wasp::debug::log(exception.what());
-        #pragma warning(suppress : 4297)  //if debug, we throw exceptions in main
+#pragma warning(suppress : 4297)  //if debug, we throw exceptions in main
         throw;
     }
-    catch (std::string& str) {
+    catch ( std::string&str ) {
         wasp::debug::log(str);
-        #pragma warning(suppress : 4297)  //if debug, we throw exceptions in main
+#pragma warning(suppress : 4297)  //if debug, we throw exceptions in main
         throw;
     }
-    catch (...) {
+    catch ( ... ) {
         wasp::debug::log("Exception caught in main of unknown type\n");
-        #pragma warning(suppress : 4297)  //if debug, we throw exceptions in main
+#pragma warning(suppress : 4297)  //if debug, we throw exceptions in main
         throw;
     }
 #else
@@ -233,18 +234,18 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 }
 
 void pumpMessages() {
-    MSG msg = { };
-    while (PeekMessage(
-            &msg,
-            nullptr,
-            0,
-            0,
-            PM_NOREMOVE
+    MSG msg = {};
+    while ( PeekMessage(
+        &msg,
+        nullptr,
+        0,
+        0,
+        PM_NOREMOVE
     )) {
-        int result{ GetMessage(&msg, nullptr, 0, 0) };
+        int result { GetMessage(&msg, nullptr, 0, 0) };
 
-        if (result == -1) {
-            throw std::runtime_error{ "Error message pump failed to get message" };
+        if ( result == -1 ) {
+            throw std::runtime_error { "Error message pump failed to get message" };
         }
 
         TranslateMessage(&msg);

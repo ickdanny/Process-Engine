@@ -5,13 +5,13 @@
 namespace process::window {
 
     MainWindow::MainWindow(
-            const WindowMode& initWindowMode,
-            HINSTANCE instanceHandle,
-            PCWSTR className,
-            PCWSTR windowName,
-            //graphics fields
-            int graphicsWidth,
-            int graphicsHeight/*,
+        const WindowMode&initWindowMode,
+        HINSTANCE instanceHandle,
+        PCWSTR className,
+        PCWSTR windowName,
+        //graphics fields
+        int graphicsWidth,
+        int graphicsHeight/*,
 
             int fillColor,
             int textColor,
@@ -23,10 +23,9 @@ namespace process::window {
             DWRITE_TEXT_ALIGNMENT textAlignment,
             DWRITE_PARAGRAPH_ALIGNMENT paragraphAlignment*/
     )
-            : currentWindowModeName{initWindowMode.modeName}
-            , windowPainter{
-                    graphicsWidth,
-                    graphicsHeight/*,
+        : currentWindowModeName { initWindowMode.modeName }, windowPainter {
+        graphicsWidth,
+        graphicsHeight/*,
 
                     fillColor,
                     textColor,
@@ -37,27 +36,25 @@ namespace process::window {
                     fontStretch,
                     textAlignment,
                     paragraphAlignment*/
-            }
-    {
-        std::pair<int, int> size{ initWindowMode.sizeFunction() };
-        std::pair<int, int> position{ initWindowMode.positionFunction(size) };
+    } {
+        std::pair<int, int> size { initWindowMode.sizeFunction() };
+        std::pair<int, int> position { initWindowMode.positionFunction(size) };
 
         create(
-                instanceHandle,
-                className,
-                windowName,
-                initWindowMode.windowStyle,
-                initWindowMode.windowExtraStyle,
-                position.first,
-                position.second,
-                size.first,
-                size.second
+            instanceHandle,
+            className,
+            windowName,
+            initWindowMode.windowStyle,
+            initWindowMode.windowExtraStyle,
+            position.first,
+            position.second,
+            size.first,
+            size.second
         );
     }
 
     LRESULT MainWindow::handleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam) {
-        switch (messageCode)
-        {
+        switch ( messageCode ) {
             case WM_CREATE: // gets recieved before main exits window.create
                 windowPainter.init(windowHandle);
                 return 0;
@@ -94,31 +91,31 @@ namespace process::window {
         return TRUE;
     }
 
-    void MainWindow::changeWindowMode(const WindowMode& windowMode) {
-        if (currentWindowModeName != windowMode.modeName) {
+    void MainWindow::changeWindowMode(const WindowMode&windowMode) {
+        if ( currentWindowModeName != windowMode.modeName ) {
             currentWindowModeName = windowMode.modeName;
 
-            std::pair<int, int> size{ windowMode.sizeFunction() };
-            std::pair<int, int> position{ windowMode.positionFunction(size) };
+            std::pair<int, int> size { windowMode.sizeFunction() };
+            std::pair<int, int> position { windowMode.positionFunction(size) };
 
             SetWindowLong(
-                    windowHandle,
-                    GWL_STYLE,
-                    windowMode.windowStyle
+                windowHandle,
+                GWL_STYLE,
+                windowMode.windowStyle
             );
             SetWindowLong(
-                    windowHandle,
-                    GWL_EXSTYLE,
-                    windowMode.windowExtraStyle
+                windowHandle,
+                GWL_EXSTYLE,
+                windowMode.windowExtraStyle
             );
             SetWindowPos(
-                    windowHandle,
-                    nullptr,
-                    position.first,
-                    position.second,
-                    size.first,
-                    size.second,
-                    SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_FRAMECHANGED
+                windowHandle,
+                nullptr,
+                position.first,
+                position.second,
+                size.first,
+                size.second,
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_FRAMECHANGED
             );
         }
     }

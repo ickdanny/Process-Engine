@@ -1,18 +1,29 @@
 #pragma once
+
 #include "windowsInclude.h"
+#include "d3dInclude.h"
 
 namespace process::window {
     class WindowPainter
-            //todo: needs to extend bitmap drawer?
+        //todo: needs to extend bitmap drawer?
     {
     private:
-        int graphicsWidth{};
-        int graphicsHeight{};
-        //todo: fields
+        //typedefs
+        template <typename T>
+        using ComPtr = Microsoft::WRL::ComPtr<T>;
+
+        //fields
+        int graphicsWidth {};
+        int graphicsHeight {};
+
+        ComPtr<ID3D11Device> devicePointer {};
+        ComPtr<IDXGISwapChain> swapChainPointer {};
+        ComPtr<ID3D11DeviceContext> deviceContextPointer {};
+
     public:
         WindowPainter(
-                int graphicsWidth,
-                int graphicsHeight
+            int graphicsWidth,
+            int graphicsHeight
         );
 
         ~WindowPainter() = default;
@@ -20,6 +31,7 @@ namespace process::window {
         void init(HWND windowHandle);
 
         void paint(HWND windowHandle);
+
         void resize(HWND windowHandle);
     };
 }

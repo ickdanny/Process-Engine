@@ -8,7 +8,7 @@
 #include <stdexcept>
 
 namespace process::window {
-    template<class DerivedClass>
+    template <class DerivedClass>
     class BaseWindow {
 
     protected:
@@ -17,45 +17,43 @@ namespace process::window {
 
     public:
         static LRESULT CALLBACK WindowProc(
-            HWND windowHandle, 
-            UINT messageCode, 
-            WPARAM wParam, 
+            HWND windowHandle,
+            UINT messageCode,
+            WPARAM wParam,
             LPARAM lParam
-        ){
-            DerivedClass* derivedInstancePointer = NULL;
+        ) {
+            DerivedClass*derivedInstancePointer = NULL;
 
-            if (messageCode == WM_NCCREATE){
-                CREATESTRUCT* createStructPointer = (CREATESTRUCT*)lParam;
+            if ( messageCode == WM_NCCREATE ) {
+                CREATESTRUCT*createStructPointer = (CREATESTRUCT*) lParam;
 
-                derivedInstancePointer = (DerivedClass*)createStructPointer->lpCreateParams;
+                derivedInstancePointer = (DerivedClass*) createStructPointer->lpCreateParams;
 
                 SetWindowLongPtr(
-                    windowHandle, 
-                    GWLP_USERDATA, 
-                    (LONG_PTR)derivedInstancePointer
+                    windowHandle,
+                    GWLP_USERDATA,
+                    (LONG_PTR) derivedInstancePointer
                 );
 
                 derivedInstancePointer->windowHandle = windowHandle;
-            }
-            else{
-                derivedInstancePointer 
-                    = (DerivedClass*)GetWindowLongPtr(windowHandle, GWLP_USERDATA);
+            } else {
+                derivedInstancePointer
+                    = (DerivedClass*) GetWindowLongPtr(windowHandle, GWLP_USERDATA);
             }
 
-            if (derivedInstancePointer){
+            if ( derivedInstancePointer ) {
                 return derivedInstancePointer->handleMessage(
-                    messageCode, 
-                    wParam, 
+                    messageCode,
+                    wParam,
                     lParam
                 );
-            }
-            else{
+            } else {
                 return DefWindowProc(windowHandle, messageCode, wParam, lParam);
             }
         }
 
-        BaseWindow() 
-            : windowHandle{ NULL } {
+        BaseWindow()
+            : windowHandle { NULL } {
         }
 
         virtual ~BaseWindow() = default;
@@ -97,15 +95,15 @@ namespace process::window {
         }
 
         virtual LRESULT handleMessage(
-            UINT messageCode, 
-            WPARAM wParam, 
+            UINT messageCode,
+            WPARAM wParam,
             LPARAM lParam
         ) = 0;
 
     private:
-        void registerWindowClass(HINSTANCE instanceHandle, const wchar_t* className) {
+        void registerWindowClass(HINSTANCE instanceHandle, const wchar_t*className) {
 
-            WNDCLASS windowClass{ };
+            WNDCLASS windowClass {};
 
             windowClass.lpfnWndProc = DerivedClass::WindowProc;
             windowClass.hInstance = instanceHandle;
@@ -140,8 +138,8 @@ namespace process::window {
                 this                    // Additional application data
             );
 
-            if (!windowHandle) {
-                throw std::runtime_error{ "Error creating window handle" };
+            if ( !windowHandle ) {
+                throw std::runtime_error { "Error creating window handle" };
             }
         }
     };

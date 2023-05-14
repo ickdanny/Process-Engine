@@ -1,16 +1,59 @@
 #include "Window/WindowPainter.h"
+#include "adaptor\HResultError.h"
 
 namespace process::window {
+
+    using HResultError = wasp::windowsadaptor::HResultError;
+
     WindowPainter::WindowPainter(
-            int graphicsWidth,
-            int graphicsHeight
+        int graphicsWidth,
+        int graphicsHeight
     )
-        : graphicsWidth{ graphicsWidth }
-        , graphicsHeight{ graphicsHeight } {
+        : graphicsWidth { graphicsWidth }, graphicsHeight { graphicsHeight } {
     }
 
     void WindowPainter::init(HWND windowHandle) {
-        //todo: windowpainter init
+        DXGI_SWAP_CHAIN_DESC swapChainDesc {};
+        swapChainDesc.BufferDesc.Width = graphicsWidth;
+        swapChainDesc.BufferDesc.Height = graphicsHeight;
+        swapChainDesc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+        swapChainDesc.BufferDesc.RefreshRate.Numerator = 0;
+        swapChainDesc.BufferDesc.RefreshRate.Denominator = 0;
+        swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+        swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+        swapChainDesc.SampleDesc.Count = 1;
+        swapChainDesc.SampleDesc.Quality = 0;
+        swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+        swapChainDesc.BufferCount = 1;
+        swapChainDesc.OutputWindow = windowHandle;
+        swapChainDesc.Windowed = TRUE; //todo: fullscreen?
+        swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+        swapChainDesc.Flags = 0;
+
+        #ifndef _DEBUG
+        UINT flags{ 0u };
+        #else
+        UINT flags{ D3D11_CREATE_DEVICE_DEBUG };
+        #endif
+
+        HRESULT result {};
+        result = D3D11CreateDeviceAndSwapChain(
+            nullptr,
+            D3D_DRIVER_TYPE_HARDWARE,
+            nullptr,
+            flags,
+            nullptr,    //todo: d3d feature lvl?
+            0,
+            D3D11_SDK_VERSION,  //todo: d3d sdk version?
+            &swapChainDesc,
+            &swapChainPointer,
+            &devicePointer,
+            nullptr,
+            &deviceContextPointer
+            );
+        if (FAILED(result)) {
+            throw HResultError("Error creating d3d device and swap-chain");
+        }
     }
 
     void WindowPainter::paint(HWND windowHandle) {

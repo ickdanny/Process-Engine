@@ -7,29 +7,29 @@
 #include "Window/WindowMode.h"
 
 namespace process::window {
-class MainWindow : public BaseWindow<MainWindow>{
+    class MainWindow : public BaseWindow<MainWindow> {
     private:
         //typedefs
         using WindowMode = wasp::window::WindowMode;
 
-        std::wstring currentWindowModeName{};
+        std::wstring currentWindowModeName {};
 
         WindowPainter windowPainter; //uninitialized!
 
-        std::function<void()> destroyCallback{};
-        std::function<void(WPARAM wParam, LPARAM lParam)> keyDownCallback{};
-        std::function<void(WPARAM wParam, LPARAM lParam)> keyUpCallback{};
-        std::function<void()> outOfFocusCallback{};
+        std::function<void()> destroyCallback {};
+        std::function<void(WPARAM wParam, LPARAM lParam)> keyDownCallback {};
+        std::function<void(WPARAM wParam, LPARAM lParam)> keyUpCallback {};
+        std::function<void()> outOfFocusCallback {};
 
     public:
         MainWindow(
-                const WindowMode& initWindowMode,
-                HINSTANCE instanceHandle,
-                PCWSTR className,
-                PCWSTR windowName,
-                //graphics fields
-                int graphicsWidth,
-                int graphicsHeight/*,
+            const WindowMode&initWindowMode,
+            HINSTANCE instanceHandle,
+            PCWSTR className,
+            PCWSTR windowName,
+            //graphics fields
+            int graphicsWidth,
+            int graphicsHeight/*,
                 int fillColor,
                 int textColor,
                 wchar_t const* fontName,
@@ -42,38 +42,38 @@ class MainWindow : public BaseWindow<MainWindow>{
         );
 
         LRESULT handleMessage(
-                UINT messageCode,
-                WPARAM wParam,
-                LPARAM lParam
+            UINT messageCode,
+            WPARAM wParam,
+            LPARAM lParam
         ) override;
 
-        std::wstring& getCurrentWindowModeName() {
+        std::wstring&getCurrentWindowModeName() {
             return currentWindowModeName;
         }
 
-        void changeWindowMode(const WindowMode& windowMode);
+        void changeWindowMode(const WindowMode&windowMode);
 
-        WindowPainter& getWindowPainter() {
+        WindowPainter&getWindowPainter() {
             return windowPainter;
         }
 
-        void setDestroyCallback(const std::function<void()>& destroyCallback) {
+        void setDestroyCallback(const std::function<void()>&destroyCallback) {
             this->destroyCallback = destroyCallback;
         }
 
         void setKeyDownCallback(
-                const std::function<void(WPARAM wParam, LPARAM lParam)>& keyDownCallback
+            const std::function<void(WPARAM wParam, LPARAM lParam)>&keyDownCallback
         ) {
             this->keyDownCallback = keyDownCallback;
         }
 
         void setKeyUpCallback(
-                const std::function<void(WPARAM wParam, LPARAM lParam)>& keyUpCallback
+            const std::function<void(WPARAM wParam, LPARAM lParam)>&keyUpCallback
         ) {
             this->keyUpCallback = keyUpCallback;
         }
 
-        void setOutOfFocusCallback(const std::function<void()>& outOfFocusCallback) {
+        void setOutOfFocusCallback(const std::function<void()>&outOfFocusCallback) {
             this->outOfFocusCallback = outOfFocusCallback;
         }
     };

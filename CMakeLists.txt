@@ -28,6 +28,8 @@ macro(recursive_add_all)
     set(PROJECT_DIRECTORIES ${PROJECT_DIRECTORIES}\;${LOCAL_DIRECTORIES} PARENT_SCOPE)
 endmacro()
 
+#todo: find and add d3d11 library
+
 add_subdirectory(./_header)
 add_subdirectory(./_source)
 add_subdirectory(./wasp)
