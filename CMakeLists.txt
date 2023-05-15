@@ -28,8 +28,6 @@ macro(recursive_add_all)
     set(PROJECT_DIRECTORIES ${PROJECT_DIRECTORIES}\;${LOCAL_DIRECTORIES} PARENT_SCOPE)
 endmacro()
 
-#todo: find and add d3d11 library
-
 add_subdirectory(./_header)
 add_subdirectory(./_source)
 add_subdirectory(./wasp)
@@ -37,3 +35,7 @@ add_subdirectory(./wasp)
 include_directories(${PROJECT_DIRECTORIES})
 
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
+
+#https://github.com/holy-shit/clion-directx-example set(LIBS d3d9 d3d11 d3dcompiler_43)
+set(LIBS d3d11)
+target_link_libraries(ProcessEngine ${LIBS})
