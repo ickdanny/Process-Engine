@@ -34,8 +34,8 @@ add_subdirectory(./wasp)
 
 include_directories(${PROJECT_DIRECTORIES})
 
-add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
+add_executable(${PROJECT_NAME} WIN32 ${PROJECT_SOURCES})
 
 #https://github.com/holy-shit/clion-directx-example set(LIBS d3d9 d3d11 d3dcompiler_43)
-set(LIBS d3d11)
+set(LIBS d3d11 winmm shlwapi)
 target_link_libraries(ProcessEngine ${LIBS})

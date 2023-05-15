@@ -9,10 +9,9 @@
 #include "windowsInclude.h"
 
 #include "MainConfig.h"
-/*
+
 #include "Game\GameLoop.h"
 #include "Game\Resources\ResourceMasterStorage.h"
- */
 #include "Game\WindowModes.h"
 #include "Window\WindowUtil.h"
 #include "Window\BaseWindow.h"
@@ -21,9 +20,10 @@
 /*
 #include "Graphics\BitmapConstructor.h"
 #include "Graphics\RenderScheduler.h"
+ */
 #include "Input\KeyInputTable.h"
 #include "Sound\MidiHub.h"
-*/
+
 #include "ComLibraryGuard.h"
 //#include "Game/Game.h"
 #include "Settings.h"
@@ -58,29 +58,29 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
             )
         };
 
-        //init COM
+        //init COM //todo: do i need this?
         wasp::windowsadaptor::ComLibraryGuard comLibraryGuard {
             tagCOINIT::COINIT_APARTMENTTHREADED
         };
 
-        /*
-      //init Resources : WIC graphics
-      resources::ResourceMasterStorage resourceMasterStorage{};
+        //init Resources
+        resources::ResourceMasterStorage resourceMasterStorage{};
 
-      resource::ResourceLoader resourceLoader{
-              std::array<resource::Loadable*, 5>{
-                      &resourceMasterStorage.directoryStorage,
-                      &resourceMasterStorage.manifestStorage,
-                      &resourceMasterStorage.bitmapStorage,
-                      &resourceMasterStorage.midiSequenceStorage,
-                      &resourceMasterStorage.dialogueStorage
-              }
-      };
-      resourceLoader.loadFile({ config::mainManifestPath });
-         */
+        resource::ResourceLoader resourceLoader{
+            std::array<wasp::resource::Loadable*, 4>{
+                &resourceMasterStorage.directoryStorage,
+                &resourceMasterStorage.manifestStorage,
+                //&resourceMasterStorage.bitmapStorage,
+                &resourceMasterStorage.midiSequenceStorage,
+                &resourceMasterStorage.dialogueStorage
+            }
+        };
+        resourceLoader.loadFile({ config::mainManifestPath });
+
         //init window
         window::MainWindow window {
-            settings.fullscreen ? windowmodes::fullscreen : windowmodes::windowed,
+            settings.fullscreen ?
+                windowmodes::fullscreen : windowmodes::windowed,
             instanceHandle,
             config::className,
             config::windowName,
@@ -88,32 +88,14 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
             config::graphicsHeight
         };
 /*
-        //init window and Direct 2D
-        window::MainWindow window{
-                settings.fullscreen ? windowmodes::fullscreen : windowmodes::windowed,
-                instanceHandle,
-                config::className,
-                config::windowName,
-                config::graphicsWidth,
-                config::graphicsHeight,
-                config::fillColor,
-                config::textColor,
-                config::fontName,
-                config::fontSize,
-                config::fontWeight,
-                config::fontStyle,
-                config::fontStretch,
-                config::textAlignment,
-                config::paragraphAlignment
-        };
 
         //init D2D Bitmaps
         resourceMasterStorage.bitmapStorage.setRenderTargetPointerAndLoadD2DBitmaps(
                 window.getWindowPainter().getRenderTargetPointer()
         );
-
+*/
         //init input
-        input::KeyInputTable keyInputTable{};
+        wasp::input::KeyInputTable keyInputTable{};
         window.setKeyDownCallback(
                 [&](WPARAM wParam, LPARAM lParam) {
                     keyInputTable.handleKeyDown(wParam, lParam);
@@ -128,6 +110,8 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
                 [&] {keyInputTable.allKeysOff(); }
         );
 
+        /*
+
         //init rendering
         graphics::RendererScheduler renderer{
                 &window,
@@ -136,9 +120,12 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
                 config::graphicsHeight
         };
 
-        //init midi
-        sound::midi::MidiHub midiHub{ settings.muted };
+         */
 
+        //init midi
+        wasp::sound::midi::MidiHub midiHub{ settings.muted };
+
+        /*
         //init Game
         Game Game{
                 &settings,
@@ -171,66 +158,61 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
                     Game.render(deltaTime);
                 }
         };
+         */
 
-        GameLoop gameLoop{
+        wasp::game::GameLoop gameLoop{
                 config::updatesPerSecond,
                 config::maxUpdatesWithoutFrame,
                 //update function
                 [&] {
-                    Game.update();
+                    //Game.update();
                     pumpMessages();
                 },
                 //draw function
                 [&](float deltaTime) {
+                    /*
                     renderer.render(
                             deltaTime,
                             renderCallback
                     );
+                     */
                 }
         };
 
         auto stopGameLoopCallback{ [&] { gameLoop.stop(); } };
 
         window.setDestroyCallback(stopGameLoopCallback);
-        Game.setExitCallback(stopGameLoopCallback);
+        //Game.setExitCallback(stopGameLoopCallback);
 
         //make the Game visible and begin running
         window.show(windowShowMode);
         gameLoop.run();
 
         //after the Game has ended, write settings and exit
-        settings::writeSettingsToFile(settings, config::mainConfigPath);
-
-         */
-#ifdef _DEBUG
-        window.show(windowShowMode);
-        while ( true ) {
-            //spin so can see debug
-        }
-#endif
+        wasp::game::settings::writeSettingsToFile(settings, config::mainConfigPath);
         return 0;
     }
-#ifdef _DEBUG
+    #ifdef _DEBUG
     catch ( std::exception&exception ) {
         wasp::debug::log(exception.what());
-#pragma warning(suppress : 4297)  //if debug, we throw exceptions in main
+        #pragma warning(suppress : 4297)  //if debug, we throw exceptions in main
         throw;
     }
     catch ( std::string&str ) {
         wasp::debug::log(str);
-#pragma warning(suppress : 4297)  //if debug, we throw exceptions in main
+        #pragma warning(suppress : 4297)  //if debug, we throw exceptions in main
         throw;
     }
     catch ( ... ) {
         wasp::debug::log("Exception caught in main of unknown type\n");
-#pragma warning(suppress : 4297)  //if debug, we throw exceptions in main
+        #pragma warning(suppress : 4297)  //if debug, we throw exceptions in main
         throw;
     }
-#else
+    #else
     catch (...) {
         std::exit(1);
     }
-#endif
+    #endif
 }
 
 void pumpMessages() {
@@ -242,7 +224,9 @@ void pumpMessages() {
         0,
         PM_NOREMOVE
     )) {
-        int result { GetMessage(&msg, nullptr, 0, 0) };
+        int result {
+            GetMessage(&msg, nullptr, 0, 0)
+        };
 
         if ( result == -1 ) {
             throw std::runtime_error { "Error message pump failed to get message" };

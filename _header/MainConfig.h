@@ -13,9 +13,8 @@ namespace process::game::config {
     constexpr int windowHeight { 480 };
 
     //resources
-    constexpr char mainManifestPath[] { "res\\potuk.mfst" };
+    constexpr wchar_t mainManifestPath[] { L"res\\potuk.mfst" };
     constexpr char mainConfigPath[] { "res\\potuk.cfg" };
-
 
     //graphics
     constexpr int graphicsWidth { windowWidth / 2 };        //320
