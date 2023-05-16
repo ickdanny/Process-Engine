@@ -7,6 +7,7 @@ namespace wasp::windowsadaptor {
 	class ComLibraryGuard {
 	public:
 		ComLibraryGuard(DWORD threadingModel);
+		
 		~ComLibraryGuard();
 	};
 }

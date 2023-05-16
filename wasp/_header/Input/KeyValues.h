@@ -75,7 +75,7 @@ namespace wasp::input {
 		k_shift,
 		k_control,
 		k_alt,
-
+		
 		undefined,
 		numKeys
 	};

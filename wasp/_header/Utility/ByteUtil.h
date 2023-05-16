@@ -5,9 +5,11 @@
 
 namespace wasp::utility {
 	uint16_t byteSwap16(uint16_t i);
+	
 	uint32_t byteSwap32(uint32_t i);
+	
 	uint64_t byteSwap64(uint64_t i);
-
+	
 	//not zero indexed!
 	template <typename IntType>
 	uint8_t getByte(IntType i, int byteNumber) {

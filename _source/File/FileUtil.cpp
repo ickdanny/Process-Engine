@@ -7,62 +7,62 @@
 #include <functional>
 
 namespace process::file {
-
-	std::wstring getFileName(const std::wstring& fileName){
+	
+	std::wstring getFileName(const std::wstring& fileName) {
 		throwIfFileDoesNotExist(fileName);
-		auto cStringFileName{ fileName.c_str() };
-		std::wstring toRet{ PathFindFileNameW(cStringFileName) };
-
+		auto cStringFileName { fileName.c_str() };
+		std::wstring toRet { PathFindFileNameW(cStringFileName) };
+		
 		//remove extension
-		std::wstring extension{ PathFindExtensionW(cStringFileName) };
-		if (!extension.empty()) {
+		std::wstring extension { PathFindExtensionW(cStringFileName) };
+		if( !extension.empty() ) {
 			toRet.erase(toRet.size() - extension.size(), extension.length());
 		}
-
+		
 		return toRet;
 	}
-
-	std::wstring getFileExtension(const std::wstring& fileName){
+	
+	std::wstring getFileExtension(const std::wstring& fileName) {
 		throwIfFileDoesNotExist(fileName);
-		auto cStringFileName{ fileName.c_str() };
-		std::wstring extension{ PathFindExtensionW(cStringFileName) };
-		if (extension.empty()) {
+		auto cStringFileName { fileName.c_str() };
+		std::wstring extension { PathFindExtensionW(cStringFileName) };
+		if( extension.empty() ) {
 			//check to see if file is directory
-			if (PathIsDirectoryW(cStringFileName)) {
+			if( PathIsDirectoryW(cStringFileName) ) {
 				return directoryExtension;
 			}
 			//if file has no extension but is also not directory, let caller handle
 			return extension;
 		}
-		if (extension[0] == '.') {
+		if( extension[0] == '.' ) {
 			extension.erase(0, 1);
 		}
 		return extension;
 	}
-
+	
 	void forEachDirectoryEntry(
 		const std::wstring& directoryName,
 		std::function<void(const std::wstring& fileName)> callBackFunction
 	) {
-		const std::filesystem::path path{ directoryName };
-
+		const std::filesystem::path path { directoryName };
+		
 		//try to make iterator
-		std::filesystem::directory_iterator iterator{};
+		std::filesystem::directory_iterator iterator {};
 		try {
-			iterator = std::filesystem::directory_iterator{ path };
+			iterator = std::filesystem::directory_iterator { path };
 		}
-		catch (...){
-			throw std::runtime_error{ "Error cannot open directory" };
+		catch( ... ) {
+			throw std::runtime_error { "Error cannot open directory" };
 		}
-
-		for (auto const& dir_entry : iterator) {
+		
+		for( auto const& dir_entry : iterator ) {
 			callBackFunction(dir_entry.path().wstring());
 		}
 	}
-
-	void throwIfFileDoesNotExist(const std::wstring& fileName){
-		if (!PathFileExistsW(fileName.c_str())) {
-			throw std::runtime_error{ "File not found" };
+	
+	void throwIfFileDoesNotExist(const std::wstring& fileName) {
+		if( !PathFileExistsW(fileName.c_str()) ) {
+			throw std::runtime_error { "File not found" };
 		}
 	}
 }

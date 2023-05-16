@@ -6,6 +6,7 @@ namespace wasp::resource {
 		virtual bool isFileLoadable() const {
 			return false;
 		}
+		
 		virtual bool isManifestLoadable() const {
 			return false;
 		}

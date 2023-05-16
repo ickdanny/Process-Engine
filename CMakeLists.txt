@@ -23,7 +23,6 @@ macro(recursive_add_all)
 
     #include this directory
     set(LOCAL_DIRECTORIES ${LOCAL_DIRECTORIES}${CMAKE_CURRENT_LIST_DIR}\;)
-    message(WARNING "${LOCAL_DIRECTORIES}")
 
     set(PROJECT_DIRECTORIES ${PROJECT_DIRECTORIES}\;${LOCAL_DIRECTORIES} PARENT_SCOPE)
 endmacro()

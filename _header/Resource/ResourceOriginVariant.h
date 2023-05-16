@@ -6,5 +6,5 @@
 #include "Resource/ManifestLoadable.h"
 
 namespace process::resource {
-    using ResourceOriginVariant = std::variant<FileOrigin, ManifestOrigin>;
+	using ResourceOriginVariant = std::variant<FileOrigin, ManifestOrigin>;
 }
