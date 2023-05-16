@@ -3,7 +3,7 @@
 #include <functional>
 
 #include "Window/BaseWindow.h"
-#include "WindowPainter.h"
+#include "GraphicsWrapper.h"
 #include "Window/WindowMode.h"
 
 namespace process::window {
@@ -14,7 +14,8 @@ namespace process::window {
 		
 		std::wstring currentWindowModeName {};
 		
-		WindowPainter windowPainter; //uninitialized!
+		//fields
+		GraphicsWrapper graphicsWrapper; //uninitialized!
 		
 		std::function<void()> destroyCallback {};
 		std::function<void(WPARAM wParam, LPARAM lParam)> keyDownCallback {};
@@ -53,8 +54,8 @@ namespace process::window {
 		
 		void changeWindowMode(const WindowMode& windowMode);
 		
-		WindowPainter& getWindowPainter() {
-			return windowPainter;
+		GraphicsWrapper& getGraphicsWrapper() {
+			return graphicsWrapper;
 		}
 		
 		void setDestroyCallback(const std::function<void()>& destroyCallback) {

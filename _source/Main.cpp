@@ -86,7 +86,7 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 
         //init D2D Bitmaps
         resourceMasterStorage.bitmapStorage.setRenderTargetPointerAndLoadD2DBitmaps(
-                window.getWindowPainter().getRenderTargetPointer()
+                window.getGraphicsWrapper().getRenderTargetPointer()
         );
 */
 		//init input
@@ -125,7 +125,7 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 		Game Game{
 				&settings,
 				&resourceMasterStorage,
-				&window.getWindowPainter(),
+				&window.getGraphicsWrapper(),
 				&keyInputTable,
 				&midiHub
 		};

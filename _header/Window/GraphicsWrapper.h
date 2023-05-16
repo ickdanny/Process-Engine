@@ -4,7 +4,7 @@
 #include "d3dInclude.h"
 
 namespace process::window {
-	class WindowPainter
+	class GraphicsWrapper
 		//todo: needs to extend bitmap drawer?
 	{
 	private:
@@ -19,20 +19,31 @@ namespace process::window {
 		ComPtr<ID3D11Device> devicePointer {};
 		ComPtr<IDXGISwapChain> swapChainPointer {};
 		ComPtr<ID3D11DeviceContext> deviceContextPointer {};
+		ComPtr<ID3D11RenderTargetView> renderTargetViewPointer {};
 	
 	public:
-		WindowPainter(
+		GraphicsWrapper(
 			int graphicsWidth,
 			int graphicsHeight
 		);
 		
-		~WindowPainter() = default;
+		~GraphicsWrapper() = default;
 		
 		void init(HWND windowHandle);
 		
 		void paint(HWND windowHandle);
 		
 		void resize(HWND windowHandle);
+		
+	private:
+		void getDevice(HWND windowHandle);
+		
+		DXGI_SWAP_CHAIN_DESC getSwapChainDesc(HWND windowHandle);
+		
+		void getRenderTargetView();
+		
+		void bufferSwap();
+		
 	};
 }
 
@@ -47,7 +58,7 @@ namespace process::window {
 #include "Graphics\ITextDrawer.h"
 
 namespace wasp::window {
-    class WindowPainter
+    class GraphicsWrapper
         : public graphics::IBitmapDrawer
         , public graphics::ITextDrawer
     {
@@ -72,7 +83,7 @@ namespace wasp::window {
         DWRITE_PARAGRAPH_ALIGNMENT paragraphAlignment{};
 
     public:
-        WindowPainter(
+        GraphicsWrapper(
             int graphicsWidth,
             int graphicsHeight,
             int fillColor,
@@ -86,7 +97,7 @@ namespace wasp::window {
             DWRITE_PARAGRAPH_ALIGNMENT paragraphAlignment
         );
 
-        ~WindowPainter() = default;
+        GraphicsWrapperer() = default;
 
         void init(HWND windowHandle);
 

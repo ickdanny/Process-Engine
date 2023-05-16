@@ -23,7 +23,7 @@ namespace process::window {
             DWRITE_TEXT_ALIGNMENT textAlignment,
             DWRITE_PARAGRAPH_ALIGNMENT paragraphAlignment*/
 	)
-		: currentWindowModeName { initWindowMode.modeName }, windowPainter {
+		: currentWindowModeName { initWindowMode.modeName }, graphicsWrapper {
 		graphicsWidth,
 		graphicsHeight/*,
 
@@ -56,13 +56,13 @@ namespace process::window {
 	LRESULT MainWindow::handleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam) {
 		switch( messageCode ) {
 			case WM_CREATE: // gets recieved before main exits window.create
-				windowPainter.init(windowHandle);
+				graphicsWrapper.init(windowHandle);
 				return 0;
 			
-			case WM_PAINT:windowPainter.paint(windowHandle);
+			case WM_PAINT:graphicsWrapper.paint(windowHandle);
 				return 0;
 			
-			case WM_SIZE:windowPainter.resize(windowHandle);
+			case WM_SIZE:graphicsWrapper.resize(windowHandle);
 				return 0;
 			
 			case WM_KEYDOWN:keyDownCallback(wParam, lParam);

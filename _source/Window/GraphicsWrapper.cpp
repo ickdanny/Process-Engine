@@ -1,34 +1,25 @@
-#include "Window/WindowPainter.h"
+#include "Window/GraphicsWrapper.h"
 #include "adaptor\HResultError.h"
 
 namespace process::window {
 	
 	using HResultError = wasp::windowsadaptor::HResultError;
 	
-	WindowPainter::WindowPainter(
+	GraphicsWrapper::GraphicsWrapper(
 		int graphicsWidth,
 		int graphicsHeight
 	)
-		: graphicsWidth { graphicsWidth }, graphicsHeight { graphicsHeight } {
+		: graphicsWidth { graphicsWidth }
+		, graphicsHeight { graphicsHeight } {
 	}
 	
-	void WindowPainter::init(HWND windowHandle) {
-		DXGI_SWAP_CHAIN_DESC swapChainDesc {};
-		swapChainDesc.BufferDesc.Width = graphicsWidth;
-		swapChainDesc.BufferDesc.Height = graphicsHeight;
-		swapChainDesc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-		swapChainDesc.BufferDesc.RefreshRate.Numerator = 0;
-		swapChainDesc.BufferDesc.RefreshRate.Denominator = 0;
-		swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-		swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-		swapChainDesc.SampleDesc.Count = 1;
-		swapChainDesc.SampleDesc.Quality = 0;
-		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		swapChainDesc.BufferCount = 1;
-		swapChainDesc.OutputWindow = windowHandle;
-		swapChainDesc.Windowed = TRUE; //todo: fullscreen?
-		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-		swapChainDesc.Flags = 0;
+	void GraphicsWrapper::init(HWND windowHandle) {
+		getDevice(windowHandle);
+		getRenderTargetView();
+	}
+	
+	void GraphicsWrapper::getDevice(HWND windowHandle) {
+		DXGI_SWAP_CHAIN_DESC swapChainDesc{ getSwapChainDesc(windowHandle) };
 		
 		#ifndef _DEBUG
 		UINT flags{ 0u };
@@ -56,17 +47,67 @@ namespace process::window {
 		}
 	}
 	
-	void WindowPainter::paint(HWND windowHandle) {
-		//todo: windowpainter paint
+	DXGI_SWAP_CHAIN_DESC GraphicsWrapper::getSwapChainDesc(HWND windowHandle) {
+		DXGI_SWAP_CHAIN_DESC swapChainDesc {};
+		swapChainDesc.BufferDesc.Width = graphicsWidth;
+		swapChainDesc.BufferDesc.Height = graphicsHeight;
+		swapChainDesc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+		swapChainDesc.BufferDesc.RefreshRate.Numerator = 0;
+		swapChainDesc.BufferDesc.RefreshRate.Denominator = 0;
+		swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+		swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+		swapChainDesc.SampleDesc.Count = 1;
+		swapChainDesc.SampleDesc.Quality = 0;
+		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		swapChainDesc.BufferCount = 1;
+		swapChainDesc.OutputWindow = windowHandle;
+		swapChainDesc.Windowed = TRUE; //todo: fullscreen?
+		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+		swapChainDesc.Flags = 0;
+		return swapChainDesc;
 	}
 	
-	void WindowPainter::resize(HWND windowHandle) {
+	void GraphicsWrapper::getRenderTargetView() {
+		ID3D11Resource* backBufferPointer{};
+		swapChainPointer->GetBuffer(
+			0,
+			__uuidof(ID3D11Resource),
+			reinterpret_cast<void**>(&backBufferPointer)
+		);
+		ID3D11RenderTargetView* renderTargetViewPointer{};
+		devicePointer->CreateRenderTargetView(
+			backBufferPointer,
+			nullptr,
+			&renderTargetViewPointer
+		);
+		backBufferPointer->Release();
+		this->renderTargetViewPointer = ComPtr<ID3D11RenderTargetView> {
+			renderTargetViewPointer
+		};
+	}
+	
+	void GraphicsWrapper::paint(HWND windowHandle) {
+		bufferSwap();
+		static float color[] { 1.0f, 0.5f, 0.0f, 1.0f };
+		deviceContextPointer->ClearRenderTargetView(
+			renderTargetViewPointer.Get(),
+			color
+		);
+	}
+	
+	void GraphicsWrapper::bufferSwap() {
+		swapChainPointer->Present(1u, 0u);
+	}
+	
+	void GraphicsWrapper::resize(HWND windowHandle) {
 		//todo: windowpainter resize
 	}
+	
+	
 }
 
 /*
- * #include "window\WindowPainter.h"
+ * #include "window\GraphicsWrapper.h"
 
 #include <cmath>
 
@@ -78,7 +119,7 @@ namespace wasp::window {
 
 	using windowsadaptor::HResultError;
 
-	WindowPainter::WindowPainter(
+	GraphicsWrapper::GraphicsWrapper(
 		int graphicsWidth,
 		int graphicsHeight,
 		int fillColor,
@@ -106,17 +147,17 @@ namespace wasp::window {
 		, paragraphAlignment{ paragraphAlignment } {
 	}
 
-	void WindowPainter::init(HWND windowHandle) {
+	void GraphicsWrapper::init(HWND windowHandle) {
 		getDeviceIndependentResources();
 		getDeviceDependentResources(windowHandle);
 	}
 
-	void WindowPainter::getDeviceIndependentResources() {
+	void GraphicsWrapper::getDeviceIndependentResources() {
 		getD2dFactoryPointer();
 		getTextFormatPointer();
 	}
 
-	void WindowPainter::getD2dFactoryPointer() {
+	void GraphicsWrapper::getD2dFactoryPointer() {
 		HRESULT result{ D2D1CreateFactory(
 			D2D1_FACTORY_TYPE_SINGLE_THREADED,
 			&d2dFactoryPointer
@@ -126,7 +167,7 @@ namespace wasp::window {
 		}
 	}
 
-	void WindowPainter::getTextFormatPointer() {
+	void GraphicsWrapper::getTextFormatPointer() {
 		HRESULT result{ getDirectWriteFactoryPointer()->CreateTextFormat(
 			fontName,
 			NULL,
@@ -145,7 +186,7 @@ namespace wasp::window {
 		textFormatPointer->SetParagraphAlignment(paragraphAlignment);
 	}
 
-	CComPtr<IDWriteFactory> WindowPainter::getDirectWriteFactoryPointer() {
+	CComPtr<IDWriteFactory> GraphicsWrapper::getDirectWriteFactoryPointer() {
 		IDWriteFactory* rawPointer{};
 		HRESULT result{DWriteCreateFactory(
 			DWRITE_FACTORY_TYPE_SHARED,
@@ -160,7 +201,7 @@ namespace wasp::window {
 		return toRet;
 	}
 
-	void WindowPainter::getDeviceDependentResources(HWND windowHandle)
+	void GraphicsWrapper::getDeviceDependentResources(HWND windowHandle)
 	{
 		if (renderTargetPointer == nullptr) {
 			getRenderTargetPointer(windowHandle);
@@ -169,7 +210,7 @@ namespace wasp::window {
 		}
 	}
 
-	void WindowPainter::getRenderTargetPointer(HWND windowHandle) {
+	void GraphicsWrapper::getRenderTargetPointer(HWND windowHandle) {
 		RECT clientRect;
 		GetClientRect(windowHandle, &clientRect);
 
@@ -186,7 +227,7 @@ namespace wasp::window {
 		}
 	}
 
-	void WindowPainter::makeBufferRenderTargetPointer() {
+	void GraphicsWrapper::makeBufferRenderTargetPointer() {
 
 		HRESULT result{ renderTargetPointer->CreateCompatibleRenderTarget(
 			D2D1_SIZE_F{
@@ -205,20 +246,20 @@ namespace wasp::window {
 		);
 	}
 
-	void WindowPainter::makeTextBrushPointer() {
+	void GraphicsWrapper::makeTextBrushPointer() {
 		HRESULT result{ bufferRenderTargetPointer->CreateSolidColorBrush(
 			D2D1::ColorF{ static_cast<uint32_t>(textColor) },
 			&textBrushPointer
 		) };
 	}
 
-	void WindowPainter::discardDeviceDependentResources() {
+	void GraphicsWrapper::discardDeviceDependentResources() {
 		renderTargetPointer = nullptr;
 		bufferRenderTargetPointer = nullptr;
 		textBrushPointer = nullptr;
 	}
 
-	void WindowPainter::paint(HWND windowHandle)
+	void GraphicsWrapper::paint(HWND windowHandle)
 	{
 		getDeviceDependentResources(windowHandle);
 		PAINTSTRUCT paintStruct;
@@ -255,7 +296,7 @@ namespace wasp::window {
 		EndPaint(windowHandle, &paintStruct);
 	}
 
-	CComPtr<ID2D1Bitmap> WindowPainter::getBufferBitmap() {
+	CComPtr<ID2D1Bitmap> GraphicsWrapper::getBufferBitmap() {
 		CComPtr<ID2D1Bitmap> toRet{};
 		HRESULT result{ bufferRenderTargetPointer->GetBitmap(&toRet) };
 		if (FAILED(result)) {
@@ -264,7 +305,7 @@ namespace wasp::window {
 		return toRet;
 	}
 
-	void WindowPainter::resize(HWND windowHandle)
+	void GraphicsWrapper::resize(HWND windowHandle)
 	{
 		if (renderTargetPointer != NULL){
 			RECT rectangle;
@@ -280,7 +321,7 @@ namespace wasp::window {
 		}
 	}
 
-	void WindowPainter::beginDraw() {
+	void GraphicsWrapper::beginDraw() {
 		bufferRenderTargetPointer->BeginDraw();
 		bufferRenderTargetPointer->Clear(D2D1::ColorF{ static_cast<uint32_t>(fillColor) });
 	}
@@ -303,7 +344,7 @@ namespace wasp::window {
 		);
 	}
 
-	void WindowPainter::drawBitmap(
+	void GraphicsWrapper::drawBitmap(
 		const math::Point2 preOffsetCenter,
 		const graphics::BitmapDrawInstruction& bitmapDrawInstruction
 	) {
@@ -404,7 +445,7 @@ namespace wasp::window {
 		}
 	}
 
-	void WindowPainter::drawSubBitmap(
+	void GraphicsWrapper::drawSubBitmap(
 		const math::Point2 preOffsetCenter,
 		const graphics::BitmapDrawInstruction& bitmapDrawInstruction,
 		const math::Rectangle& sourceRectangle
@@ -510,7 +551,7 @@ namespace wasp::window {
 		}
 	}
 
-	void WindowPainter::drawText(
+	void GraphicsWrapper::drawText(
 		const math::Point2 pos,
 		const std::wstring& text,
 		const std::pair<float, float> bounds
@@ -524,7 +565,7 @@ namespace wasp::window {
 		);
 	}
 
-	inline void WindowPainter::makeBitmapDrawCall(
+	inline void GraphicsWrapper::makeBitmapDrawCall(
 		ID2D1Bitmap& bitmap,
 		const math::Point2 upperLeft,
 		float scaledWidth,
@@ -544,7 +585,7 @@ namespace wasp::window {
 		);
 	}
 
-	inline void WindowPainter::makeTransformBitmapDrawCall(
+	inline void GraphicsWrapper::makeTransformBitmapDrawCall(
 		ID2D1Bitmap& bitmap,
 		const D2D1::Matrix3x2F& transform,
 		const math::Point2 upperLeft,
@@ -557,7 +598,7 @@ namespace wasp::window {
 		bufferRenderTargetPointer->SetTransform(D2D1::Matrix3x2F::Identity());
 	}
 
-	inline void WindowPainter::makeSubBitmapDrawCall(
+	inline void GraphicsWrapper::makeSubBitmapDrawCall(
 		ID2D1Bitmap& bitmap,
 		const math::Point2 upperLeft,
 		float scaledWidth,
@@ -584,7 +625,7 @@ namespace wasp::window {
 		);
 	}
 
-	inline void WindowPainter::makeTransformSubBitmapDrawCall(
+	inline void GraphicsWrapper::makeTransformSubBitmapDrawCall(
 		ID2D1Bitmap& bitmap,
 		const D2D1::Matrix3x2F& transform,
 		const math::Point2 upperLeft,
@@ -605,7 +646,7 @@ namespace wasp::window {
 		bufferRenderTargetPointer->SetTransform(D2D1::Matrix3x2F::Identity());
 	}
 
-	void WindowPainter::endDraw() {
+	void GraphicsWrapper::endDraw() {
 		bufferRenderTargetPointer->EndDraw();
 	}
 
