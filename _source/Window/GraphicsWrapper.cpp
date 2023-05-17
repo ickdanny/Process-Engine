@@ -1,5 +1,5 @@
 #include "Window/GraphicsWrapper.h"
-#include "adaptor\HResultError.h"
+#include "Adaptor\HResultError.h"
 
 namespace process::window {
 	
