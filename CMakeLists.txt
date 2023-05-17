@@ -30,10 +30,13 @@ endmacro()
 add_subdirectory(./_header)
 add_subdirectory(./_source)
 add_subdirectory(./wasp)
+add_subdirectory(./_shaders)
 
 include_directories(${PROJECT_DIRECTORIES})
 
 add_executable(${PROJECT_NAME} WIN32 ${PROJECT_SOURCES})
+
+add_dependencies(${PROJECT_NAME} shaders)
 
 #https://github.com/holy-shit/clion-directx-example set(LIBS d3d9 d3d11 d3dcompiler_43)
 set(LIBS d3d11 winmm shlwapi)

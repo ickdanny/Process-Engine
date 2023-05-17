@@ -16,6 +16,7 @@ namespace process::window {
 	void GraphicsWrapper::init(HWND windowHandle) {
 		getDevice(windowHandle);
 		getRenderTargetView();
+		setupPipeline();
 	}
 	
 	void GraphicsWrapper::getDevice(HWND windowHandle) {
@@ -86,6 +87,10 @@ namespace process::window {
 		};
 	}
 	
+	void GraphicsWrapper::setupPipeline() {
+	
+	}
+	
 	void GraphicsWrapper::paint(HWND windowHandle) {
 		bufferSwap();
 		static float color[] { 1.0f, 0.5f, 0.0f, 1.0f };
@@ -102,6 +107,8 @@ namespace process::window {
 	void GraphicsWrapper::resize(HWND windowHandle) {
 		//todo: windowpainter resize
 	}
+	
+	
 	
 	
 }

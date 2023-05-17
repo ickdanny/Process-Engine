@@ -26,22 +26,22 @@ namespace process::window {
 			int graphicsWidth,
 			int graphicsHeight
 		);
-		
 		~GraphicsWrapper() = default;
 		
 		void init(HWND windowHandle);
-		
 		void paint(HWND windowHandle);
-		
 		void resize(HWND windowHandle);
+		
+		struct Vertex2{
+			float x{};
+			float y{};
+		};
 		
 	private:
 		void getDevice(HWND windowHandle);
-		
 		DXGI_SWAP_CHAIN_DESC getSwapChainDesc(HWND windowHandle);
-		
 		void getRenderTargetView();
-		
+		void setupPipeline();
 		void bufferSwap();
 		
 	};
