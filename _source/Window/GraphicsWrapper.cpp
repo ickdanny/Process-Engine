@@ -169,7 +169,7 @@ namespace process::window {
 			color
 		);
 		
-		//todo: remove triangle test
+		/*
 		const Vertex2 vertices[] {
 			{0.0f, 0.3f},
 			{0.3f, 0.9f},
@@ -202,6 +202,7 @@ namespace process::window {
 			&offset
 		);
 		contextPointer->Draw(3u, 0u);
+		*/
 	}
 	
 	void GraphicsWrapper::bufferSwap() {
