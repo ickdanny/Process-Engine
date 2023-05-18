@@ -20,7 +20,7 @@ namespace process::window {
 	}
 	
 	void GraphicsWrapper::getDevice(HWND windowHandle) {
-		DXGI_SWAP_CHAIN_DESC swapChainDesc{ getSwapChainDesc(windowHandle) };
+		DXGI_SWAP_CHAIN_DESC swapChainDesc{ makeSwapChainDesc(windowHandle) };
 		
 		#ifndef _DEBUG
 		UINT flags{ 0u };
@@ -41,14 +41,14 @@ namespace process::window {
 			&swapChainPointer,
 			&devicePointer,
 			nullptr,
-			&deviceContextPointer
+			&contextPointer
 		);
 		if( FAILED(result) ) {
 			throw HResultError("Error creating d3d device and swap-chain");
 		}
 	}
 	
-	DXGI_SWAP_CHAIN_DESC GraphicsWrapper::getSwapChainDesc(HWND windowHandle) {
+	DXGI_SWAP_CHAIN_DESC GraphicsWrapper::makeSwapChainDesc(HWND windowHandle) {
 		DXGI_SWAP_CHAIN_DESC swapChainDesc {};
 		swapChainDesc.BufferDesc.Width = graphicsWidth;
 		swapChainDesc.BufferDesc.Height = graphicsHeight;
@@ -88,16 +88,120 @@ namespace process::window {
 	}
 	
 	void GraphicsWrapper::setupPipeline() {
-	
+		
+		ComPtr<ID3DBlob> blobPointer{};
+		
+		//assign pixel shader
+		ComPtr<ID3D11PixelShader> psPointer{};
+		D3DReadFileToBlob(L"PixelShader.cso", &blobPointer);
+		devicePointer->CreatePixelShader(
+			blobPointer->GetBufferPointer(),
+			blobPointer->GetBufferSize(),
+			nullptr,
+			psPointer.GetAddressOf()
+		);
+		contextPointer->PSSetShader(
+			psPointer.Get(),
+			nullptr,
+			0
+		);
+		
+		//assign vertex shader
+		ComPtr<ID3D11VertexShader> vsPointer{};
+		D3DReadFileToBlob(L"VertexShader.cso", &blobPointer);
+		devicePointer->CreateVertexShader(
+			blobPointer->GetBufferPointer(),
+			blobPointer->GetBufferSize(),
+			nullptr,
+			vsPointer.GetAddressOf()
+		);
+		contextPointer->VSSetShader(
+			vsPointer.Get(),
+			nullptr,
+			0
+		);
+		
+		//specify input layout
+		ComPtr<ID3D11InputLayout> inputLayoutPointer{};
+		const D3D11_INPUT_ELEMENT_DESC inputElementDesc[] {
+			{
+				"Position",
+				0u,
+				DXGI_FORMAT_R32G32_FLOAT,
+				0u,
+				0u,
+				D3D11_INPUT_PER_VERTEX_DATA,
+				0u
+			}
+		};
+		devicePointer->CreateInputLayout(
+			inputElementDesc,
+			(UINT)std::size(inputElementDesc),
+			blobPointer->GetBufferPointer(),
+			blobPointer->GetBufferSize(),
+			inputLayoutPointer.GetAddressOf()
+		);
+		contextPointer->IASetInputLayout(inputLayoutPointer.Get());
+		
+		//configure viewport
+		D3D11_VIEWPORT viewport{};
+		viewport.Width = (float)graphicsWidth;
+		viewport.Height = (float)graphicsHeight;
+		viewport.MinDepth = 0.0f;
+		viewport.MaxDepth = 1.0f;
+		viewport.TopLeftX = 0.0f;
+		viewport.TopLeftY = 0.0f;
+		contextPointer->RSSetViewports(1, &viewport);
+		
+		//bind output merger to the back buffer
+		contextPointer->OMSetRenderTargets(
+			1,
+			renderTargetViewPointer.GetAddressOf(),
+			nullptr
+		);
 	}
 	
 	void GraphicsWrapper::paint(HWND windowHandle) {
 		bufferSwap();
 		static float color[] { 1.0f, 0.5f, 0.0f, 1.0f };
-		deviceContextPointer->ClearRenderTargetView(
+		contextPointer->ClearRenderTargetView(
 			renderTargetViewPointer.Get(),
 			color
 		);
+		
+		//todo: remove triangle test
+		const Vertex2 vertices[] {
+			{0.0f, 0.3f},
+			{0.3f, 0.9f},
+			{0.8f, -0.3f}
+		};
+		contextPointer->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		
+		ComPtr<ID3D11Buffer> vertexBufferPointer{};
+		D3D11_BUFFER_DESC bufferDesc{};
+		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		bufferDesc.CPUAccessFlags = 0u;
+		bufferDesc.MiscFlags = 0u;
+		bufferDesc.ByteWidth = sizeof(vertices);
+		bufferDesc.StructureByteStride = sizeof(Vertex2);
+		D3D11_SUBRESOURCE_DATA subresourceData{};
+		subresourceData.pSysMem = vertices;
+		devicePointer->CreateBuffer(
+			&bufferDesc,
+			&subresourceData,
+			vertexBufferPointer.GetAddressOf()
+		);
+		const UINT stride = sizeof(Vertex2);
+		const UINT offset = 0u;
+		contextPointer->IASetVertexBuffers(
+			0u,
+			1u,
+			vertexBufferPointer.GetAddressOf(),
+			&stride,
+			&offset
+		);
+		contextPointer->Draw(3u, 0u);
 	}
 	
 	void GraphicsWrapper::bufferSwap() {

@@ -18,7 +18,7 @@ namespace process::window {
 		
 		ComPtr<ID3D11Device> devicePointer {};
 		ComPtr<IDXGISwapChain> swapChainPointer {};
-		ComPtr<ID3D11DeviceContext> deviceContextPointer {};
+		ComPtr<ID3D11DeviceContext> contextPointer {};
 		ComPtr<ID3D11RenderTargetView> renderTargetViewPointer {};
 	
 	public:
@@ -39,7 +39,7 @@ namespace process::window {
 		
 	private:
 		void getDevice(HWND windowHandle);
-		DXGI_SWAP_CHAIN_DESC getSwapChainDesc(HWND windowHandle);
+		DXGI_SWAP_CHAIN_DESC makeSwapChainDesc(HWND windowHandle);
 		void getRenderTargetView();
 		void setupPipeline();
 		void bufferSwap();
