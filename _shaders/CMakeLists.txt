@@ -23,9 +23,16 @@ foreach(FILE ${HLSL_SHADER_FILES})
     #the command becomes part of the target and will only execute when the target itself is built
     #if the target is already built, the command will not execute
     add_custom_command(TARGET shaders
+            #the commmand to run
             COMMAND fxc.exe /nologo /Emain /T${ShaderType}_${ShaderModel} $<IF:$<CONFIG:DEBUG>,/Od,/O1> /Zi /Fo ${CMAKE_BINARY_DIR}/${FILE_WE}.cso /Fd ${CMAKE_BINARY_DIR}/${FILE_WE}.pdb ${FILE}
+            #specify the primary input source file to the command
             MAIN_DEPENDENCY ${FILE}
+            #display the given message before the commands are executed at build time
             COMMENT "HLSL ${FILE}"
+            #execute the command with the given current working directory
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            #all arguments to the commands will be escaped properly for the build tool so that
+            #the invoked command receives each argument unchanged
             VERBATIM)
+
 endforeach(FILE)
