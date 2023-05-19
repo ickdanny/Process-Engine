@@ -20,6 +20,7 @@ namespace process::window {
 		ComPtr<IDXGISwapChain> swapChainPointer {};
 		ComPtr<ID3D11DeviceContext> contextPointer {};
 		ComPtr<ID3D11RenderTargetView> renderTargetViewPointer {};
+		ComPtr<ID3D11DepthStencilView> depthStencilViewPointer {};
 	
 	public:
 		GraphicsWrapper(
@@ -32,18 +33,20 @@ namespace process::window {
 		void paint(HWND windowHandle);
 		void resize(HWND windowHandle);
 		
-		struct Vertex2{
+		struct Vertex3{
 			float x{};
 			float y{};
+			float z{};
 		};
 		
 	private:
 		void getDevice(HWND windowHandle);
 		DXGI_SWAP_CHAIN_DESC makeSwapChainDesc(HWND windowHandle);
 		void getRenderTargetView();
+		void getDepthStencilView();
 		void setupPipeline();
 		void bufferSwap();
-		
+		void clearBuffer();
 	};
 }
 
