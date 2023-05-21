@@ -53,7 +53,7 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 			)
 		};
 		
-		//init COM //todo: do i need this?
+		//init COM
 		wasp::windowsadaptor::ComLibraryGuard comLibraryGuard {
 			tagCOINIT::COINIT_APARTMENTTHREADED
 		};

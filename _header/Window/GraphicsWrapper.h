@@ -21,6 +21,8 @@ namespace process::window {
 		ComPtr<ID3D11DeviceContext> contextPointer {};
 		ComPtr<ID3D11RenderTargetView> renderTargetViewPointer {};
 		ComPtr<ID3D11DepthStencilView> depthStencilViewPointer {};
+		
+		//todo: temp texture
 	
 	public:
 		GraphicsWrapper(
@@ -33,10 +35,12 @@ namespace process::window {
 		void paint(HWND windowHandle);
 		void resize(HWND windowHandle);
 		
-		struct Vertex3{
+		struct Vertex{
 			float x{};
 			float y{};
 			float z{};
+			float u{};
+			float v{};
 		};
 		
 	private:

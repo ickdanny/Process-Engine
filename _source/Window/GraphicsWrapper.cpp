@@ -185,6 +185,15 @@ namespace process::window {
 				0u,
 				D3D11_INPUT_PER_VERTEX_DATA,
 				0u
+			},
+			{
+				"TexCoords",
+				0u,
+				DXGI_FORMAT_R32G32_FLOAT,
+				0u,
+				12u,
+				D3D11_INPUT_PER_VERTEX_DATA,
+				0u
 			}
 		};
 		result = devicePointer->CreateInputLayout(
