@@ -3,20 +3,67 @@
 
 #include <unordered_map>
 
+namespace {
+	template <>
+	struct std::hash<WICPixelFormatGUID> {
+		std::size_t operator()(WICPixelFormatGUID const& format) const noexcept {
+			std::size_t h1 = std::hash<unsigned long> {}(format.Data1);
+			std::size_t h2 = std::hash<unsigned short> {}(format.Data2);
+			std::size_t h3 = std::hash<unsigned short> {}(format.Data3);
+			std::size_t h4 = hashCharArray(
+				format.Data4,
+				sizeof(format.Data4) / sizeof(unsigned char)
+			);
+			std::size_t hash { h1 };
+			hash ^= (h2 << 5) + (h2 >> 3);
+			hash ^= (h3 << 4) + (h3 >> 4);
+			hash ^= (h4 << 2) + (h4 >> 8);
+			return hash;
+		}
+	
+	private:
+		static std::size_t hashCharArray(const unsigned char* charPointer, int length) {
+			std::size_t hash { static_cast<size_t>(0xc82a320f8684e99f) };
+			for( int index = 0; index < length; ++index ) {
+				hash ^= std::hash<unsigned char> {}(charPointer[index])
+					+ 0x9e3779b1
+					+ (hash << 6)
+					+ (hash >> 2);
+			}
+			return hash;
+		}
+	};
+	
+	using wasp::windowsadaptor::HResultError;
+	
+	template <typename T>
+	using ComPtr = Microsoft::WRL::ComPtr<T>;
+	
+	std::unordered_map<WICPixelFormatGUID, DXGI_FORMAT> wicToD3DFormatMap{
+		{GUID_WICPixelFormat128bppRGBAFloat, DXGI_FORMAT_R32G32B32A32_FLOAT },
+		{ GUID_WICPixelFormat64bppRGBAHalf ,DXGI_FORMAT_R16G16B16A16_FLOAT },
+		{ GUID_WICPixelFormat64bppRGBA, DXGI_FORMAT_R16G16B16A16_UNORM },
+		{ GUID_WICPixelFormat32bppRGBA, DXGI_FORMAT_R8G8B8A8_UNORM },
+		{ GUID_WICPixelFormat32bppBGRA, DXGI_FORMAT_B8G8R8A8_UNORM },
+		{ GUID_WICPixelFormat32bppBGR, DXGI_FORMAT_B8G8R8X8_UNORM },
+		{ GUID_WICPixelFormat32bppRGBA1010102XR,
+											 DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM },
+		{ GUID_WICPixelFormat32bppRGBA1010102, DXGI_FORMAT_R10G10B10A2_UNORM },
+		{ GUID_WICPixelFormat32bppRGBE, DXGI_FORMAT_R9G9B9E5_SHAREDEXP },
+		{ GUID_WICPixelFormat16bppBGRA5551, DXGI_FORMAT_B5G5R5A1_UNORM },
+		{ GUID_WICPixelFormat16bppBGR565, DXGI_FORMAT_B5G6R5_UNORM },
+		{ GUID_WICPixelFormat32bppGrayFloat, DXGI_FORMAT_R32_FLOAT },
+		{ GUID_WICPixelFormat16bppGrayHalf, DXGI_FORMAT_R16_FLOAT },
+		{ GUID_WICPixelFormat16bppGray, DXGI_FORMAT_R16_UNORM },
+		{ GUID_WICPixelFormat8bppGray, DXGI_FORMAT_R8_UNORM },
+		{ GUID_WICPixelFormat8bppAlpha, DXGI_FORMAT_A8_UNORM },
+		{ GUID_WICPixelFormat96bppRGBFloat, DXGI_FORMAT_R32G32B32_FLOAT }
+	};
+	
+	
+}
+
 namespace process::graphics {
-	
-	namespace {
-		using wasp::windowsadaptor::HResultError;
-		
-		template <typename T>
-		using ComPtr = Microsoft::WRL::ComPtr<T>;
-		
-		std::unordered_map<WICPixelFormatGUID, DXGI_FORMAT> wicToD3DFormatMap{
-			{GUID_WICPixelFormat128bppRGBAFloat, DXGI_FORMAT_R32G32B32A32_FLOAT}
-		};
-		//todo: need a hash for GUID...
-	}
-	
 	BitmapLoader::BitmapLoader() {
 		init();
 	}
@@ -75,53 +122,132 @@ namespace process::graphics {
 		return bitmapDecoderPointer;
 	}
 	
-	DXGI_FORMAT BitmapLoader::getD3DFormatFromWicBitcode(
-		const ComPtr<IWICBitmapFrameDecode> framePointer
+	ComPtr<ID3D11Texture2D> BitmapLoader::convertWicBitmapToD3D(
+		const ComPtr<IWICBitmapFrameDecode>& framePointer,
+		const ComPtr<ID3D11Device>& devicePointer
+	) {
+		PixelDataBuffer pixelDataBuffer{ getPixelDataBuffer(framePointer) };
+		DXGI_FORMAT format{ getD3DFormatFromWicFrame(framePointer) };
+		// Create texture
+		D3D11_TEXTURE2D_DESC desc{};
+		desc.Width = pixelDataBuffer.width;
+		desc.Height = pixelDataBuffer.height;
+		desc.MipLevels = 1;
+		desc.ArraySize = 1;
+		desc.Format = format;
+		desc.SampleDesc.Count = 1;
+		desc.SampleDesc.Quality = 0;
+		desc.Usage = D3D11_USAGE_IMMUTABLE;
+		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		desc.CPUAccessFlags = 0;
+		desc.MiscFlags = 0;
+		
+		D3D11_SUBRESOURCE_DATA initData;
+		initData.pSysMem = pixelDataBuffer.buffer.data();
+		initData.SysMemPitch = static_cast<UINT>( pixelDataBuffer.width );
+		initData.SysMemSlicePitch = static_cast<UINT>( pixelDataBuffer.size );
+		
+		ComPtr<ID3D11Texture2D> texturePointer{};
+		HRESULT result{ devicePointer->CreateTexture2D(
+			&desc,
+			&initData,
+			texturePointer.GetAddressOf()
+		) };
+		if(FAILED(result)){
+			throw HResultError{ "Error creating Texture2D" };
+		}
+		return texturePointer;
+	}
+	
+	DXGI_FORMAT BitmapLoader::getD3DFormatFromWicFrame(
+		const ComPtr<IWICBitmapFrameDecode>& framePointer
 	) {
 		WICPixelFormatGUID wicPixelFormat{};
 		HRESULT result{ framePointer->GetPixelFormat(&wicPixelFormat) };
 		if (FAILED(result)){
 			throw HResultError{ "Error determining WIC pixel format" };
 		}
+		auto search = wicToD3DFormatMap.find(wicPixelFormat);
+		if(search != wicToD3DFormatMap.end()){
+			return search->second;
+		}
+		else{
+			throw std::runtime_error{ "Could not convert wic to d3d" };
+		}
+	}
+	
+	BitmapLoader::PixelDataBuffer BitmapLoader::getPixelDataBuffer(
+		const ComPtr<IWICBitmapFrameDecode>& framePointer
+	) {
+		//https://stackoverflow.com/questions/25797536/getting-a-bitmap-bitsperpixel-from
+		//-iwicbitmapsource-iwicbitmap-iwicbitmapdecod
 		
+		WICPixelFormatGUID format{};
+		HRESULT result{ framePointer->GetPixelFormat(&format) };
+		if (FAILED(result)){
+			throw HResultError{ "Error determining WIC pixel format" };
+		}
+		
+		auto bitsPerPixel { getBitsPerPixel(format) };
+		
+		UINT width{};
+		UINT height{};
+		result = framePointer->GetSize(&width, &height);
+		if(FAILED(result)){
+			throw HResultError{ "Error determining WIC bitmap size" };
+		}
+		
+		//+7 forces to next byte if needed
+		auto widthBits { (float)(bitsPerPixel * width + 7) };
+		auto widthBytes{ (UINT)(widthBits / 8.0f) };
+		auto heightBits{ (float)(bitsPerPixel * height + 7) };
+		auto heightBytes{ (UINT)(heightBits / 8.0f) };
+		
+		std::size_t bufferSize{ widthBytes * heightBytes };
+		std::vector<byte> buffer(bufferSize);
+		
+		result = framePointer->CopyPixels(
+			nullptr,
+			widthBytes,
+			bufferSize,
+			buffer.data()
+		);
+		
+		if(FAILED(result)){
+			throw HResultError{ "Error copying data into buffer" };
+		}
+		
+		return { buffer, bufferSize, widthBytes, heightBytes };
 	}
 	
-	ComPtr<ID2D1Bitmap> BitmapLoader::convertWicBitmapToD2D(
-		const ComPtr<IWICFormatConverter> formatConverterPointer,
-		const ComPtr<ID2D1HwndRenderTarget> renderTargetPointer
-	) {
-		ComPtr<ID2D1Bitmap> bitmapPointer{};
-		HRESULT result{ renderTargetPointer->CreateBitmapFromWicBitmap(
-			formatConverterPointer,
-			NULL,
-			&bitmapPointer
+	uint_least32_t BitmapLoader::getBitsPerPixel(const WICPixelFormatGUID& format){
+		//get pointer to an instance of the Pixel Format
+		ComPtr<IWICComponentInfo> componentInfoPointer {};
+		HRESULT result { wicFactoryPointer->CreateComponentInfo(
+			format,
+			componentInfoPointer.GetAddressOf()
 		) };
-		if (FAILED(result)) {
-			throw HResultError{ "Error creating bitmap from WIC bitmap" };
+		if(FAILED(result)){
+			throw HResultError{ "Failed to create WIC component info" };
 		}
-		return bitmapPointer;
-	}
-	
-	
-	
-	/*
-	void BitmapLoader::initWicFormatConverter(
-		const ComPtr<IWICFormatConverter> formatConverterPointer,
-		const ComPtr<IWICBitmapFrameDecode> framePointer
-	) {
-		HRESULT result{
-			formatConverterPointer->Initialize(
-				framePointer.Get(),               	// Input bitmap to convert
-				GUID_WICPixelFormat32bppPBGRA,  	// Destination pixel format
-				WICBitmapDitherTypeNone,        		// Specified dither pattern
-				nullptr,                          	// Specify a particular palette
-				0.f,                    	// Alpha threshold
-				WICBitmapPaletteTypeCustom   	// Palette translation type
-			)
-		};
-		if (FAILED(result)) {
-			throw HResultError{ "Error initiating WIC format converter with frame" };
+		
+		//get IWICPixelFormatInfo from IWICComponentInfo
+		ComPtr<IWICPixelFormatInfo> pixelFormatInfoPointer;
+		
+		result = componentInfoPointer->QueryInterface(
+			__uuidof(IWICPixelFormatInfo),
+			reinterpret_cast<void**>(pixelFormatInfoPointer.GetAddressOf())
+		);
+		if(FAILED(result)){
+			throw HResultError{ "Failed to convert component info to pixel info" };
 		}
+		
+		// get bits per pixel
+		uint_least32_t bitsPerPixel{};
+		result = pixelFormatInfoPointer->GetBitsPerPixel(&bitsPerPixel);
+		if(FAILED(result)){
+			throw HResultError{ "Failed to get bits per pixel " };
+		}
+		return bitsPerPixel;
 	}
-	 */
 }

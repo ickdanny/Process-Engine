@@ -1,5 +1,8 @@
 #include "Window/GraphicsWrapper.h"
-#include "Adaptor\HResultError.h"
+#include "Adaptor/HResultError.h"
+
+//todo: temp test
+#include "Graphics/BitmapLoader.h"
 
 namespace process::window {
 	
@@ -249,6 +252,16 @@ namespace process::window {
 		bufferSwap();
 		clearBuffer();
 		
+		graphics::BitmapLoader bitmapLoader{};
+		auto framePointer{
+			bitmapLoader.getWicBitmapFrameDecodePointer(L"res\\test.png")
+		};
+		auto texturePointer{
+			bitmapLoader.convertWicBitmapToD3D(framePointer, devicePointer)
+		};
+		//todo: need shader view and samplers
+		
+		/*
 		const Vertex3 vertices[] {
 			{0.0f, 0.3f, 0.5f},
 			{0.3f, 0.9f, -0.5f},
@@ -281,7 +294,7 @@ namespace process::window {
 			&offset
 		);
 		contextPointer->Draw(3u, 0u);
-		
+		*/
 	}
 	
 	void GraphicsWrapper::bufferSwap() {
