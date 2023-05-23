@@ -3,67 +3,66 @@
 
 #include <unordered_map>
 
-namespace {
-	template <>
-	struct std::hash<WICPixelFormatGUID> {
-		std::size_t operator()(WICPixelFormatGUID const& format) const noexcept {
-			std::size_t h1 = std::hash<unsigned long> {}(format.Data1);
-			std::size_t h2 = std::hash<unsigned short> {}(format.Data2);
-			std::size_t h3 = std::hash<unsigned short> {}(format.Data3);
-			std::size_t h4 = hashCharArray(
-				format.Data4,
-				sizeof(format.Data4) / sizeof(unsigned char)
-			);
-			std::size_t hash { h1 };
-			hash ^= (h2 << 5) + (h2 >> 3);
-			hash ^= (h3 << 4) + (h3 >> 4);
-			hash ^= (h4 << 2) + (h4 >> 8);
-			return hash;
+template <>
+struct std::hash<WICPixelFormatGUID> {
+	std::size_t operator()(WICPixelFormatGUID const& format) const noexcept {
+		std::size_t h1 = std::hash<unsigned long> {}(format.Data1);
+		std::size_t h2 = std::hash<unsigned short> {}(format.Data2);
+		std::size_t h3 = std::hash<unsigned short> {}(format.Data3);
+		std::size_t h4 = hashCharArray(
+			format.Data4,
+			sizeof(format.Data4) / sizeof(unsigned char)
+		);
+		std::size_t hash { h1 };
+		hash ^= (h2 << 5) + (h2 >> 3);
+		hash ^= (h3 << 4) + (h3 >> 4);
+		hash ^= (h4 << 2) + (h4 >> 8);
+		return hash;
+	}
+
+private:
+	static std::size_t hashCharArray(const unsigned char* charPointer, int length) {
+		std::size_t hash { static_cast<size_t>(0xc82a320f8684e99f) };
+		for( int index = 0; index < length; ++index ) {
+			hash ^= std::hash<unsigned char> {}(charPointer[index])
+				+ 0x9e3779b1
+				+ (hash << 6)
+				+ (hash >> 2);
 		}
-	
-	private:
-		static std::size_t hashCharArray(const unsigned char* charPointer, int length) {
-			std::size_t hash { static_cast<size_t>(0xc82a320f8684e99f) };
-			for( int index = 0; index < length; ++index ) {
-				hash ^= std::hash<unsigned char> {}(charPointer[index])
-					+ 0x9e3779b1
-					+ (hash << 6)
-					+ (hash >> 2);
-			}
-			return hash;
-		}
-	};
-	
-	using wasp::windowsadaptor::HResultError;
-	
-	template <typename T>
-	using ComPtr = Microsoft::WRL::ComPtr<T>;
-	
-	std::unordered_map<WICPixelFormatGUID, DXGI_FORMAT> wicToD3DFormatMap{
-		{GUID_WICPixelFormat128bppRGBAFloat, DXGI_FORMAT_R32G32B32A32_FLOAT },
-		{ GUID_WICPixelFormat64bppRGBAHalf ,DXGI_FORMAT_R16G16B16A16_FLOAT },
-		{ GUID_WICPixelFormat64bppRGBA, DXGI_FORMAT_R16G16B16A16_UNORM },
-		{ GUID_WICPixelFormat32bppRGBA, DXGI_FORMAT_R8G8B8A8_UNORM },
-		{ GUID_WICPixelFormat32bppBGRA, DXGI_FORMAT_B8G8R8A8_UNORM },
-		{ GUID_WICPixelFormat32bppBGR, DXGI_FORMAT_B8G8R8X8_UNORM },
-		{ GUID_WICPixelFormat32bppRGBA1010102XR,
-											 DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM },
-		{ GUID_WICPixelFormat32bppRGBA1010102, DXGI_FORMAT_R10G10B10A2_UNORM },
-		{ GUID_WICPixelFormat32bppRGBE, DXGI_FORMAT_R9G9B9E5_SHAREDEXP },
-		{ GUID_WICPixelFormat16bppBGRA5551, DXGI_FORMAT_B5G5R5A1_UNORM },
-		{ GUID_WICPixelFormat16bppBGR565, DXGI_FORMAT_B5G6R5_UNORM },
-		{ GUID_WICPixelFormat32bppGrayFloat, DXGI_FORMAT_R32_FLOAT },
-		{ GUID_WICPixelFormat16bppGrayHalf, DXGI_FORMAT_R16_FLOAT },
-		{ GUID_WICPixelFormat16bppGray, DXGI_FORMAT_R16_UNORM },
-		{ GUID_WICPixelFormat8bppGray, DXGI_FORMAT_R8_UNORM },
-		{ GUID_WICPixelFormat8bppAlpha, DXGI_FORMAT_A8_UNORM },
-		{ GUID_WICPixelFormat96bppRGBFloat, DXGI_FORMAT_R32G32B32_FLOAT }
-	};
-	
-	
-}
+		return hash;
+	}
+};
 
 namespace process::graphics {
+	
+	namespace {
+		using wasp::windowsadaptor::HResultError;
+		
+		template <typename T>
+		using ComPtr = Microsoft::WRL::ComPtr<T>;
+		
+		std::unordered_map<WICPixelFormatGUID, DXGI_FORMAT> wicToD3DFormatMap{
+			{GUID_WICPixelFormat128bppRGBAFloat, DXGI_FORMAT_R32G32B32A32_FLOAT },
+			{ GUID_WICPixelFormat64bppRGBAHalf ,DXGI_FORMAT_R16G16B16A16_FLOAT },
+			{ GUID_WICPixelFormat64bppRGBA, DXGI_FORMAT_R16G16B16A16_UNORM },
+			{ GUID_WICPixelFormat32bppRGBA, DXGI_FORMAT_R8G8B8A8_UNORM },
+			{ GUID_WICPixelFormat32bppBGRA, DXGI_FORMAT_B8G8R8A8_UNORM },
+			{ GUID_WICPixelFormat32bppBGR, DXGI_FORMAT_B8G8R8X8_UNORM },
+			{ GUID_WICPixelFormat32bppRGBA1010102XR,
+												 DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM },
+			{ GUID_WICPixelFormat32bppRGBA1010102, DXGI_FORMAT_R10G10B10A2_UNORM },
+			{ GUID_WICPixelFormat32bppRGBE, DXGI_FORMAT_R9G9B9E5_SHAREDEXP },
+			{ GUID_WICPixelFormat16bppBGRA5551, DXGI_FORMAT_B5G5R5A1_UNORM },
+			{ GUID_WICPixelFormat16bppBGR565, DXGI_FORMAT_B5G6R5_UNORM },
+			{ GUID_WICPixelFormat32bppGrayFloat, DXGI_FORMAT_R32_FLOAT },
+			{ GUID_WICPixelFormat16bppGrayHalf, DXGI_FORMAT_R16_FLOAT },
+			{ GUID_WICPixelFormat16bppGray, DXGI_FORMAT_R16_UNORM },
+			{ GUID_WICPixelFormat8bppGray, DXGI_FORMAT_R8_UNORM },
+			{ GUID_WICPixelFormat8bppAlpha, DXGI_FORMAT_A8_UNORM },
+			{ GUID_WICPixelFormat96bppRGBFloat, DXGI_FORMAT_R32G32B32_FLOAT }
+		};
+	}
+	
 	BitmapLoader::BitmapLoader() {
 		init();
 	}
@@ -122,7 +121,7 @@ namespace process::graphics {
 		return bitmapDecoderPointer;
 	}
 	
-	ComPtr<ID3D11Texture2D> BitmapLoader::convertWicBitmapToD3D(
+	ComPtr<ID3D11ShaderResourceView> BitmapLoader::convertWicBitmapToD3D(
 		const ComPtr<IWICBitmapFrameDecode>& framePointer,
 		const ComPtr<ID3D11Device>& devicePointer
 	) {
@@ -144,8 +143,8 @@ namespace process::graphics {
 		
 		D3D11_SUBRESOURCE_DATA initData;
 		initData.pSysMem = pixelDataBuffer.buffer.data();
-		initData.SysMemPitch = static_cast<UINT>( pixelDataBuffer.width );
-		initData.SysMemSlicePitch = static_cast<UINT>( pixelDataBuffer.size );
+		initData.SysMemPitch = static_cast<UINT>( pixelDataBuffer.widthBytes );
+		initData.SysMemSlicePitch = static_cast<UINT>( pixelDataBuffer.sizeBytes );
 		
 		ComPtr<ID3D11Texture2D> texturePointer{};
 		HRESULT result{ devicePointer->CreateTexture2D(
@@ -156,7 +155,24 @@ namespace process::graphics {
 		if(FAILED(result)){
 			throw HResultError{ "Error creating Texture2D" };
 		}
-		return texturePointer;
+		
+		//create view
+		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+		srvDesc.Format = format;
+		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Texture2D.MostDetailedMip = 0u;
+		srvDesc.Texture2D.MipLevels = 1u;
+		
+		ComPtr<ID3D11ShaderResourceView> viewPointer{};
+		result = devicePointer->CreateShaderResourceView(
+			texturePointer.Get(),
+			&srvDesc,
+			viewPointer.GetAddressOf()
+		);
+		if(FAILED(result)){
+			throw HResultError{ "Error creating view for Texture2D" };
+		}
+		return viewPointer;
 	}
 	
 	DXGI_FORMAT BitmapLoader::getD3DFormatFromWicFrame(
@@ -194,7 +210,7 @@ namespace process::graphics {
 		UINT height{};
 		result = framePointer->GetSize(&width, &height);
 		if(FAILED(result)){
-			throw HResultError{ "Error determining WIC bitmap size" };
+			throw HResultError{ "Error determining WIC bitmap sizeBytes" };
 		}
 		
 		//+7 forces to next byte if needed
@@ -217,7 +233,7 @@ namespace process::graphics {
 			throw HResultError{ "Error copying data into buffer" };
 		}
 		
-		return { buffer, bufferSize, widthBytes, heightBytes };
+		return { buffer, bufferSize, widthBytes, heightBytes, width, height };
 	}
 	
 	uint_least32_t BitmapLoader::getBitsPerPixel(const WICPixelFormatGUID& format){

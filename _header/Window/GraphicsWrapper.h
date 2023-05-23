@@ -21,8 +21,6 @@ namespace process::window {
 		ComPtr<ID3D11DeviceContext> contextPointer {};
 		ComPtr<ID3D11RenderTargetView> renderTargetViewPointer {};
 		ComPtr<ID3D11DepthStencilView> depthStencilViewPointer {};
-		
-		//todo: temp texture
 	
 	public:
 		GraphicsWrapper(

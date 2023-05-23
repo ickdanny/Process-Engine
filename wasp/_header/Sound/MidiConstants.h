@@ -6,7 +6,7 @@
 namespace wasp::sound::midi {
 	//all midi files should begin with "MThd"
 	constexpr uint32_t requiredHeaderID { 0x4d546864 };
-	//currently all midi files have a header size of 6
+	//currently all midi files have a header sizeBytes of 6
 	constexpr uint32_t minimumHeaderSize { 0x00000006 };
 	
 	enum fileFormat : std::uint16_t {

@@ -16,7 +16,7 @@ namespace wasp::window {
 		
 		const std::function<std::pair<int, int>()> sizeFunction {};
 		
-		//gets passed size
+		//gets passed sizeBytes
 		const std::function<std::pair<int, int>(const std::pair<int, int>)> positionFunction {};
 	};
 }

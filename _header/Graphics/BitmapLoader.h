@@ -23,7 +23,7 @@ namespace process::graphics {
 			const std::wstring& fileName
 		);
 		
-		ComPtr<ID3D11Texture2D> convertWicBitmapToD3D(
+		ComPtr<ID3D11ShaderResourceView> convertWicBitmapToD3D(
 			const ComPtr<IWICBitmapFrameDecode>& framePointer,
 			const ComPtr<ID3D11Device>& devicePointer
 		);
@@ -42,7 +42,9 @@ namespace process::graphics {
 		
 		struct PixelDataBuffer{
 			std::vector<byte> buffer{};
-			std::size_t size{};
+			std::size_t sizeBytes{};
+			std::size_t widthBytes{};
+			std::size_t heightBytes{};
 			std::size_t width{};
 			std::size_t height{};
 		};

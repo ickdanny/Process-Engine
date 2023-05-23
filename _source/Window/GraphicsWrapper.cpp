@@ -159,6 +159,26 @@ namespace process::window {
 			0
 		);
 		
+		//specify sampler
+		D3D11_SAMPLER_DESC samplerDesc{};
+		samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+		ComPtr<ID3D11SamplerState> samplerStatePointer{};
+		result = devicePointer->CreateSamplerState(
+			&samplerDesc,
+			samplerStatePointer.GetAddressOf()
+		);
+		if(FAILED(result)){
+			throw HResultError{ "Failed to create sampler state" };
+		}
+		contextPointer->PSSetSamplers(
+			0u,
+			1u,
+			samplerStatePointer.GetAddressOf()
+		);
+		
 		//assign vertex shader
 		ComPtr<ID3D11VertexShader> vsPointer{};
 		D3DReadFileToBlob(L"VertexShader.cso", &blobPointer);
@@ -190,7 +210,7 @@ namespace process::window {
 				0u
 			},
 			{
-				"TexCoords",
+				"TexCoord",
 				0u,
 				DXGI_FORMAT_R32G32_FLOAT,
 				0u,
@@ -256,18 +276,23 @@ namespace process::window {
 		auto framePointer{
 			bitmapLoader.getWicBitmapFrameDecodePointer(L"res\\test.png")
 		};
-		auto texturePointer{
+		auto textureViewPointer{
 			bitmapLoader.convertWicBitmapToD3D(framePointer, devicePointer)
 		};
-		//todo: need shader view and samplers
+		contextPointer->PSSetShaderResources(
+			0u,
+			1u,
+			textureViewPointer.GetAddressOf()
+		);
 		
-		/*
-		const Vertex3 vertices[] {
-			{0.0f, 0.3f, 0.5f},
-			{0.3f, 0.9f, -0.5f},
-			{0.8f, -0.3f, 0.5f}
+		const Vertex vertices[] {
+			{-0.9f, -0.9f, 0.5f, 0.0f, 0.0f },
+			{-0.9f, 0.9f, 0.5f, 0.0f, 1.0f },
+			{0.9f, -0.9f, 0.5f, 1.0f, 0.0f },
+			{0.9f, 0.9f, 0.5f, 1.0f, 1.0f },
 		};
-		contextPointer->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		
+		contextPointer->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 		
 		ComPtr<ID3D11Buffer> vertexBufferPointer{};
 		D3D11_BUFFER_DESC bufferDesc{};
@@ -276,15 +301,15 @@ namespace process::window {
 		bufferDesc.CPUAccessFlags = 0u;
 		bufferDesc.MiscFlags = 0u;
 		bufferDesc.ByteWidth = sizeof(vertices);
-		bufferDesc.StructureByteStride = sizeof(Vertex3);
-		D3D11_SUBRESOURCE_DATA subresourceData{};
-		subresourceData.pSysMem = vertices;
+		bufferDesc.StructureByteStride = sizeof(Vertex);
+		D3D11_SUBRESOURCE_DATA initData{};
+		initData.pSysMem = vertices;
 		devicePointer->CreateBuffer(
 			&bufferDesc,
-			&subresourceData,
+			&initData,
 			vertexBufferPointer.GetAddressOf()
 		);
-		const UINT stride = sizeof(Vertex3);
+		const UINT stride = bufferDesc.StructureByteStride;
 		const UINT offset = 0u;
 		contextPointer->IASetVertexBuffers(
 			0u,
@@ -293,8 +318,7 @@ namespace process::window {
 			&stride,
 			&offset
 		);
-		contextPointer->Draw(3u, 0u);
-		*/
+		contextPointer->Draw(4u, 0u);
 	}
 	
 	void GraphicsWrapper::bufferSwap() {
@@ -432,11 +456,11 @@ namespace wasp::window {
 		RECT clientRect;
 		GetClientRect(windowHandle, &clientRect);
 
-		D2D1_SIZE_U size = D2D1::SizeU(clientRect.right, clientRect.bottom);
+		D2D1_SIZE_U sizeBytes = D2D1::SizeU(clientRect.right, clientRect.bottom);
 
 		HRESULT result{ d2dFactoryPointer->CreateHwndRenderTarget(
 			D2D1::RenderTargetProperties(),
-			D2D1::HwndRenderTargetProperties(windowHandle, size),
+			D2D1::HwndRenderTargetProperties(windowHandle, sizeBytes),
 			&renderTargetPointer
 		) };
 
@@ -491,9 +515,9 @@ namespace wasp::window {
 		if (bufferRenderTargetPointer) {
 			D2D1_SIZE_F windowSize = renderTargetPointer->GetSize();
 
-			// Create a rectangle same size of current window
+			// Create a rectangle same sizeBytes of current window
 			D2D1_RECT_F rectangle = D2D1::RectF(
-				0.0f, 0.0f, windowSize.width, windowSize.height
+				0.0f, 0.0f, windowSize.widthBytes, windowSize.heightBytes
 			);
 
 			renderTargetPointer->DrawBitmap(
@@ -529,9 +553,9 @@ namespace wasp::window {
 			RECT rectangle;
 			GetClientRect(windowHandle, &rectangle);
 
-			D2D1_SIZE_U size = D2D1::SizeU(rectangle.right, rectangle.bottom);
+			D2D1_SIZE_U sizeBytes = D2D1::SizeU(rectangle.right, rectangle.bottom);
 
-			renderTargetPointer->Resize(size);
+			renderTargetPointer->Resize(sizeBytes);
 			InvalidateRect(windowHandle, NULL, FALSE); //what in the fuck
 		}
 		else {
@@ -587,10 +611,10 @@ namespace wasp::window {
 					d2dCenter
 				);
 				float scaledWidth{
-					originalSize.width * bitmapDrawInstruction.getScale()
+					originalSize.widthBytes * bitmapDrawInstruction.getScale()
 				};
 				float scaledHeight{
-					originalSize.height * bitmapDrawInstruction.getScale()
+					originalSize.heightBytes * bitmapDrawInstruction.getScale()
 				};
 				const math::Point2& upperLeft{
 					center.x - (scaledWidth / 2),
@@ -608,15 +632,15 @@ namespace wasp::window {
 			//only rotation
 			else {
 				const math::Point2& upperLeft{
-					center.x - (originalSize.width / 2),
-					center.y - (originalSize.height / 2)
+					center.x - (originalSize.widthBytes / 2),
+					center.y - (originalSize.heightBytes / 2)
 				};
 				makeTransformBitmapDrawCall(
 					bitmap,
 					transform,
 					upperLeft,
-					originalSize.width,
-					originalSize.height,
+					originalSize.widthBytes,
+					originalSize.heightBytes,
 					bitmapDrawInstruction.getOpacity()
 				);
 			}
@@ -629,10 +653,10 @@ namespace wasp::window {
 				d2dCenter
 			);
 			float scaledWidth{
-					originalSize.width * bitmapDrawInstruction.getScale()
+					originalSize.widthBytes * bitmapDrawInstruction.getScale()
 			};
 			float scaledHeight{
-				originalSize.height * bitmapDrawInstruction.getScale()
+				originalSize.heightBytes * bitmapDrawInstruction.getScale()
 			};
 			const math::Point2& upperLeft{
 				center.x - (scaledWidth / 2),
@@ -650,14 +674,14 @@ namespace wasp::window {
 		//normal draw call
 		else {
 			const math::Point2& upperLeft{
-				center.x - (originalSize.width / 2),
-				center.y - (originalSize.height / 2)
+				center.x - (originalSize.widthBytes / 2),
+				center.y - (originalSize.heightBytes / 2)
 			};
 			makeBitmapDrawCall(
 				bitmap,
 				upperLeft,
-				originalSize.width,
-				originalSize.height,
+				originalSize.widthBytes,
+				originalSize.heightBytes,
 				bitmapDrawInstruction.getOpacity()
 			);
 		}
@@ -673,7 +697,7 @@ namespace wasp::window {
 		math::Point2 center{ preOffsetCenter + bitmapDrawInstruction.getOffset() };
 
 		ID2D1Bitmap& bitmap{ *bitmapDrawInstruction.getBitmap() };
-		D2D1_SIZE_F originalSize = { sourceRectangle.width, sourceRectangle.height };
+		D2D1_SIZE_F originalSize = { sourceRectangle.widthBytes, sourceRectangle.heightBytes };
 
 		//only rotation or both rotation and scale
 		if (bitmapDrawInstruction.requiresRotation()) {
@@ -689,10 +713,10 @@ namespace wasp::window {
 					d2dCenter
 				);
 				float scaledWidth{
-					originalSize.width * bitmapDrawInstruction.getScale()
+					originalSize.widthBytes * bitmapDrawInstruction.getScale()
 				};
 				float scaledHeight{
-					originalSize.height * bitmapDrawInstruction.getScale()
+					originalSize.heightBytes * bitmapDrawInstruction.getScale()
 				};
 				const math::Point2& upperLeft{
 					center.x - (scaledWidth / 2),
@@ -711,15 +735,15 @@ namespace wasp::window {
 			//only rotation
 			else {
 				const math::Point2& upperLeft{
-					center.x - (originalSize.width / 2),
-					center.y - (originalSize.height / 2)
+					center.x - (originalSize.widthBytes / 2),
+					center.y - (originalSize.heightBytes / 2)
 				};
 				makeTransformSubBitmapDrawCall(
 					bitmap,
 					transform,
 					upperLeft,
-					originalSize.width,
-					originalSize.height,
+					originalSize.widthBytes,
+					originalSize.heightBytes,
 					bitmapDrawInstruction.getOpacity(),
 					sourceRectangle
 				);
@@ -733,10 +757,10 @@ namespace wasp::window {
 				d2dCenter
 			);
 			float scaledWidth{
-					originalSize.width * bitmapDrawInstruction.getScale()
+					originalSize.widthBytes * bitmapDrawInstruction.getScale()
 			};
 			float scaledHeight{
-				originalSize.height * bitmapDrawInstruction.getScale()
+				originalSize.heightBytes * bitmapDrawInstruction.getScale()
 			};
 			const math::Point2& upperLeft{
 				center.x - (scaledWidth / 2),
@@ -755,14 +779,14 @@ namespace wasp::window {
 		//normal draw call
 		else {
 			const math::Point2& upperLeft{
-				center.x - (originalSize.width / 2),
-				center.y - (originalSize.height / 2)
+				center.x - (originalSize.widthBytes / 2),
+				center.y - (originalSize.heightBytes / 2)
 			};
 			makeSubBitmapDrawCall(
 				bitmap,
 				upperLeft,
-				originalSize.width,
-				originalSize.height,
+				originalSize.widthBytes,
+				originalSize.heightBytes,
 				bitmapDrawInstruction.getOpacity(),
 				sourceRectangle
 			);
@@ -776,7 +800,7 @@ namespace wasp::window {
 	) {
 		bufferRenderTargetPointer->DrawText(
 			text.c_str(),
-			text.size(),
+			text.sizeBytes(),
 			textFormatPointer,
 			D2D1::RectF(pos.x, pos.y, pos.x + bounds.first, pos.y + bounds.second),
 			textBrushPointer
@@ -837,8 +861,8 @@ namespace wasp::window {
 			D2D1::RectF(
 				sourceRectangle.x,
 				sourceRectangle.y,
-				sourceRectangle.x + sourceRectangle.width,
-				sourceRectangle.y + sourceRectangle.height
+				sourceRectangle.x + sourceRectangle.widthBytes,
+				sourceRectangle.y + sourceRectangle.heightBytes
 			)
 		);
 	}
