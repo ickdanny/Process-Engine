@@ -2,6 +2,11 @@ Texture2D tex;
 
 SamplerState samplerState;
 
-float4 main( float2 texCoord : TexCoord ) : SV_Target{
-    return tex.Sample(samplerState, texCoord);
+struct VSOut{
+    float4 pos : SV_Position;
+    float2 texCoord : TexCoord;
+};
+
+float4 main( VSOut vsOut ) : SV_Target{
+    return tex.Sample(samplerState, vsOut.texCoord);
 }

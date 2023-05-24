@@ -286,10 +286,10 @@ namespace process::window {
 		);
 		
 		const Vertex vertices[] {
-			{-0.9f, -0.9f, 0.5f, 0.0f, 0.0f },
-			{-0.9f, 0.9f, 0.5f, 0.0f, 1.0f },
-			{0.9f, -0.9f, 0.5f, 1.0f, 0.0f },
-			{0.9f, 0.9f, 0.5f, 1.0f, 1.0f },
+			{-0.9f, -0.9f, 0.5f, 0.0f, 1.0f },
+			{-0.9f, 0.9f, 0.5f, 0.0f, 0.0f },
+			{0.9f, -0.9f, 0.5f, 1.0f, 1.0f },
+			{0.9f, 0.9f, 0.5f, 1.0f, 0.0f },
 		};
 		
 		contextPointer->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
