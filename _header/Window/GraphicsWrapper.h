@@ -33,6 +33,10 @@ namespace process::window {
 		void paint(HWND windowHandle);
 		void resize(HWND windowHandle);
 		
+		ComPtr<ID3D11Device> getDevicePointer() {
+			return devicePointer;
+		}
+		
 		struct Vertex{
 			float x{};
 			float y{};
@@ -59,12 +63,12 @@ namespace process::window {
 #include "windowsDWriteInclude.h"
 //#include <utility>
 
-#include "Graphics\IBitmapDrawer.h"
+#include "Graphics\ISpriteDrawer.h"
 #include "Graphics\ITextDrawer.h"
 
 namespace wasp::window {
     class GraphicsWrapper
-        : public graphics::IBitmapDrawer
+        : public graphics::ISpriteDrawer
         , public graphics::ITextDrawer
     {
     private:
@@ -117,12 +121,12 @@ namespace wasp::window {
 
         void drawBitmap(
             const math::Point2 preOffsetCenter,
-            const graphics::BitmapDrawInstruction& bitmapDrawInstruction
+            const graphics::SpriteDrawInstruction& bitmapDrawInstruction
         ) override;
 
         void drawSubBitmap(
             const math::Point2 preOffsetCenter,
-            const graphics::BitmapDrawInstruction& bitmapDrawInstruction,
+            const graphics::SpriteDrawInstruction& bitmapDrawInstruction,
             const math::Rectangle& sourceRectangle
         ) override;
 

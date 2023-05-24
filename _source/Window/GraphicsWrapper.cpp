@@ -1,8 +1,8 @@
-#include "Window/GraphicsWrapper.h"
-#include "Adaptor/HResultError.h"
+#include "Window\GraphicsWrapper.h"
+#include "Adaptor\HResultError.h"
 
 //todo: temp test
-#include "Graphics/BitmapLoader.h"
+#include "Graphics/TextureLoader.h"
 
 namespace process::window {
 	
@@ -272,12 +272,12 @@ namespace process::window {
 		bufferSwap();
 		clearBuffer();
 		
-		graphics::BitmapLoader bitmapLoader{};
+		graphics::TextureLoader bitmapLoader{};
 		auto framePointer{
-			bitmapLoader.getWicBitmapFrameDecodePointer(L"res\\test.png")
+			bitmapLoader.getWicFramePointer(L"res\\test.png")
 		};
 		auto textureViewPointer{
-			bitmapLoader.convertWicBitmapToD3D(framePointer, devicePointer)
+			bitmapLoader.convertWicFrameToD3DTextureView(framePointer, devicePointer)
 		};
 		contextPointer->PSSetShaderResources(
 			0u,
@@ -588,7 +588,7 @@ namespace wasp::window {
 
 	void GraphicsWrapper::drawBitmap(
 		const math::Point2 preOffsetCenter,
-		const graphics::BitmapDrawInstruction& bitmapDrawInstruction
+		const graphics::SpriteDrawInstruction& bitmapDrawInstruction
 	) {
 		//assume beginDraw has already been called
 
@@ -689,7 +689,7 @@ namespace wasp::window {
 
 	void GraphicsWrapper::drawSubBitmap(
 		const math::Point2 preOffsetCenter,
-		const graphics::BitmapDrawInstruction& bitmapDrawInstruction,
+		const graphics::SpriteDrawInstruction& bitmapDrawInstruction,
 		const math::Rectangle& sourceRectangle
 	) {
 		//assume beginDraw has already been called

@@ -62,10 +62,10 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 		resources::ResourceMasterStorage resourceMasterStorage {};
 		
 		resource::ResourceLoader resourceLoader {
-			std::array<wasp::resource::Loadable*, 4> {
+			std::array<wasp::resource::Loadable*, 5> {
 				&resourceMasterStorage.directoryStorage,
 				&resourceMasterStorage.manifestStorage,
-				//&resourceMasterStorage.bitmapStorage,
+				&resourceMasterStorage.textureStorage,
 				&resourceMasterStorage.midiSequenceStorage,
 				&resourceMasterStorage.dialogueStorage
 			}
@@ -82,13 +82,12 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 			config::graphicsWidth,
 			config::graphicsHeight
 		};
-/*
-
-        //init D2D Bitmaps
-        resourceMasterStorage.bitmapStorage.setRenderTargetPointerAndLoadD2DBitmaps(
-                window.getGraphicsWrapper().getRenderTargetPointer()
+		
+		//init d3d textures
+        resourceMasterStorage.textureStorage.setdevicePointerAndLoadD3DTextures(
+                window.getGraphicsWrapper().getDevicePointer()
         );
-*/
+
 		//init input
 		wasp::input::KeyInputTable keyInputTable {};
 		window.setKeyDownCallback(
@@ -110,7 +109,7 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 		//init rendering
 		graphics::RendererScheduler renderer{
 				&window,
-				&resourceMasterStorage.bitmapStorage,
+				&resourceMasterStorage.textureStorage,
 				config::graphicsWidth,
 				config::graphicsHeight
 		};

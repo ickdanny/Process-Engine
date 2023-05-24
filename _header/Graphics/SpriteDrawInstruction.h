@@ -1,0 +1,132 @@
+#pragma once
+
+#include "windowsInclude.h"
+#include "d3dInclude.h"
+#include <atlbase.h>		//for CComPtr
+#include <stdexcept>
+
+#include "Math/Angle.h"
+#include "Math/Vector2.h"
+
+namespace process::graphics {
+	class SpriteDrawInstruction {
+	private:
+		//typedefs
+		using Angle = wasp::math::Angle;
+		using Vector2 = wasp::math::Vector2;
+		template <typename T>
+		using ComPtr = Microsoft::WRL::ComPtr<T>;
+
+		//constants
+		static constexpr float minOpacity{ 0.0f };
+		static constexpr float maxOpacity{ 1.0f };
+		static constexpr float minScale{ 0.01f };
+		static constexpr float defaultRotation{ 0.0f };
+		static constexpr float defaultOpacity{ 1.0f };
+		static constexpr float defaultScale{ 1.0f };
+
+		//fields
+		ComPtr<ID3D11ShaderResourceView> textureView{};
+		Vector2 offset{};
+		Angle rotation{ defaultRotation };
+		float opacity{ defaultOpacity };
+		float scale{ defaultScale };
+
+		bool updated{};         //useful for implementation
+
+	public:
+		//constructor
+		explicit SpriteDrawInstruction(
+			const ComPtr<ID3D11ShaderResourceView>& textureView,
+			const Vector2& offset = {},
+			Angle rotation = { defaultRotation },
+			float opacity = defaultOpacity,
+			float scale = defaultScale
+		)
+			: textureView{ textureView }
+			, offset{ offset }
+			, rotation{ rotation }
+			, opacity{ opacity }
+			, scale{ scale }
+		{
+			throwIfOutOfRange();
+		}
+
+		//getters
+		const ComPtr<ID3D11ShaderResourceView>& getTextureView() const {
+			return textureView;
+		}
+		const Vector2& getOffset() const {
+			return offset;
+		}
+		Angle getRotation() const {
+			//return by value
+			return rotation;
+		}
+		float getOpacity() const {
+			return opacity;
+		}
+		float getScale() const {
+			return scale;
+		}
+
+		//setters
+		void setTextureView(const ComPtr<ID3D11ShaderResourceView>& textureView) {
+			this->textureView = textureView;
+			flagForUpdate();
+		}
+		void setOffset(const Vector2& offset) {
+			this->offset = offset;
+			flagForUpdate();
+		}
+		void setRotation(Angle rotation) {
+			this->rotation = rotation;
+			flagForUpdate();
+		}
+		void setOpacity(float opacity) {
+			this->opacity = opacity;
+			throwIfOpacityOutOfRange();
+			flagForUpdate();
+		}
+		void setScale(float scale) {
+			this->scale = scale;
+			throwIfScaleOutOfRange();
+			flagForUpdate();
+		}
+
+		bool requiresRotation() const {
+			return static_cast<float>(rotation) != defaultRotation;
+		}
+
+		bool requiresScale() const {
+			return scale != defaultScale;
+		}
+
+		//updating
+		bool isUpdated() const {
+			return updated;
+		}
+		void flagForUpdate() {
+			updated = false;
+		}
+		void update() {
+			updated = true;
+		}
+
+	private:
+		void throwIfOutOfRange() const {
+			throwIfOpacityOutOfRange();
+			throwIfScaleOutOfRange();
+		}
+		void throwIfOpacityOutOfRange() const {
+			if (opacity < minOpacity || opacity > maxOpacity) {
+				throw std::out_of_range("Error opacity out of range");
+			}
+		}
+		void throwIfScaleOutOfRange() const {
+			if (scale <= minScale) {
+				throw std::out_of_range("Error scale out of range");
+			}
+		}
+	};
+}

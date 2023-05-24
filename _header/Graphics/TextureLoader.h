@@ -8,7 +8,7 @@
 #include <vector>
 
 namespace process::graphics {
-	class BitmapLoader {
+	class TextureLoader {
 	private:
 		//typedefs
 		template <typename T>
@@ -17,13 +17,13 @@ namespace process::graphics {
 		ComPtr<IWICImagingFactory> wicFactoryPointer{};
 	
 	public:
-		BitmapLoader();
+		TextureLoader();
 		
-		ComPtr<IWICBitmapFrameDecode> getWicBitmapFrameDecodePointer(
+		ComPtr<IWICBitmapFrameDecode> getWicFramePointer(
 			const std::wstring& fileName
 		);
 		
-		ComPtr<ID3D11ShaderResourceView> convertWicBitmapToD3D(
+		ComPtr<ID3D11ShaderResourceView> convertWicFrameToD3DTextureView(
 			const ComPtr<IWICBitmapFrameDecode>& framePointer,
 			const ComPtr<ID3D11Device>& devicePointer
 		);
@@ -49,7 +49,7 @@ namespace process::graphics {
 			std::size_t height{};
 		};
 		
-		PixelDataBuffer getPixelDataBuffer( const ComPtr<IWICBitmapFrameDecode>& framePointer);
+		PixelDataBuffer getPixelDataBuffer(const ComPtr<IWICBitmapFrameDecode>& framePointer);
 		
 		uint_least32_t getBitsPerPixel(const WICPixelFormatGUID& format);
 	};
