@@ -2,11 +2,29 @@
 #include "Adaptor\HResultError.h"
 
 //todo: temp test
-#include "Graphics/TextureLoader.h"
+#include "Graphics/SpriteLoader.h"
 
 namespace process::window {
 	
-	using HResultError = wasp::windowsadaptor::HResultError;
+	namespace{
+		using HResultError = wasp::windowsadaptor::HResultError;
+		using Point2 = wasp::math::Point2;
+		
+		constexpr Point2 convertPointToNDC(Point2 point, float width, float height){
+			float halfWidth = width / 2.0f;
+			float halfHeight = height / 2.0f;
+			return {
+				point.x / halfWidth - 1.0f,
+				-(point.y / halfHeight - 1.0f)
+			};
+		}
+		
+		struct VSConstantBuffer{
+			DirectX::XMMATRIX transform{};
+		};
+		
+		constexpr unsigned int numVertices{ 4u };
+	}
 	
 	GraphicsWrapper::GraphicsWrapper(
 		int graphicsWidth,
@@ -197,6 +215,25 @@ namespace process::window {
 			0
 		);
 		
+		//create VS constant buffer
+		D3D11_BUFFER_DESC cbDesc{};
+		cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		cbDesc.Usage = D3D11_USAGE_DYNAMIC;
+		cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		cbDesc.MiscFlags = 0u;
+		cbDesc.ByteWidth = sizeof(VSConstantBuffer);
+		cbDesc.StructureByteStride = 0u;
+		D3D11_SUBRESOURCE_DATA vsConstantBufferInitData{};
+		result = devicePointer->CreateBuffer(
+			&cbDesc,
+			&vsConstantBufferInitData,
+			VSConstantBufferPointer.GetAddressOf()
+		);
+		if(FAILED(result)){
+			throw HResultError{ "failed to create VS constant buffer" };
+		}
+		updateVSConstantBuffer();
+		
 		//specify input layout
 		ComPtr<ID3D11InputLayout> inputLayoutPointer{};
 		const D3D11_INPUT_ELEMENT_DESC inputElementDesc[] {
@@ -230,6 +267,41 @@ namespace process::window {
 			throw HResultError{ "Error creating input layout" };
 		}
 		contextPointer->IASetInputLayout(inputLayoutPointer.Get());
+		
+		//supply vertex buffer for quad
+		const Vertex vertices[] {
+			{-1.0f, -1.0f, 0.5f, 0.0f, 1.0f },
+			{-1.0f, 1.0f, 0.5f, 0.0f, 0.0f },
+			{1.0f, -1.0f, 0.5f, 1.0f, 1.0f },
+			{1.0f, 1.0f, 0.5f, 1.0f, 0.0f },
+		};
+		
+		contextPointer->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+		
+		ComPtr<ID3D11Buffer> vertexBufferPointer{};
+		D3D11_BUFFER_DESC bufferDesc{};
+		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		bufferDesc.CPUAccessFlags = 0u;
+		bufferDesc.MiscFlags = 0u;
+		bufferDesc.ByteWidth = sizeof(vertices);
+		bufferDesc.StructureByteStride = sizeof(Vertex);
+		D3D11_SUBRESOURCE_DATA vertexBufferInitData{};
+		vertexBufferInitData.pSysMem = vertices;
+		devicePointer->CreateBuffer(
+			&bufferDesc,
+			&vertexBufferInitData,
+			vertexBufferPointer.GetAddressOf()
+		);
+		const UINT stride = bufferDesc.StructureByteStride;
+		const UINT offset = 0u;
+		contextPointer->IASetVertexBuffers(
+			0u,
+			1u,
+			vertexBufferPointer.GetAddressOf(),
+			&stride,
+			&offset
+		);
 		
 		//configure viewport
 		D3D11_VIEWPORT viewport{};
@@ -271,54 +343,6 @@ namespace process::window {
 	void GraphicsWrapper::paint(HWND windowHandle) {
 		bufferSwap();
 		clearBuffer();
-		
-		graphics::TextureLoader bitmapLoader{};
-		auto framePointer{
-			bitmapLoader.getWicFramePointer(L"res\\test.png")
-		};
-		auto textureViewPointer{
-			bitmapLoader.convertWicFrameToD3DTextureView(framePointer, devicePointer)
-		};
-		contextPointer->PSSetShaderResources(
-			0u,
-			1u,
-			textureViewPointer.GetAddressOf()
-		);
-		
-		const Vertex vertices[] {
-			{-0.9f, -0.9f, 0.5f, 0.0f, 1.0f },
-			{-0.9f, 0.9f, 0.5f, 0.0f, 0.0f },
-			{0.9f, -0.9f, 0.5f, 1.0f, 1.0f },
-			{0.9f, 0.9f, 0.5f, 1.0f, 0.0f },
-		};
-		
-		contextPointer->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-		
-		ComPtr<ID3D11Buffer> vertexBufferPointer{};
-		D3D11_BUFFER_DESC bufferDesc{};
-		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-		bufferDesc.CPUAccessFlags = 0u;
-		bufferDesc.MiscFlags = 0u;
-		bufferDesc.ByteWidth = sizeof(vertices);
-		bufferDesc.StructureByteStride = sizeof(Vertex);
-		D3D11_SUBRESOURCE_DATA initData{};
-		initData.pSysMem = vertices;
-		devicePointer->CreateBuffer(
-			&bufferDesc,
-			&initData,
-			vertexBufferPointer.GetAddressOf()
-		);
-		const UINT stride = bufferDesc.StructureByteStride;
-		const UINT offset = 0u;
-		contextPointer->IASetVertexBuffers(
-			0u,
-			1u,
-			vertexBufferPointer.GetAddressOf(),
-			&stride,
-			&offset
-		);
-		contextPointer->Draw(4u, 0u);
 	}
 	
 	void GraphicsWrapper::bufferSwap() {
@@ -343,9 +367,76 @@ namespace process::window {
 		//todo: windowpainter resize
 	}
 	
+	void GraphicsWrapper::drawSprite(
+		const GraphicsWrapper::Point2 preOffsetCenter,
+		const graphics::SpriteDrawInstruction& spriteDrawInstruction
+	) {
+		contextPointer->PSSetShaderResources(
+			0u,
+			1u,
+			spriteDrawInstruction.getSprite().textureView.GetAddressOf()
+		);
+		
+		Point2 offsetCenter{ preOffsetCenter + spriteDrawInstruction.getOffset() };
+		Point2 centerNDC{ convertPointToNDC(
+			offsetCenter,
+			static_cast<float>(graphicsWidth),
+			static_cast<float>(graphicsHeight))
+		};
+		float widthScale{
+			static_cast<float>(spriteDrawInstruction.getSprite().width)
+				/ static_cast<float>(graphicsWidth)
+		};
+		float heightScale{
+			static_cast<float>(spriteDrawInstruction.getSprite().height)
+				/ static_cast<float>(graphicsHeight)
+		};
+		
+		VSConstantBuffer constantBuffer{
+			{
+				DirectX::XMMatrixTranspose(
+					DirectX::XMMatrixRotationZ(spriteDrawInstruction.getRotation()) *
+					DirectX::XMMatrixScaling(
+						widthScale,
+						heightScale,
+						1.0f
+					) *
+					DirectX::XMMatrixTranslation(
+						centerNDC.x,
+						centerNDC.y,
+						0.0f		//todo: sprite depth
+					)
+				)
+			}
+		};
+		contextPointer->UpdateSubresource(
+			VSConstantBufferPointer.Get(),
+			0u,
+			nullptr,
+			&constantBuffer,
+			0u,
+			0u
+		);
+		updateVSConstantBuffer();
+		
+		contextPointer->Draw(numVertices, 0u);
+	}
 	
+	void GraphicsWrapper::drawSubSprite(
+		const GraphicsWrapper::Point2 preOffsetCenter,
+		const graphics::SpriteDrawInstruction& spriteDrawInstruction,
+		const GraphicsWrapper::Rectangle& sourceRectangle
+	) {
+		//todo: draw subsprite
+	}
 	
-	
+	void GraphicsWrapper::updateVSConstantBuffer() {
+		contextPointer->VSSetConstantBuffers(
+			0u,
+			1u,
+			VSConstantBufferPointer.GetAddressOf()
+		);
+	}
 }
 
 /*
@@ -586,7 +677,7 @@ namespace wasp::window {
 		);
 	}
 
-	void GraphicsWrapper::drawBitmap(
+	void GraphicsWrapper::drawSprite(
 		const math::Point2 preOffsetCenter,
 		const graphics::SpriteDrawInstruction& bitmapDrawInstruction
 	) {
@@ -687,7 +778,7 @@ namespace wasp::window {
 		}
 	}
 
-	void GraphicsWrapper::drawSubBitmap(
+	void GraphicsWrapper::drawSubSprite(
 		const math::Point2 preOffsetCenter,
 		const graphics::SpriteDrawInstruction& bitmapDrawInstruction,
 		const math::Rectangle& sourceRectangle

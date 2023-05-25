@@ -7,6 +7,7 @@
 
 #include "Math/Angle.h"
 #include "Math/Vector2.h"
+#include "Graphics/Sprite.h"
 
 namespace process::graphics {
 	class SpriteDrawInstruction {
@@ -26,7 +27,7 @@ namespace process::graphics {
 		static constexpr float defaultScale{ 1.0f };
 
 		//fields
-		ComPtr<ID3D11ShaderResourceView> textureView{};
+		Sprite sprite{};
 		Vector2 offset{};
 		Angle rotation{ defaultRotation };
 		float opacity{ defaultOpacity };
@@ -37,13 +38,13 @@ namespace process::graphics {
 	public:
 		//constructor
 		explicit SpriteDrawInstruction(
-			const ComPtr<ID3D11ShaderResourceView>& textureView,
+			Sprite sprite,
 			const Vector2& offset = {},
 			Angle rotation = { defaultRotation },
 			float opacity = defaultOpacity,
 			float scale = defaultScale
 		)
-			: textureView{ textureView }
+			: sprite{ sprite }
 			, offset{ offset }
 			, rotation{ rotation }
 			, opacity{ opacity }
@@ -53,8 +54,8 @@ namespace process::graphics {
 		}
 
 		//getters
-		const ComPtr<ID3D11ShaderResourceView>& getTextureView() const {
-			return textureView;
+		const Sprite& getSprite() const {
+			return sprite;
 		}
 		const Vector2& getOffset() const {
 			return offset;
@@ -71,8 +72,8 @@ namespace process::graphics {
 		}
 
 		//setters
-		void setTextureView(const ComPtr<ID3D11ShaderResourceView>& textureView) {
-			this->textureView = textureView;
+		void setSprite(const Sprite& sprite) {
+			this->sprite = sprite;
 			flagForUpdate();
 		}
 		void setOffset(const Vector2& offset) {

@@ -11,12 +11,12 @@ namespace process::graphics {
 		using Point2 = wasp::math::Point2;
 		using Rectangle = wasp::math::Rectangle;
 	public:
-		virtual void drawBitmap(
+		virtual void drawSprite(
 			const Point2 center,
 			const SpriteDrawInstruction& spriteDrawInstruction
 		) = 0;
 
-		virtual void drawSubBitmap(
+		virtual void drawSubSprite(
 			const Point2 center,
 			const SpriteDrawInstruction& spriteDrawInstruction,
 			const Rectangle& sourceRectangle

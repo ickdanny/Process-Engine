@@ -1,4 +1,4 @@
-#include "Game\Resources\TextureStorage.h"
+#include "Game\Resources\SpriteStorage.h"
 
 #include "File\FileUtil.h"
 
@@ -6,9 +6,10 @@ namespace process::game::resources {
 	
 	namespace{
 		using ResourceBase = wasp::resource::ResourceBase;
+		using Sprite = graphics::Sprite;
 	}
 
-	void TextureStorage::reload(const std::wstring& id) {
+	void SpriteStorage::reload(const std::wstring& id) {
 		if (resourceLoaderPointer) {
 			auto found{ resourceMap.find(id) };
 			if (found != resourceMap.end()) {
@@ -51,17 +52,17 @@ namespace process::game::resources {
 		}
 	}
 
-	ResourceBase* TextureStorage::loadFromFile(
+	ResourceBase* SpriteStorage::loadFromFile(
 		const resource::FileOrigin& fileOrigin,
 		const resource::ResourceLoader& resourceLoader
 	) {
 		ComPtr<IWICBitmapFrameDecode> wicFrame{
-			textureLoader.getWicFramePointer(fileOrigin.fileName)
+			spriteLoader.getWicFramePointer(fileOrigin.fileName)
 		};
 
-		ComPtr<ID3D11ShaderResourceView> d3dTextureView{};
+		Sprite sprite{};
 		if (devicePointer) {
-			d3dTextureView = textureLoader.convertWicFrameToD3DTextureView(
+			sprite = spriteLoader.convertWicFrameToSprite(
 				wicFrame,
 				devicePointer
 			);
@@ -72,12 +73,12 @@ namespace process::game::resources {
 			throw std::runtime_error{ "Error loaded pre-existing id" };
 		}
 
-		std::shared_ptr<resource::Resource<WicFrameAndD3DTextureView>> resourceSharedPointer{
-			std::make_shared<resource::Resource<WicFrameAndD3DTextureView>>(
+		ResourceSharedPointer resourceSharedPointer{
+			std::make_shared<ResourceType>(
 				id,
 				fileOrigin,
-				std::make_shared<WicFrameAndD3DTextureView>(
-					WicFrameAndD3DTextureView{ wicFrame, d3dTextureView }
+				std::make_shared<WicFrameAndSprite>(
+					WicFrameAndSprite{ wicFrame, sprite }
 				)
 			)
 		};
@@ -88,18 +89,18 @@ namespace process::game::resources {
 		return resourceSharedPointer.get();
 	}
 
-	ResourceBase* TextureStorage::loadFromManifest(
+	ResourceBase* SpriteStorage::loadFromManifest(
 		const resource::ManifestOrigin& manifestOrigin,
 		const resource::ResourceLoader& resourceLoader
 	) {
 		const std::wstring& fileName{ manifestOrigin.manifestArguments[1] };
 		ComPtr<IWICBitmapFrameDecode> wicFrame{
-			textureLoader.getWicFramePointer(fileName)
+			spriteLoader.getWicFramePointer(fileName)
 		};
 
-		ComPtr<ID3D11ShaderResourceView> d3dTextureView{};
+		Sprite sprite{};
 		if (devicePointer) {
-			d3dTextureView = textureLoader.convertWicFrameToD3DTextureView(
+			sprite = spriteLoader.convertWicFrameToSprite(
 				wicFrame,
 				devicePointer
 			);
@@ -110,12 +111,12 @@ namespace process::game::resources {
 			throw std::runtime_error{ "Error loaded pre-existing id" };
 		}
 
-		std::shared_ptr<resource::Resource<WicFrameAndD3DTextureView>> resourceSharedPointer{
-			std::make_shared<resource::Resource<WicFrameAndD3DTextureView>>(
+		ResourceSharedPointer resourceSharedPointer{
+			std::make_shared<ResourceType>(
 				id,
 				manifestOrigin,
-				std::make_shared<WicFrameAndD3DTextureView>(
-					WicFrameAndD3DTextureView{ wicFrame, d3dTextureView }
+				std::make_shared<WicFrameAndSprite>(
+					WicFrameAndSprite{ wicFrame, sprite }
 				)
 			)
 		};
@@ -126,27 +127,27 @@ namespace process::game::resources {
 		return resourceSharedPointer.get();
 	}
 	
-	void TextureStorage::setdevicePointerAndLoadD3DTextures(
+	void SpriteStorage::setDevicePointerAndLoadD3DTextures(
 		const ComPtr<ID3D11Device>& devicePointer
 	){
 		this->devicePointer = devicePointer;
 		throwIfCannotConstructD3DTextures();
 		forEach(
-			[&](std::shared_ptr<ResourceType> resourceSharedPointer) {
+			[&](const ResourceSharedPointer& resourceSharedPointer) {
 				loadD3DTexture(*resourceSharedPointer);
 			}
 		);
 	}
 
-	void TextureStorage::loadD3DTexture(ResourceType& resource) {
+	void SpriteStorage::loadD3DTexture(ResourceType& resource) {
 		auto& data{ *resource.getDataPointerCopy() };
-		data.d3dTextureView = textureLoader.convertWicFrameToD3DTextureView(
+		data.sprite = spriteLoader.convertWicFrameToSprite(
 			data.wicFrame,
 			devicePointer
 		);
 	}
 
-	void TextureStorage::throwIfCannotConstructD3DTextures() {
+	void SpriteStorage::throwIfCannotConstructD3DTextures() {
 		if (!devicePointer) {
 			throw std::runtime_error{ "Error cannot create D2D Bitmaps" };
 		}

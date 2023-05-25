@@ -65,7 +65,7 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 			std::array<wasp::resource::Loadable*, 5> {
 				&resourceMasterStorage.directoryStorage,
 				&resourceMasterStorage.manifestStorage,
-				&resourceMasterStorage.textureStorage,
+				&resourceMasterStorage.spriteStorage,
 				&resourceMasterStorage.midiSequenceStorage,
 				&resourceMasterStorage.dialogueStorage
 			}
@@ -84,9 +84,9 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 		};
 		
 		//init d3d textures
-        resourceMasterStorage.textureStorage.setdevicePointerAndLoadD3DTextures(
-                window.getGraphicsWrapper().getDevicePointer()
-        );
+		resourceMasterStorage.spriteStorage.setDevicePointerAndLoadD3DTextures(
+			window.getGraphicsWrapper().getDevicePointer()
+		);
 
 		//init input
 		wasp::input::KeyInputTable keyInputTable {};
@@ -109,7 +109,7 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 		//init rendering
 		graphics::RendererScheduler renderer{
 				&window,
-				&resourceMasterStorage.textureStorage,
+				&resourceMasterStorage.spriteStorage,
 				config::graphicsWidth,
 				config::graphicsHeight
 		};
@@ -164,6 +164,7 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 			},
 			//draw function
 			[&](float deltaTime) {
+				//todo: for now don't worry about render scheduler, just draw same thread
 				/*
 				renderer.render(
 						deltaTime,

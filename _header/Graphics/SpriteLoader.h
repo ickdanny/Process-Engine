@@ -7,8 +7,10 @@
 #include <string>
 #include <vector>
 
+#include "Graphics/Sprite.h"
+
 namespace process::graphics {
-	class TextureLoader {
+	class SpriteLoader {
 	private:
 		//typedefs
 		template <typename T>
@@ -17,13 +19,13 @@ namespace process::graphics {
 		ComPtr<IWICImagingFactory> wicFactoryPointer{};
 	
 	public:
-		TextureLoader();
+		SpriteLoader();
 		
 		ComPtr<IWICBitmapFrameDecode> getWicFramePointer(
 			const std::wstring& fileName
 		);
 		
-		ComPtr<ID3D11ShaderResourceView> convertWicFrameToD3DTextureView(
+		Sprite convertWicFrameToSprite(
 			const ComPtr<IWICBitmapFrameDecode>& framePointer,
 			const ComPtr<ID3D11Device>& devicePointer
 		);
@@ -45,8 +47,8 @@ namespace process::graphics {
 			std::size_t sizeBytes{};
 			std::size_t widthBytes{};
 			std::size_t heightBytes{};
-			std::size_t width{};
-			std::size_t height{};
+			unsigned int width{};
+			unsigned int height{};
 		};
 		
 		PixelDataBuffer getPixelDataBuffer(const ComPtr<IWICBitmapFrameDecode>& framePointer);

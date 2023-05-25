@@ -1,14 +1,17 @@
 #pragma once
 
+#include "Graphics/ISpriteDrawer.h"
+
 #include "windowsInclude.h"
 #include "d3dInclude.h"
 
 namespace process::window {
-	class GraphicsWrapper
-		//todo: needs to extend bitmap drawer?
+	class GraphicsWrapper : public graphics::ISpriteDrawer
 	{
 	private:
 		//typedefs
+		using Point2 = wasp::math::Point2;
+		using Rectangle = wasp::math::Rectangle;
 		template <typename T>
 		using ComPtr = Microsoft::WRL::ComPtr<T>;
 		
@@ -21,7 +24,8 @@ namespace process::window {
 		ComPtr<ID3D11DeviceContext> contextPointer {};
 		ComPtr<ID3D11RenderTargetView> renderTargetViewPointer {};
 		ComPtr<ID3D11DepthStencilView> depthStencilViewPointer {};
-	
+		ComPtr<ID3D11Buffer> VSConstantBufferPointer{};
+		
 	public:
 		GraphicsWrapper(
 			int graphicsWidth,
@@ -32,6 +36,17 @@ namespace process::window {
 		void init(HWND windowHandle);
 		void paint(HWND windowHandle);
 		void resize(HWND windowHandle);
+		
+		void drawSprite(
+			Point2 preOffsetCenter,
+			const graphics::SpriteDrawInstruction& spriteDrawInstruction
+		) override;
+		
+		void drawSubSprite(
+			Point2 preOffsetCenter,
+			const graphics::SpriteDrawInstruction& spriteDrawInstruction,
+			const Rectangle& sourceRectangle
+		) override;
 		
 		ComPtr<ID3D11Device> getDevicePointer() {
 			return devicePointer;
@@ -53,6 +68,7 @@ namespace process::window {
 		void setupPipeline();
 		void bufferSwap();
 		void clearBuffer();
+		void updateVSConstantBuffer();
 	};
 }
 
@@ -119,12 +135,12 @@ namespace wasp::window {
 
         void beginDraw() override;
 
-        void drawBitmap(
+        void drawSprite(
             const math::Point2 preOffsetCenter,
             const graphics::SpriteDrawInstruction& bitmapDrawInstruction
         ) override;
 
-        void drawSubBitmap(
+        void drawSubSprite(
             const math::Point2 preOffsetCenter,
             const graphics::SpriteDrawInstruction& bitmapDrawInstruction,
             const math::Rectangle& sourceRectangle

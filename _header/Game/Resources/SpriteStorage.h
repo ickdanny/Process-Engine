@@ -5,34 +5,36 @@
 
 #include "Resource\ResourceStorage.h"
 #include "Resource\ResourceBase.h"
-#include "Graphics\TextureLoader.h"
+#include "Graphics\SpriteLoader.h"
+#include "Graphics\Sprite.h"
 
 #pragma warning(disable : 4250) //suppress inherit via dominance
 
 namespace process::game::resources {
 
-	struct WicFrameAndD3DTextureView {
+	struct WicFrameAndSprite {
 		Microsoft::WRL::ComPtr<IWICBitmapFrameDecode> wicFrame{};
-		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> d3dTextureView{};
+		graphics::Sprite sprite{};
 	};
 
-	class TextureStorage
-		: public resource::ResourceStorage<WicFrameAndD3DTextureView>
+	class SpriteStorage
+		: public resource::ResourceStorage<WicFrameAndSprite>
 		, public resource::FileLoadable
 		, public resource::ManifestLoadable
 	{
 	private:
-		using TextureLoader = graphics::TextureLoader;
-		using ResourceType = resource::Resource<WicFrameAndD3DTextureView>;
+		using TextureLoader = graphics::SpriteLoader;
+		using ResourceType = resource::Resource<WicFrameAndSprite>;
+		using ResourceSharedPointer = std::shared_ptr<ResourceType>;
 		using ResourceBase = wasp::resource::ResourceBase;
 		template <typename T>
 		using ComPtr = Microsoft::WRL::ComPtr<T>;
 		
-		TextureLoader textureLoader{};
+		TextureLoader spriteLoader{};
 		ComPtr<ID3D11Device> devicePointer{};
 
 	public:
-		TextureStorage()
+		SpriteStorage()
 			: FileLoadable{ {L"png"} }
 			, ManifestLoadable{ {L"image"} } {
 		}
@@ -49,7 +51,7 @@ namespace process::game::resources {
 			const resource::ResourceLoader& resourceLoader
 		) override;
 
-		void setdevicePointerAndLoadD3DTextures(const ComPtr<ID3D11Device>& devicePointer);
+		void setDevicePointerAndLoadD3DTextures(const ComPtr<ID3D11Device>& devicePointer);
 		
 	private:
 		void loadD3DTexture(ResourceType& resource);

@@ -1,4 +1,4 @@
-#include "Graphics\TextureLoader.h"
+#include "Graphics\SpriteLoader.h"
 #include "HResultError.h"
 
 #include <unordered_map>
@@ -63,15 +63,15 @@ namespace process::graphics {
 		};
 	}
 	
-	TextureLoader::TextureLoader() {
+	SpriteLoader::SpriteLoader() {
 		init();
 	}
 	
-	void TextureLoader::init() {
+	void SpriteLoader::init() {
 		initWicFactory();
 	}
 	
-	void TextureLoader::initWicFactory() {
+	void SpriteLoader::initWicFactory() {
 		HRESULT result{
 			CoCreateInstance(
 				CLSID_WICImagingFactory,
@@ -85,7 +85,7 @@ namespace process::graphics {
 		}
 	}
 	
-	ComPtr<IWICBitmapFrameDecode> TextureLoader::getWicFramePointer(
+	ComPtr<IWICBitmapFrameDecode> SpriteLoader::getWicFramePointer(
 		const std::wstring& fileName
 	) {
 		ComPtr<IWICBitmapDecoder> bitmapDecoderPointer{
@@ -104,7 +104,7 @@ namespace process::graphics {
 		return framePointer;
 	}
 	
-	ComPtr<IWICBitmapDecoder> TextureLoader::getBitmapDecoderPointer(
+	ComPtr<IWICBitmapDecoder> SpriteLoader::getBitmapDecoderPointer(
 		const std::wstring& fileName
 	) {
 		ComPtr<IWICBitmapDecoder> bitmapDecoderPointer{};
@@ -121,7 +121,7 @@ namespace process::graphics {
 		return bitmapDecoderPointer;
 	}
 	
-	ComPtr<ID3D11ShaderResourceView> TextureLoader::convertWicFrameToD3DTextureView(
+	Sprite SpriteLoader::convertWicFrameToSprite(
 		const ComPtr<IWICBitmapFrameDecode>& framePointer,
 		const ComPtr<ID3D11Device>& devicePointer
 	) {
@@ -172,10 +172,14 @@ namespace process::graphics {
 		if(FAILED(result)){
 			throw HResultError{ "Error creating view for Texture2D" };
 		}
-		return viewPointer;
+		return {
+			viewPointer,
+			pixelDataBuffer.width,
+			pixelDataBuffer.height
+		};
 	}
 	
-	DXGI_FORMAT TextureLoader::getD3DFormatFromWicFrame(
+	DXGI_FORMAT SpriteLoader::getD3DFormatFromWicFrame(
 		const ComPtr<IWICBitmapFrameDecode>& framePointer
 	) {
 		WICPixelFormatGUID wicPixelFormat{};
@@ -192,7 +196,7 @@ namespace process::graphics {
 		}
 	}
 	
-	TextureLoader::PixelDataBuffer TextureLoader::getPixelDataBuffer(
+	SpriteLoader::PixelDataBuffer SpriteLoader::getPixelDataBuffer(
 		const ComPtr<IWICBitmapFrameDecode>& framePointer
 	) {
 		//https://stackoverflow.com/questions/25797536/getting-a-bitmap-bitsperpixel-from
@@ -210,7 +214,7 @@ namespace process::graphics {
 		UINT height{};
 		result = framePointer->GetSize(&width, &height);
 		if(FAILED(result)){
-			throw HResultError{ "Error determining WIC bitmap sizeBytes" };
+			throw HResultError{ "Error determining WIC pixel size" };
 		}
 		
 		//+7 forces to next byte if needed
@@ -236,7 +240,7 @@ namespace process::graphics {
 		return { buffer, bufferSize, widthBytes, heightBytes, width, height };
 	}
 	
-	uint_least32_t TextureLoader::getBitsPerPixel(const WICPixelFormatGUID& format){
+	uint_least32_t SpriteLoader::getBitsPerPixel(const WICPixelFormatGUID& format){
 		//get pointer to an instance of the Pixel Format
 		ComPtr<IWICComponentInfo> componentInfoPointer {};
 		HRESULT result { wicFactoryPointer->CreateComponentInfo(
