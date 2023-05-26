@@ -39,6 +39,6 @@ add_executable(${PROJECT_NAME} WIN32 ${PROJECT_SOURCES})
 add_dependencies(${PROJECT_NAME} shaders)
 
 #https://github.com/holy-shit/clion-directx-example
-set(LIBS d3d11 d3dcompiler winmm shlwapi directxmath)
+set(LIBS d3d11 d3dcompiler winmm shlwapi)
 
 target_link_libraries(ProcessEngine ${LIBS})

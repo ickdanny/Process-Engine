@@ -2,7 +2,6 @@
 
 #include "windowsInclude.h"
 #include "d3dInclude.h"
-#include <atlbase.h>		//for CComPtr
 #include <stdexcept>
 #include <utility>
 

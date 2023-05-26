@@ -1,8 +1,6 @@
 #include "Window\GraphicsWrapper.h"
-#include "Adaptor\HResultError.h"
 
-//todo: temp test
-#include "Graphics/SpriteLoader.h"
+#include "Adaptor\HResultError.h"
 
 namespace process::window {
 	
@@ -116,7 +114,6 @@ namespace process::window {
 	}
 	
 	void GraphicsWrapper::getDepthStencilView() {
-		HRESULT result{};
 		
 		//create the depth buffer texture
 		ComPtr<ID3D11Texture2D> depthStencilPointer{};
@@ -131,11 +128,11 @@ namespace process::window {
 		depthDesc.Usage = D3D11_USAGE_DEFAULT;
 		depthDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 		
-		result = devicePointer->CreateTexture2D(
+		HRESULT result{ devicePointer->CreateTexture2D(
 			&depthDesc,
 			nullptr,
 			depthStencilPointer.GetAddressOf()
-		);
+		) };
 		if(FAILED(result)){
 			throw HResultError{ "Error creating depth buffer texture" };
 		}
@@ -156,18 +153,17 @@ namespace process::window {
 	}
 	
 	void GraphicsWrapper::setupPipeline() {
-		HRESULT result{};
 		ComPtr<ID3DBlob> blobPointer{};
 		
 		//assign pixel shader
 		ComPtr<ID3D11PixelShader> psPointer{};
 		D3DReadFileToBlob(L"PixelShader.cso", &blobPointer);
-		result = devicePointer->CreatePixelShader(
+		HRESULT result{ devicePointer->CreatePixelShader(
 			blobPointer->GetBufferPointer(),
 			blobPointer->GetBufferSize(),
 			nullptr,
 			psPointer.GetAddressOf()
-		);
+		) };
 		if(FAILED(result)){
 			throw HResultError{ "Error creating pixel shader" };
 		}
