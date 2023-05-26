@@ -30,6 +30,10 @@
 #include "ConsoleOutput.h"
 #include "Logging.h"
 
+//todo:temp
+#include "Math/Point2.h"
+#include "Graphics/SpriteDrawInstruction.h"
+
 using namespace process;
 using namespace process::game;
 
@@ -154,7 +158,7 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 		};
 		 */
 		
-		wasp::game::GameLoop gameLoop {
+		game::GameLoop gameLoop {
 			config::updatesPerSecond,
 			config::maxUpdatesWithoutFrame,
 			//update function
@@ -163,8 +167,19 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 				pumpMessages();
 			},
 			//draw function
-			[&](float deltaTime) {
+			[&]() {
 				//todo: for now don't worry about render scheduler, just draw same thread
+				wasp::math::Point2 point{ 200, 200 };
+				auto frameAndSpritePointer{
+					resourceMasterStorage.spriteStorage.get(L"test")
+				};
+				graphics::SpriteDrawInstruction drawInstruction{
+					frameAndSpritePointer->sprite
+				};
+				window.getGraphicsWrapper().drawSprite(
+					point,
+					drawInstruction
+				);
 				/*
 				renderer.render(
 						deltaTime,

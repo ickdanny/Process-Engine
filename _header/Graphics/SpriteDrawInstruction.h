@@ -4,6 +4,7 @@
 #include "d3dInclude.h"
 #include <atlbase.h>		//for CComPtr
 #include <stdexcept>
+#include <utility>
 
 #include "Math/Angle.h"
 #include "Math/Vector2.h"
@@ -38,7 +39,7 @@ namespace process::graphics {
 	public:
 		//constructor
 		explicit SpriteDrawInstruction(
-			Sprite sprite,
+			const Sprite& sprite,
 			const Vector2& offset = {},
 			Angle rotation = { defaultRotation },
 			float opacity = defaultOpacity,
