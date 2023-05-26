@@ -169,7 +169,10 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 			//draw function
 			[&]() {
 				//todo: for now don't worry about render scheduler, just draw same thread
-				wasp::math::Point2 point{ 200, 200 };
+				wasp::math::Point2 point{
+					config::graphicsWidth/2,
+					config::graphicsHeight/2
+				};
 				auto frameAndSpritePointer{
 					resourceMasterStorage.spriteStorage.get(L"test")
 				};
@@ -186,6 +189,7 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 						renderCallback
 				);
 				 */
+				window.getGraphicsWrapper().present();
 			}
 		};
 		

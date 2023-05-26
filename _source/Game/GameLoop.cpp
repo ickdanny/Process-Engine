@@ -31,7 +31,7 @@ namespace process::game {
 			//draw frames if possible
 			if( getCurrentTime() < nextUpdate ) {
 				while( getCurrentTime() < nextUpdate && running ) {
-					//renderFunction();	//todo: right now spinning CPU
+					renderFunction();
 				}
 			}
 			else {

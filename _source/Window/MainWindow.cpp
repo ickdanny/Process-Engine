@@ -54,32 +54,41 @@ namespace process::window {
 	}
 	
 	LRESULT MainWindow::handleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam) {
+		wasp::debug::log(std::to_string(messageCode));
 		switch( messageCode ) {
 			case WM_CREATE: // gets recieved before main exits window.create
 				graphicsWrapper.init(windowHandle);
 				return 0;
 			
-			case WM_PAINT:graphicsWrapper.paint(windowHandle);
+			case WM_PAINT: {
+				graphicsWrapper.paint(windowHandle);
+				return 0;
+			}
+			
+			case WM_SIZE:
+				graphicsWrapper.resize(windowHandle);
 				return 0;
 			
-			case WM_SIZE:graphicsWrapper.resize(windowHandle);
+			case WM_KEYDOWN:
+				keyDownCallback(wParam, lParam);
 				return 0;
 			
-			case WM_KEYDOWN:keyDownCallback(wParam, lParam);
-				return 0;
-			
-			case WM_KEYUP:keyUpCallback(wParam, lParam);
+			case WM_KEYUP:
+				keyUpCallback(wParam, lParam);
 				return 0;
 			
 			case WM_KILLFOCUS:
-			case WM_ENTERSIZEMOVE:outOfFocusCallback();
+			case WM_ENTERSIZEMOVE:
+				outOfFocusCallback();
 				return 0;
 			
-			case WM_DESTROY:destroyCallback();
+			case WM_DESTROY:
+				destroyCallback();
 				PostQuitMessage(0);
 				return 0;
 			
-			default:return DefWindowProc(windowHandle, messageCode, wParam, lParam);
+			default:
+				return DefWindowProc(windowHandle, messageCode, wParam, lParam);
 		}
 		return TRUE;
 	}

@@ -8,5 +8,6 @@ struct VSOut{
 };
 
 float4 main( VSOut vsOut ) : SV_Target{
-    return tex.Sample(samplerState, vsOut.texCoord);
+    return float4(vsOut.pos.x, vsOut.pos.y, vsOut.pos.z, 1.0f);
+    //return tex.Sample(samplerState, vsOut.texCoord);
 }

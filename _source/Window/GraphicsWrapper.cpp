@@ -2,6 +2,8 @@
 
 #include "Adaptor\HResultError.h"
 
+#include "Logging.h"
+
 namespace process::window {
 	
 	namespace{
@@ -48,8 +50,7 @@ namespace process::window {
 		UINT flags { D3D11_CREATE_DEVICE_DEBUG };
 		#endif
 		
-		HRESULT result {};
-		result = D3D11CreateDeviceAndSwapChain(
+		HRESULT result{ D3D11CreateDeviceAndSwapChain(
 			nullptr,
 			D3D_DRIVER_TYPE_HARDWARE,
 			nullptr,
@@ -62,7 +63,7 @@ namespace process::window {
 			&devicePointer,
 			nullptr,
 			&contextPointer
-		);
+		) };
 		if( FAILED(result) ) {
 			throw HResultError{"Error creating d3d device and swap-chain" };
 		}
@@ -89,15 +90,13 @@ namespace process::window {
 	}
 	
 	void GraphicsWrapper::getRenderTargetView() {
-		HRESULT result{};
-		
 		//get pointer to the back buffer
 		ComPtr<ID3D11Resource> backBufferPointer{};
-		result = swapChainPointer->GetBuffer(
+		HRESULT result{ swapChainPointer->GetBuffer(
 			0,
 			__uuidof(ID3D11Resource),
 			reinterpret_cast<void**>(backBufferPointer.GetAddressOf())
-		);
+		) };
 		if(FAILED(result)){
 			throw HResultError{ "Error getting back buffer from swap chain" };
 		}
@@ -219,10 +218,9 @@ namespace process::window {
 		cbDesc.MiscFlags = 0u;
 		cbDesc.ByteWidth = sizeof(VSConstantBuffer);
 		cbDesc.StructureByteStride = 0u;
-		D3D11_SUBRESOURCE_DATA vsConstantBufferInitData{};
 		result = devicePointer->CreateBuffer(
 			&cbDesc,
-			&vsConstantBufferInitData,
+			nullptr,
 			VSConstantBufferPointer.GetAddressOf()
 		);
 		if(FAILED(result)){
@@ -337,6 +335,13 @@ namespace process::window {
 	}
 	
 	void GraphicsWrapper::paint(HWND windowHandle) {
+		//d3d takes care of presenting frames, so do nothing for the paint messages
+		PAINTSTRUCT paintStruct{};
+		BeginPaint(windowHandle, &paintStruct);
+		EndPaint(windowHandle, &paintStruct);
+	}
+	
+	void GraphicsWrapper::present() {
 		bufferSwap();
 		clearBuffer();
 	}

@@ -34,8 +34,10 @@ namespace process::window {
 		~GraphicsWrapper() = default;
 		
 		void init(HWND windowHandle);
-		void paint(HWND windowHandle);
+		static void paint(HWND windowHandle);
 		void resize(HWND windowHandle);
+		
+		void present();
 		
 		void drawSprite(
 			Point2 preOffsetCenter,
