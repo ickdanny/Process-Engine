@@ -109,7 +109,6 @@ namespace process::window {
 	}
 	
 	void GraphicsWrapper::getDepthStencilView() {
-		
 		//create the depth buffer texture
 		ComPtr<ID3D11Texture2D> depthStencilPointer{};
 		D3D11_TEXTURE2D_DESC depthDesc{};
@@ -148,9 +147,41 @@ namespace process::window {
 	}
 	
 	void GraphicsWrapper::setupPipeline() {
+		auto vsBlobPointer{ setVertexShader() };
+		setPixelShader();
+		setSampler();
+		setVSConstantBuffer();
+		setInputLayout(vsBlobPointer);
+		setVertexBuffer();
+		setViewport();
+		setDepthStencilState();
+		setBlendState();
+		setRenderTargets();
+	}
+	
+	GraphicsWrapper::ComPtr<ID3DBlob> GraphicsWrapper::setVertexShader(){
 		ComPtr<ID3DBlob> blobPointer{};
-		
-		//assign pixel shader
+		ComPtr<ID3D11VertexShader> vsPointer{};
+		D3DReadFileToBlob(L"VertexShader.cso", &blobPointer);
+		HRESULT result{ devicePointer->CreateVertexShader(
+			blobPointer->GetBufferPointer(),
+			blobPointer->GetBufferSize(),
+			nullptr,
+			vsPointer.GetAddressOf()
+		) };
+		if(FAILED(result)){
+			throw HResultError{ "Error creating vertex shader" };
+		}
+		contextPointer->VSSetShader(
+			vsPointer.Get(),
+			nullptr,
+			0
+		);
+		return blobPointer;
+	}
+	
+	void GraphicsWrapper::setPixelShader(){
+		ComPtr<ID3DBlob> blobPointer{};
 		ComPtr<ID3D11PixelShader> psPointer{};
 		D3DReadFileToBlob(L"PixelShader.cso", &blobPointer);
 		HRESULT result{ devicePointer->CreatePixelShader(
@@ -167,18 +198,19 @@ namespace process::window {
 			nullptr,
 			0
 		);
-		
-		//specify sampler
+	}
+	
+	void GraphicsWrapper::setSampler(){
 		D3D11_SAMPLER_DESC samplerDesc{};
 		samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 		samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
 		ComPtr<ID3D11SamplerState> samplerStatePointer{};
-		result = devicePointer->CreateSamplerState(
+		HRESULT result{ devicePointer->CreateSamplerState(
 			&samplerDesc,
 			samplerStatePointer.GetAddressOf()
-		);
+		) };
 		if(FAILED(result)){
 			throw HResultError{ "Failed to create sampler state" };
 		}
@@ -187,26 +219,9 @@ namespace process::window {
 			1u,
 			samplerStatePointer.GetAddressOf()
 		);
-		
-		//assign vertex shader
-		ComPtr<ID3D11VertexShader> vsPointer{};
-		D3DReadFileToBlob(L"VertexShader.cso", &blobPointer);
-		result = devicePointer->CreateVertexShader(
-			blobPointer->GetBufferPointer(),
-			blobPointer->GetBufferSize(),
-			nullptr,
-			vsPointer.GetAddressOf()
-		);
-		if(FAILED(result)){
-			throw HResultError{ "Error creating vertex shader" };
-		}
-		contextPointer->VSSetShader(
-			vsPointer.Get(),
-			nullptr,
-			0
-		);
-		
-		//create VS constant buffer
+	}
+	
+	void GraphicsWrapper::setVSConstantBuffer(){
 		D3D11_BUFFER_DESC cbDesc{};
 		cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 		cbDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -214,17 +229,18 @@ namespace process::window {
 		cbDesc.MiscFlags = 0u;
 		cbDesc.ByteWidth = sizeof(VSConstantBuffer);
 		cbDesc.StructureByteStride = 0u;
-		result = devicePointer->CreateBuffer(
+		HRESULT result{ devicePointer->CreateBuffer(
 			&cbDesc,
 			nullptr,
 			VSConstantBufferPointer.GetAddressOf()
-		);
+		) };
 		if(FAILED(result)){
 			throw HResultError{ "failed to create VS constant buffer" };
 		}
 		updateVSConstantBuffer();
-		
-		//specify input layout
+	}
+	
+	void GraphicsWrapper::setInputLayout(const ComPtr<ID3DBlob>& vsBlobPointer){
 		ComPtr<ID3D11InputLayout> inputLayoutPointer{};
 		const D3D11_INPUT_ELEMENT_DESC inputElementDesc[] {
 			{
@@ -246,19 +262,20 @@ namespace process::window {
 				0u
 			}
 		};
-		result = devicePointer->CreateInputLayout(
+		HRESULT result{ devicePointer->CreateInputLayout(
 			inputElementDesc,
 			(UINT)std::size(inputElementDesc),
-			blobPointer->GetBufferPointer(),
-			blobPointer->GetBufferSize(),
+			vsBlobPointer->GetBufferPointer(),
+			vsBlobPointer->GetBufferSize(),
 			inputLayoutPointer.GetAddressOf()
-		);
+		) };
 		if(FAILED(result)){
 			throw HResultError{ "Error creating input layout" };
 		}
 		contextPointer->IASetInputLayout(inputLayoutPointer.Get());
-		
-		//supply vertex buffer for quad
+	}
+	
+	void GraphicsWrapper::setVertexBuffer(){
 		const Vertex vertices[] {
 			{-1.0f, -1.0f, 0.5f, 0.0f, 1.0f },
 			{-1.0f, 1.0f, 0.5f, 0.0f, 0.0f },
@@ -278,11 +295,14 @@ namespace process::window {
 		bufferDesc.StructureByteStride = sizeof(Vertex);
 		D3D11_SUBRESOURCE_DATA vertexBufferInitData{};
 		vertexBufferInitData.pSysMem = vertices;
-		devicePointer->CreateBuffer(
+		HRESULT result{ devicePointer->CreateBuffer(
 			&bufferDesc,
 			&vertexBufferInitData,
 			vertexBufferPointer.GetAddressOf()
-		);
+		) };
+		if(FAILED(result)){
+			throw HResultError{ "Failed to create vertex buffer!" };
+		}
 		const UINT stride = bufferDesc.StructureByteStride;
 		const UINT offset = 0u;
 		contextPointer->IASetVertexBuffers(
@@ -292,8 +312,9 @@ namespace process::window {
 			&stride,
 			&offset
 		);
-		
-		//configure viewport
+	}
+	
+	void GraphicsWrapper::setViewport(){
 		D3D11_VIEWPORT viewport{};
 		viewport.Width = (float)graphicsWidth;
 		viewport.Height = (float)graphicsHeight;
@@ -302,18 +323,19 @@ namespace process::window {
 		viewport.TopLeftX = 0.0f;
 		viewport.TopLeftY = 0.0f;
 		contextPointer->RSSetViewports(1, &viewport);
-		
-		//bind depth stencil state to the output merger
+	}
+	
+	void GraphicsWrapper::setDepthStencilState() {
 		D3D11_DEPTH_STENCIL_DESC depthStencilDesc{};
 		depthStencilDesc.DepthEnable = TRUE;
 		depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 		depthStencilDesc.DepthFunc = D3D11_COMPARISON_GREATER;
 		
 		ComPtr<ID3D11DepthStencilState> depthStencilStatePointer{};
-		result = devicePointer->CreateDepthStencilState(
+		HRESULT result{ devicePointer->CreateDepthStencilState(
 			&depthStencilDesc,
 			depthStencilStatePointer.GetAddressOf()
-		);
+		) };
 		if(FAILED(result)){
 			throw HResultError{ "Error creating depth stencil state" };
 		}
@@ -321,8 +343,42 @@ namespace process::window {
 			depthStencilStatePointer.Get(),
 			0u
 		);
+	}
+	
+	void GraphicsWrapper::setBlendState(){
 		
-		//bind back buffer and depth buffer to the output merger
+		D3D11_BLEND_DESC blendStateDesc{};
+		blendStateDesc.AlphaToCoverageEnable = false;
+		blendStateDesc.IndependentBlendEnable = false;
+		auto& renderTargetBlendDesc{
+			blendStateDesc.RenderTarget[0]
+		};
+		renderTargetBlendDesc.BlendEnable = true;
+		renderTargetBlendDesc.SrcBlend = D3D11_BLEND_SRC_ALPHA;
+		renderTargetBlendDesc.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+		renderTargetBlendDesc.BlendOp = D3D11_BLEND_OP_ADD;
+		renderTargetBlendDesc.SrcBlendAlpha = D3D11_BLEND_ONE;
+		renderTargetBlendDesc.DestBlendAlpha = D3D11_BLEND_ONE;
+		renderTargetBlendDesc.BlendOpAlpha = D3D11_BLEND_OP_MAX;
+		renderTargetBlendDesc.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+		
+		ComPtr<ID3D11BlendState> blendStatePointer{};
+		HRESULT result{ devicePointer->CreateBlendState(
+			&blendStateDesc,
+			blendStatePointer.GetAddressOf()
+		) };
+		if(FAILED(result)){
+			throw HResultError{ "Failed to create blend state" };
+		}
+		
+		contextPointer->OMSetBlendState(
+			blendStatePointer.Get(),
+			nullptr,
+			0xffffffff	//default value
+		);
+	}
+	
+	void GraphicsWrapper::setRenderTargets(){
 		contextPointer->OMSetRenderTargets(
 			1,
 			renderTargetViewPointer.GetAddressOf(),

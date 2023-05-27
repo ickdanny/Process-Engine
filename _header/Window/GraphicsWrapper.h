@@ -71,7 +71,19 @@ namespace process::window {
 		DXGI_SWAP_CHAIN_DESC makeSwapChainDesc(HWND windowHandle);
 		void getRenderTargetView();
 		void getDepthStencilView();
+		
 		void setupPipeline();
+		ComPtr<ID3DBlob> setVertexShader();
+		void setPixelShader();
+		void setSampler();
+		void setVSConstantBuffer();
+		void setInputLayout(const ComPtr<ID3DBlob>& vsBlobPointer);
+		void setVertexBuffer();
+		void setViewport();
+		void setDepthStencilState();
+		void setBlendState();
+		void setRenderTargets();
+		
 		void bufferSwap();
 		void clearBuffer();
 		void mapVSConstantBuffer(const VSConstantBuffer* constantBuffer);

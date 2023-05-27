@@ -179,10 +179,10 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 				};
 				graphics::SpriteDrawInstruction drawInstruction{
 					frameAndSpritePointer->sprite,
-					wasp::math::Vector2{ config::graphicsWidth/2, config::graphicsHeight/2 },
+					wasp::math::Vector2{ 0.0f, 0.0f},
 					static_cast<float>(tick),
 					1.0f,
-					0.5f
+					1.0f
 				};
 				window.getGraphicsWrapper().drawSprite(
 					point,

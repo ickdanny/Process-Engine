@@ -5,6 +5,7 @@
 *.cfg
 *.zip
 *.dlg
+*.cap
 .idea/
 cmake-build-debug/
 cmake-build-release/
