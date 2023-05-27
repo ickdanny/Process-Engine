@@ -15,6 +15,10 @@ namespace process::window {
 		template <typename T>
 		using ComPtr = Microsoft::WRL::ComPtr<T>;
 		
+		struct VSConstantBuffer{
+			DirectX::XMMATRIX transform{};
+		};
+		
 		//fields
 		int graphicsWidth {};
 		int graphicsHeight {};
@@ -70,6 +74,7 @@ namespace process::window {
 		void setupPipeline();
 		void bufferSwap();
 		void clearBuffer();
+		void mapVSConstantBuffer(const VSConstantBuffer* constantBuffer);
 		void updateVSConstantBuffer();
 	};
 }

@@ -9,8 +9,8 @@ namespace process::game::config {
 	//window
 	constexpr wchar_t className[] { L"POTUK" };
 	constexpr wchar_t windowName[] { L"POTUK" };
-	constexpr int windowWidth { 640 };
-	constexpr int windowHeight { 480 };
+	constexpr int windowWidth { 640 };	//640
+	constexpr int windowHeight { 480 };	//480
 	
 	//resources
 	constexpr wchar_t mainManifestPath[] { L"res\\potuk.mfst" };

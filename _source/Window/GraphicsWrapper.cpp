@@ -19,10 +19,6 @@ namespace process::window {
 			};
 		}
 		
-		struct VSConstantBuffer{
-			DirectX::XMMATRIX transform{};
-		};
-		
 		constexpr unsigned int numVertices{ 4u };
 	}
 	
@@ -378,28 +374,54 @@ namespace process::window {
 			spriteDrawInstruction.getSprite().textureView.GetAddressOf()
 		);
 		
+		float graphicsWidthFloat{ static_cast<float>(graphicsWidth) };
+		float graphicsHeightFloat{ static_cast<float>(graphicsHeight) };
+		
 		Point2 offsetCenter{ preOffsetCenter + spriteDrawInstruction.getOffset() };
 		Point2 centerNDC{ convertPointToNDC(
 			offsetCenter,
-			static_cast<float>(graphicsWidth),
-			static_cast<float>(graphicsHeight))
+			graphicsWidthFloat,
+			graphicsHeightFloat)
 		};
+		float rotation{ spriteDrawInstruction.getRotation() };
 		float widthScale{
 			static_cast<float>(spriteDrawInstruction.getSprite().width)
-				/ static_cast<float>(graphicsWidth)
+				/ graphicsWidthFloat
 		};
 		float heightScale{
 			static_cast<float>(spriteDrawInstruction.getSprite().height)
-				/ static_cast<float>(graphicsHeight)
+				/ graphicsHeightFloat
 		};
 		
 		VSConstantBuffer constantBuffer{
 			{
 				DirectX::XMMatrixTranspose(
-					DirectX::XMMatrixRotationZ(spriteDrawInstruction.getRotation()) *
+					//reverse correction
+					DirectX::XMMatrixScaling(
+						graphicsWidthFloat / graphicsHeightFloat,
+						1.0f,
+						1.0f
+					) *
+					//scale by sprite dimensions
 					DirectX::XMMatrixScaling(
 						widthScale,
 						heightScale,
+						1.0f
+					) *
+					//scale by scale factor
+					DirectX::XMMatrixScaling(
+						spriteDrawInstruction.getScale(),
+						spriteDrawInstruction.getScale(),
+						1.0f
+					) *
+					//rotate on xy plane
+					DirectX::XMMatrixRotationZ(
+						rotation
+					) *
+					//aspect correction
+					DirectX::XMMatrixScaling(
+						graphicsHeightFloat / graphicsWidthFloat,
+						1.0f,
 						1.0f
 					) *
 					DirectX::XMMatrixTranslation(
@@ -410,15 +432,7 @@ namespace process::window {
 				)
 			}
 		};
-		contextPointer->UpdateSubresource(
-			VSConstantBufferPointer.Get(),
-			0u,
-			nullptr,
-			&constantBuffer,
-			0u,
-			0u
-		);
-		updateVSConstantBuffer();
+		mapVSConstantBuffer(&constantBuffer);
 		
 		contextPointer->Draw(numVertices, 0u);
 	}
@@ -431,6 +445,28 @@ namespace process::window {
 		//todo: draw subsprite
 	}
 	
+	void GraphicsWrapper::mapVSConstantBuffer(const VSConstantBuffer *const constantBuffer) {
+		
+		D3D11_MAPPED_SUBRESOURCE mappedResource{};
+
+		//disable GPU access
+		contextPointer->Map(
+			VSConstantBufferPointer.Get(),
+			0,
+			D3D11_MAP_WRITE_DISCARD,
+			0,
+			&mappedResource
+		);
+		//update buffer
+		memcpy(
+			mappedResource.pData,
+			constantBuffer,
+			sizeof(VSConstantBuffer)
+		);
+		//re-enable GPU access
+		contextPointer->Unmap(VSConstantBufferPointer.Get(), 0);
+	}
+	
 	void GraphicsWrapper::updateVSConstantBuffer() {
 		contextPointer->VSSetConstantBuffers(
 			0u,
@@ -438,6 +474,8 @@ namespace process::window {
 			VSConstantBufferPointer.GetAddressOf()
 		);
 	}
+	
+	
 }
 
 /*

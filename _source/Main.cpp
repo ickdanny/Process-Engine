@@ -157,6 +157,7 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 				}
 		};
 		 */
+		float tick{ 0.0f };
 		
 		game::GameLoop gameLoop {
 			config::updatesPerSecond,
@@ -177,7 +178,11 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 					resourceMasterStorage.spriteStorage.get(L"test")
 				};
 				graphics::SpriteDrawInstruction drawInstruction{
-					frameAndSpritePointer->sprite
+					frameAndSpritePointer->sprite,
+					wasp::math::Vector2{ config::graphicsWidth/2, config::graphicsHeight/2 },
+					static_cast<float>(tick),
+					1.0f,
+					0.5f
 				};
 				window.getGraphicsWrapper().drawSprite(
 					point,
@@ -190,6 +195,7 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 				);
 				 */
 				window.getGraphicsWrapper().present();
+				tick += 0.01f;
 			}
 		};
 		
