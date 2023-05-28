@@ -47,14 +47,18 @@ namespace process::window {
 		UINT flags { D3D11_CREATE_DEVICE_DEBUG };
 		#endif
 		
+		D3D_FEATURE_LEVEL featureLevels[]{
+			D3D_FEATURE_LEVEL_10_1
+		};
+		
 		HRESULT result{ D3D11CreateDeviceAndSwapChain(
 			nullptr,
 			D3D_DRIVER_TYPE_HARDWARE,
 			nullptr,
 			flags,
-			nullptr,    //todo: d3d feature lvl?
-			0,
-			D3D11_SDK_VERSION,  //todo: d3d sdk version?
+			featureLevels,
+			sizeof(featureLevels) / sizeof(D3D_FEATURE_LEVEL),
+			D3D11_SDK_VERSION,
 			&swapChainDesc,
 			&swapChainPointer,
 			&devicePointer,

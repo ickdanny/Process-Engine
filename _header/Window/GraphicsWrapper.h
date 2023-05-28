@@ -17,6 +17,7 @@ namespace process::window {
 		using SpriteDrawInstruction = graphics::SpriteDrawInstruction;
 		
 		struct VSConstantBuffer{
+			[[maybe_unused]] //the following IS used by d3d
 			DirectX::XMMATRIX transform{};
 		};
 		
@@ -60,10 +61,16 @@ namespace process::window {
 		}
 		
 		struct Vertex{
+			//the following ARE used by d3d
+			[[maybe_unused]]
 			float x{};
+			[[maybe_unused]]
 			float y{};
+			[[maybe_unused]]
 			float z{};
+			[[maybe_unused]]
 			float u{};
+			[[maybe_unused]]
 			float v{};
 		};
 		
@@ -93,6 +100,7 @@ namespace process::window {
 		void bufferSwap();
 		void clearBuffer();
 		void updatePSTexture(const SpriteDrawInstruction& spriteDrawInstruction);
+		[[nodiscard]]
 		DirectX::XMMATRIX makeTransform(
 			GraphicsWrapper::Point2 preOffsetCenter,
 			const SpriteDrawInstruction& spriteDrawInstruction,
