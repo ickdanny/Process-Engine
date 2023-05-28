@@ -9,6 +9,7 @@ namespace process::window {
 	namespace{
 		using HResultError = wasp::windowsadaptor::HResultError;
 		using Point2 = wasp::math::Point2;
+		using Vector2 = wasp::math::Vector2;
 		
 		constexpr Point2 convertPointToNDC(Point2 point, float width, float height){
 			float halfWidth = width / 2.0f;
@@ -275,12 +276,12 @@ namespace process::window {
 		contextPointer->IASetInputLayout(inputLayoutPointer.Get());
 	}
 	
-	void GraphicsWrapper::setVertexBuffer(){
+	void GraphicsWrapper::setVertexBuffer(float uLow, float uHigh, float vLow, float vHigh) {
 		const Vertex vertices[] {
-			{-1.0f, -1.0f, 0.5f, 0.0f, 1.0f },
-			{-1.0f, 1.0f, 0.5f, 0.0f, 0.0f },
-			{1.0f, -1.0f, 0.5f, 1.0f, 1.0f },
-			{1.0f, 1.0f, 0.5f, 1.0f, 0.0f },
+			{-1.0f, -1.0f, 0.5f, uLow, vHigh },
+			{-1.0f, 1.0f, 0.5f, uLow, vLow },
+			{1.0f, -1.0f, 0.5f, uHigh, vHigh },
+			{1.0f, 1.0f, 0.5f, uHigh, vLow },
 		};
 		
 		contextPointer->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
@@ -293,11 +294,11 @@ namespace process::window {
 		bufferDesc.MiscFlags = 0u;
 		bufferDesc.ByteWidth = sizeof(vertices);
 		bufferDesc.StructureByteStride = sizeof(Vertex);
-		D3D11_SUBRESOURCE_DATA vertexBufferInitData{};
-		vertexBufferInitData.pSysMem = vertices;
+		D3D11_SUBRESOURCE_DATA initData{};
+		initData.pSysMem = vertices;
 		HRESULT result{ devicePointer->CreateBuffer(
 			&bufferDesc,
-			&vertexBufferInitData,
+			&initData,
 			vertexBufferPointer.GetAddressOf()
 		) };
 		if(FAILED(result)){
@@ -421,91 +422,139 @@ namespace process::window {
 	}
 	
 	void GraphicsWrapper::drawSprite(
-		const GraphicsWrapper::Point2 preOffsetCenter,
-		const graphics::SpriteDrawInstruction& spriteDrawInstruction
+		const Point2 preOffsetCenter,
+		const SpriteDrawInstruction& spriteDrawInstruction
 	) {
-		contextPointer->PSSetShaderResources(
-			0u,
-			1u,
-			spriteDrawInstruction.getSprite().textureView.GetAddressOf()
-		);
+		updatePSTexture(spriteDrawInstruction);
 		
-		float graphicsWidthFloat{ static_cast<float>(graphicsWidth) };
-		float graphicsHeightFloat{ static_cast<float>(graphicsHeight) };
-		
-		Point2 offsetCenter{ preOffsetCenter + spriteDrawInstruction.getOffset() };
-		Point2 centerNDC{ convertPointToNDC(
-			offsetCenter,
-			graphicsWidthFloat,
-			graphicsHeightFloat)
-		};
-		float rotation{ spriteDrawInstruction.getRotation() };
-		float widthScale{
-			static_cast<float>(spriteDrawInstruction.getSprite().width)
-				/ graphicsWidthFloat
-		};
-		float heightScale{
+		VSConstantBuffer constantBuffer{makeTransform(
+			preOffsetCenter,
+			spriteDrawInstruction,
+			static_cast<float>(spriteDrawInstruction.getSprite().width),
 			static_cast<float>(spriteDrawInstruction.getSprite().height)
-				/ graphicsHeightFloat
-		};
-		
-		VSConstantBuffer constantBuffer{
-			{
-				DirectX::XMMatrixTranspose(
-					//reverse correction
-					DirectX::XMMatrixScaling(
-						graphicsWidthFloat / graphicsHeightFloat,
-						1.0f,
-						1.0f
-					) *
-					//scale by sprite dimensions
-					DirectX::XMMatrixScaling(
-						widthScale,
-						heightScale,
-						1.0f
-					) *
-					//scale by scale factor
-					DirectX::XMMatrixScaling(
-						spriteDrawInstruction.getScale(),
-						spriteDrawInstruction.getScale(),
-						1.0f
-					) *
-					//rotate on xy plane
-					DirectX::XMMatrixRotationZ(
-						rotation
-					) *
-					//aspect correction
-					DirectX::XMMatrixScaling(
-						graphicsHeightFloat / graphicsWidthFloat,
-						1.0f,
-						1.0f
-					) *
-					DirectX::XMMatrixTranslation(
-						centerNDC.x,
-						centerNDC.y,
-						0.0f		//todo: sprite depth
-					)
-				)
-			}
-		};
+		) };
 		mapVSConstantBuffer(&constantBuffer);
 		
 		contextPointer->Draw(numVertices, 0u);
 	}
 	
 	void GraphicsWrapper::drawSubSprite(
-		const GraphicsWrapper::Point2 preOffsetCenter,
-		const graphics::SpriteDrawInstruction& spriteDrawInstruction,
-		const GraphicsWrapper::Rectangle& sourceRectangle
+		const Point2 preOffsetCenter,
+		const SpriteDrawInstruction& spriteDrawInstruction,
+		const Rectangle& sourceRectangle
 	) {
-		//todo: draw subsprite
+		//if width and height are small, draw nothing
+		if(sourceRectangle.width < 0.5f && sourceRectangle.height < 0.5f){
+			return;
+		}
+		
+		//change texture coordinates : recall that they range from 0 to 1
+		float fullWidth{ static_cast<float>(spriteDrawInstruction.getSprite().width) };
+		float fullHeight{ static_cast<float>(spriteDrawInstruction.getSprite().height) };
+		float uLow{ sourceRectangle.x / fullWidth };
+		float uHigh{ (sourceRectangle.x + sourceRectangle.width) / fullWidth };
+		float vLow{ sourceRectangle.y / fullHeight };
+		float vHigh{ (sourceRectangle.y + sourceRectangle.height) / fullHeight };
+		setVertexBuffer(uLow, uHigh, vLow, vHigh);
+		
+		//find the new center for the quad
+		Point2 subCenter{
+			sourceRectangle.x + sourceRectangle.width / 2.0f,
+			sourceRectangle.y + sourceRectangle.height / 2.0f
+		};
+		Point2 fullCenter{fullWidth / 2.0f, fullHeight / 2.0f};
+		Vector2 subOffset{
+			wasp::math::vectorFromAToB(fullCenter, subCenter)
+		};
+		Point2 newPreOffsetCenter{ preOffsetCenter + subOffset };
+		
+		//draw sprite at that new center and with updated texture coords
+		updatePSTexture(spriteDrawInstruction);
+		
+		VSConstantBuffer constantBuffer{makeTransform(
+			newPreOffsetCenter,
+			spriteDrawInstruction,
+			sourceRectangle.width,
+			sourceRectangle.height
+		) };
+		mapVSConstantBuffer(&constantBuffer);
+		
+		contextPointer->Draw(numVertices, 0u);
+		
+		//historically, sub-sprite calls have been rare, so change texture coords back
+		setVertexBuffer();
 	}
 	
-	void GraphicsWrapper::mapVSConstantBuffer(const VSConstantBuffer *const constantBuffer) {
+	void GraphicsWrapper::updatePSTexture(const SpriteDrawInstruction& spriteDrawInstruction) {
+		contextPointer->PSSetShaderResources(
+			0u,
+			1u,
+			spriteDrawInstruction.getSprite().textureView.GetAddressOf()
+		);
+	}
+	
+	#pragma warning(suppress : 4068) //suppress unknown pragma
+	#pragma clang diagnostic push
+	#pragma warning(suppress : 4068) //suppress unknown pragma
+	#pragma clang diagnostic ignored "-Wshadow"
+	DirectX::XMMATRIX GraphicsWrapper::makeTransform(
+		const Point2 preOffsetCenter,
+		const SpriteDrawInstruction& spriteDrawInstruction,
+		float quadWidthPixels,
+		float quadHeightPixels
+	) const {
+		float graphicsWidth{ static_cast<float>(this->graphicsWidth) };
+		float graphicsHeight{ static_cast<float>(this->graphicsHeight) };
 		
-		D3D11_MAPPED_SUBRESOURCE mappedResource{};
+		float aspect{ graphicsWidth / graphicsHeight };
+		
+		float widthScale{
+			quadWidthPixels / graphicsWidth
+		};
+		float heightScale{
+			quadHeightPixels / graphicsHeight
+		};
+		
+		Point2 offsetCenter{ preOffsetCenter + spriteDrawInstruction.getOffset() };
+		Point2 centerNDC{ convertPointToNDC(
+			offsetCenter,
+			graphicsWidth,
+			graphicsHeight)
+		};
 
+		return DirectX::XMMatrixTranspose(
+			//reverse aspect correction
+			//scale by sprite dimensions
+			//scale by scale factor
+			DirectX::XMMatrixScaling(
+				aspect * widthScale * spriteDrawInstruction.getScale(),
+				heightScale * spriteDrawInstruction.getScale(),
+				1.0f
+			) *
+			//rotate on xy plane
+			DirectX::XMMatrixRotationZ(
+				spriteDrawInstruction.getRotation()
+			) *
+			//aspect correction
+			DirectX::XMMatrixScaling(
+				1.0f / aspect,
+				1.0f,
+				1.0f
+			) *
+			//translation last
+			DirectX::XMMatrixTranslation(
+				centerNDC.x,
+				centerNDC.y,
+				0.0f		//todo: sprite depth
+			)
+		);
+	}
+	#pragma warning(suppress : 4068) //suppress unknown pragma
+	#pragma clang diagnostic pop
+	
+	void GraphicsWrapper::mapVSConstantBuffer(const VSConstantBuffer* const constantBuffer) {
 		//disable GPU access
+		D3D11_MAPPED_SUBRESOURCE mappedResource{};
 		contextPointer->Map(
 			VSConstantBufferPointer.Get(),
 			0,
@@ -513,12 +562,14 @@ namespace process::window {
 			0,
 			&mappedResource
 		);
+		
 		//update buffer
 		memcpy(
 			mappedResource.pData,
 			constantBuffer,
 			sizeof(VSConstantBuffer)
 		);
+		
 		//re-enable GPU access
 		contextPointer->Unmap(VSConstantBufferPointer.Get(), 0);
 	}
@@ -530,8 +581,6 @@ namespace process::window {
 			VSConstantBufferPointer.GetAddressOf()
 		);
 	}
-	
-	
 }
 
 /*

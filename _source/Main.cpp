@@ -184,9 +184,16 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 					1.0f,
 					1.0f
 				};
-				window.getGraphicsWrapper().drawSprite(
+				wasp::math::Rectangle subSpriteRect{
+					0.0f,
+					0.0f,
+					config::graphicsWidth / 2.0f,
+					config::graphicsHeight
+				};
+				window.getGraphicsWrapper().drawSubSprite(
 					point,
-					drawInstruction
+					drawInstruction,
+					subSpriteRect
 				);
 				/*
 				renderer.render(

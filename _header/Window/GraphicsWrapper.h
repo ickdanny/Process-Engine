@@ -14,6 +14,7 @@ namespace process::window {
 		using Rectangle = wasp::math::Rectangle;
 		template <typename T>
 		using ComPtr = Microsoft::WRL::ComPtr<T>;
+		using SpriteDrawInstruction = graphics::SpriteDrawInstruction;
 		
 		struct VSConstantBuffer{
 			DirectX::XMMATRIX transform{};
@@ -45,12 +46,12 @@ namespace process::window {
 		
 		void drawSprite(
 			Point2 preOffsetCenter,
-			const graphics::SpriteDrawInstruction& spriteDrawInstruction
+			const SpriteDrawInstruction& spriteDrawInstruction
 		) override;
 		
 		void drawSubSprite(
 			Point2 preOffsetCenter,
-			const graphics::SpriteDrawInstruction& spriteDrawInstruction,
+			const SpriteDrawInstruction& spriteDrawInstruction,
 			const Rectangle& sourceRectangle
 		) override;
 		
@@ -78,7 +79,12 @@ namespace process::window {
 		void setSampler();
 		void setVSConstantBuffer();
 		void setInputLayout(const ComPtr<ID3DBlob>& vsBlobPointer);
-		void setVertexBuffer();
+		void setVertexBuffer(
+			float uLow = 0.0f,
+			float uHigh = 1.0f,
+			float vLow = 0.0f,
+			float vHigh = 1.0f
+		);
 		void setViewport();
 		void setDepthStencilState();
 		void setBlendState();
@@ -86,6 +92,13 @@ namespace process::window {
 		
 		void bufferSwap();
 		void clearBuffer();
+		void updatePSTexture(const SpriteDrawInstruction& spriteDrawInstruction);
+		DirectX::XMMATRIX makeTransform(
+			GraphicsWrapper::Point2 preOffsetCenter,
+			const SpriteDrawInstruction& spriteDrawInstruction,
+			float quadWidthPixels,
+			float quadHeightPixels
+		) const;
 		void mapVSConstantBuffer(const VSConstantBuffer* constantBuffer);
 		void updateVSConstantBuffer();
 	};
