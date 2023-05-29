@@ -16,10 +16,6 @@
 #include "Window\WindowUtil.h"
 #include "Window\BaseWindow.h"
 #include "Window\MainWindow.h"
-/*
-#include "Graphics\BitmapConstructor.h"
-#include "Graphics\RenderScheduler.h"
- */
 #include "Input\KeyInputTable.h"
 #include "Sound\MidiHub.h"
 #include "ComLibraryGuard.h"
@@ -108,18 +104,6 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 			[&] { keyInputTable.allKeysOff(); }
 		);
 		
-		/*
-
-		//init rendering
-		graphics::RendererScheduler renderer{
-				&window,
-				&resourceMasterStorage.spriteStorage,
-				config::graphicsWidth,
-				config::graphicsHeight
-		};
-
-		 */
-		
 		//init midi
 		wasp::sound::midi::MidiHub midiHub { settings.muted };
 		
@@ -149,16 +133,11 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 					settings::writeSettingsToFile(settings, config::mainConfigPath);
 				}
 		);
-
-		//init gameloop
-		graphics::RendererScheduler::RenderCallback renderCallback{
-				[&](float deltaTime) {
-					Game.render(deltaTime);
-				}
-		};
 		 */
-		float tick{ 0.0f };
 		
+		int tick{ 0 };
+		
+		//note: unlike previous engines, no interpolation thus no render scheduler
 		game::GameLoop gameLoop {
 			config::updatesPerSecond,
 			config::maxUpdatesWithoutFrame,
@@ -179,9 +158,9 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 				};
 				graphics::SpriteDrawInstruction drawInstruction{
 					frameAndSpritePointer->sprite,
+					10000,
 					wasp::math::Vector2{ 0.0f, 0.0f},
-					static_cast<float>(tick),
-					1.0f,
+					tick / 100.0f,
 					1.0f
 				};
 				wasp::math::Rectangle subSpriteRect{
@@ -195,14 +174,13 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 					drawInstruction,
 					subSpriteRect
 				);
-				/*
-				renderer.render(
-						deltaTime,
-						renderCallback
+				drawInstruction.setDepth(-10000);
+				window.getGraphicsWrapper().drawSprite(
+					point,
+					drawInstruction
 				);
-				 */
 				window.getGraphicsWrapper().present();
-				tick += 0.01f;
+				++tick;
 			}
 		};
 		

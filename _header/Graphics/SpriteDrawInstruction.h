@@ -1,5 +1,10 @@
 #pragma once
 
+#pragma warning(suppress : 4068) //suppress unknown pragma
+#pragma clang diagnostic push
+#pragma warning(suppress : 4068) //suppress unknown pragma
+#pragma clang diagnostic ignored "-Wshadow"
+
 #include "windowsInclude.h"
 #include "d3dInclude.h"
 #include <stdexcept>
@@ -15,22 +20,21 @@ namespace process::graphics {
 		//typedefs
 		using Angle = wasp::math::Angle;
 		using Vector2 = wasp::math::Vector2;
-		template <typename T>
-		using ComPtr = Microsoft::WRL::ComPtr<T>;
-
+		
 		//constants
-		static constexpr float minOpacity{ 0.0f };
-		static constexpr float maxOpacity{ 1.0f };
+	public:
+		static constexpr int minDepth{ -10000 };
+		static constexpr int maxDepth{ 10000 };
 		static constexpr float minScale{ 0.01f };
 		static constexpr float defaultRotation{ 0.0f };
-		static constexpr float defaultOpacity{ 1.0f };
 		static constexpr float defaultScale{ 1.0f };
-
+		
+	private:
 		//fields
 		Sprite sprite{};
+		int depth{};
 		Vector2 offset{};
 		Angle rotation{ defaultRotation };
-		float opacity{ defaultOpacity };
 		float scale{ defaultScale };
 
 		bool updated{};         //useful for implementation
@@ -39,23 +43,27 @@ namespace process::graphics {
 		//constructor
 		explicit SpriteDrawInstruction(
 			const Sprite& sprite,
+			int depth,
 			const Vector2& offset = {},
 			Angle rotation = { defaultRotation },
-			float opacity = defaultOpacity,
 			float scale = defaultScale
 		)
 			: sprite{ sprite }
+			, depth{ depth }
 			, offset{ offset }
 			, rotation{ rotation }
-			, opacity{ opacity }
 			, scale{ scale }
 		{
-			throwIfOutOfRange();
+			throwIfDepthOutOfRange();
+			throwIfScaleOutOfRange();
 		}
 
 		//getters
 		const Sprite& getSprite() const {
 			return sprite;
+		}
+		const int getDepth() const {
+			return depth;
 		}
 		const Vector2& getOffset() const {
 			return offset;
@@ -63,9 +71,6 @@ namespace process::graphics {
 		Angle getRotation() const {
 			//return by value
 			return rotation;
-		}
-		float getOpacity() const {
-			return opacity;
 		}
 		float getScale() const {
 			return scale;
@@ -76,6 +81,10 @@ namespace process::graphics {
 			this->sprite = sprite;
 			flagForUpdate();
 		}
+		void setDepth(int depth){
+			this->depth = depth;
+			flagForUpdate();
+		}
 		void setOffset(const Vector2& offset) {
 			this->offset = offset;
 			flagForUpdate();
@@ -84,25 +93,13 @@ namespace process::graphics {
 			this->rotation = rotation;
 			flagForUpdate();
 		}
-		void setOpacity(float opacity) {
-			this->opacity = opacity;
-			throwIfOpacityOutOfRange();
-			flagForUpdate();
-		}
 		void setScale(float scale) {
 			this->scale = scale;
 			throwIfScaleOutOfRange();
 			flagForUpdate();
 		}
 
-		bool requiresRotation() const {
-			return static_cast<float>(rotation) != defaultRotation;
-		}
-
-		bool requiresScale() const {
-			return scale != defaultScale;
-		}
-
+		//todo: check if we need SpriteDrawInstruction update
 		//updating
 		bool isUpdated() const {
 			return updated;
@@ -115,13 +112,9 @@ namespace process::graphics {
 		}
 
 	private:
-		void throwIfOutOfRange() const {
-			throwIfOpacityOutOfRange();
-			throwIfScaleOutOfRange();
-		}
-		void throwIfOpacityOutOfRange() const {
-			if (opacity < minOpacity || opacity > maxOpacity) {
-				throw std::out_of_range("Error opacity out of range");
+		void throwIfDepthOutOfRange() const {
+			if(depth < minDepth || depth > maxDepth){
+				throw std::out_of_range("Error depth out of range");
 			}
 		}
 		void throwIfScaleOutOfRange() const {
@@ -131,3 +124,6 @@ namespace process::graphics {
 		}
 	};
 }
+
+#pragma warning(suppress : 4068) //suppress unknown pragma
+#pragma clang diagnostic pop

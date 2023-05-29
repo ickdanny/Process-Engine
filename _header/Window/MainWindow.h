@@ -9,8 +9,6 @@
 namespace process::window {
 	class MainWindow : public BaseWindow<MainWindow> {
 	private:
-		//typedefs
-		using WindowMode = wasp::window::WindowMode;
 		
 		std::wstring currentWindowModeName {};
 		

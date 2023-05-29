@@ -6,17 +6,17 @@
 
 #include "windowsInclude.h"
 
-namespace wasp::window {
+namespace process::window {
 	
 	struct WindowMode {
 		const std::wstring modeName {};
 		
-		const DWORD windowStyle {};
-		const DWORD windowExtraStyle {};
+		const unsigned long windowStyle {};
+		const unsigned long windowExtraStyle {};
 		
 		const std::function<std::pair<int, int>()> sizeFunction {};
 		
-		//gets passed sizeBytes
+		//gets passed size
 		const std::function<std::pair<int, int>(const std::pair<int, int>)> positionFunction {};
 	};
 }

@@ -25,7 +25,7 @@ namespace process::window {
 			DerivedClass* derivedInstancePointer = NULL;
 			
 			if( messageCode == WM_NCCREATE ) {
-				CREATESTRUCT* createStructPointer = (CREATESTRUCT*) lParam;
+				auto* createStructPointer = (CREATESTRUCT*) lParam;
 				
 				derivedInstancePointer = (DerivedClass*) createStructPointer->lpCreateParams;
 				
@@ -55,7 +55,7 @@ namespace process::window {
 		}
 		
 		BaseWindow()
-			: windowHandle { NULL } {
+			: windowHandle { nullptr } {
 		}
 		
 		virtual ~BaseWindow() = default;
@@ -77,8 +77,8 @@ namespace process::window {
 			int y = CW_USEDEFAULT,
 			int width = CW_USEDEFAULT,
 			int height = CW_USEDEFAULT,
-			HWND parentWindowHandle = 0,
-			HMENU menuHandle = 0
+			HWND parentWindowHandle = nullptr,
+			HMENU menuHandle = nullptr
 		) {
 			registerWindowClass(instanceHandle, className);
 			createWindow(
@@ -114,6 +114,10 @@ namespace process::window {
 			RegisterClass(&windowClass);
 		}
 		
+		#pragma warning(suppress : 4068) //suppress unknown pragma
+		#pragma clang diagnostic push
+		#pragma warning(suppress : 4068) //suppress unknown pragma
+		#pragma clang diagnostic ignored "-Wshadow"
 		void createWindow(
 			HINSTANCE instanceHandle,
 			PCWSTR className,
@@ -144,5 +148,7 @@ namespace process::window {
 				throw std::runtime_error { "Error creating window handle" };
 			}
 		}
+		#pragma warning(suppress : 4068) //suppress unknown pragma
+		#pragma clang diagnostic pop
 	};
 }

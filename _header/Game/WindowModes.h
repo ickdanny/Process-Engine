@@ -8,7 +8,7 @@ namespace process::game::windowmodes {
 	
 	//we use extern const because constexpr doesn't work with wide string literal
 	
-	extern const wasp::window::WindowMode windowed {
+	extern const window::WindowMode windowed {
 		L"WINDOWED",
 		WS_MINIMIZEBOX | WS_SYSMENU | WS_CAPTION,
 		0,
@@ -18,7 +18,7 @@ namespace process::game::windowmodes {
 		wasp::window::findCenterPositionWithBorder
 	};
 	
-	extern const wasp::window::WindowMode fullscreen {
+	extern const window::WindowMode fullscreen {
 		L"FULLSCREEN",
 		WS_POPUP | WS_VISIBLE,
 		WS_EX_APPWINDOW,

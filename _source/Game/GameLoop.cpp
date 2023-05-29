@@ -30,8 +30,9 @@ namespace process::game {
 			}
 			//draw frames if possible
 			if( getCurrentTime() < nextUpdate ) {
+				renderFunction();
 				while( getCurrentTime() < nextUpdate && running ) {
-					renderFunction();
+					//do nothing
 				}
 			}
 			else {

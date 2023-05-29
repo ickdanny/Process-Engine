@@ -9,34 +9,12 @@ namespace process::window {
 		HINSTANCE instanceHandle,
 		PCWSTR className,
 		PCWSTR windowName,
-		//graphics fields
 		int graphicsWidth,
-		int graphicsHeight/*,
-
-            int fillColor,
-            int textColor,
-            wchar_t const* fontName,
-            float fontSize,
-            DWRITE_FONT_WEIGHT fontWeight, //todo: not sure if use dwrite
-            DWRITE_FONT_STYLE fontStyle,
-            DWRITE_FONT_STRETCH fontStretch,
-            DWRITE_TEXT_ALIGNMENT textAlignment,
-            DWRITE_PARAGRAPH_ALIGNMENT paragraphAlignment*/
+		int graphicsHeight
 	)
-		: currentWindowModeName { initWindowMode.modeName }, graphicsWrapper {
-		graphicsWidth,
-		graphicsHeight/*,
-
-                    fillColor,
-                    textColor,
-                    fontName,
-                    fontSize,//todo: not sure if use dwrite
-                    fontWeight,
-                    fontStyle,
-                    fontStretch,
-                    textAlignment,
-                    paragraphAlignment*/
-	} {
+		: currentWindowModeName { initWindowMode.modeName }
+		, graphicsWrapper { graphicsWidth, graphicsHeight }
+	{
 		std::pair<int, int> size { initWindowMode.sizeFunction() };
 		std::pair<int, int> position { initWindowMode.positionFunction(size) };
 		
@@ -54,20 +32,19 @@ namespace process::window {
 	}
 	
 	LRESULT MainWindow::handleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam) {
-		wasp::debug::log(std::to_string(messageCode));
 		switch( messageCode ) {
 			case WM_CREATE: // gets recieved before main exits window.create
 				graphicsWrapper.init(windowHandle);
 				return 0;
-			
+				
 			case WM_PAINT: {
-				graphicsWrapper.paint(windowHandle);
+				//dummy paint handling - d3d takes care of presenting frames
+				PAINTSTRUCT paintStruct{};
+				BeginPaint(windowHandle, &paintStruct);
+				EndPaint(windowHandle, &paintStruct);
 				return 0;
 			}
-			
-			case WM_SIZE:
-				graphicsWrapper.resize(windowHandle);
-				return 0;
+			//do not handle WM_SIZE
 			
 			case WM_KEYDOWN:
 				keyDownCallback(wParam, lParam);
@@ -90,7 +67,6 @@ namespace process::window {
 			default:
 				return DefWindowProc(windowHandle, messageCode, wParam, lParam);
 		}
-		return TRUE;
 	}
 	
 	void MainWindow::changeWindowMode(const WindowMode& windowMode) {
