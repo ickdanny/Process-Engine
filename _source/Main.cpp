@@ -26,10 +26,6 @@
 #include "ConsoleOutput.h"
 #include "Logging.h"
 
-//todo:temp
-#include "Math/Point2.h"
-#include "Graphics/SpriteDrawInstruction.h"
-
 using namespace process;
 using namespace process::game;
 
@@ -135,8 +131,6 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 		);
 		 */
 		
-		int tick{ 0 };
-		
 		//note: unlike previous engines, no interpolation thus no render scheduler
 		game::GameLoop gameLoop {
 			config::updatesPerSecond,
@@ -148,39 +142,7 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 			},
 			//draw function
 			[&]() {
-				//todo: for now don't worry about render scheduler, just draw same thread
-				wasp::math::Point2 point{
-					config::graphicsWidth/2,
-					config::graphicsHeight/2
-				};
-				auto frameAndSpritePointer{
-					resourceMasterStorage.spriteStorage.get(L"test")
-				};
-				graphics::SpriteDrawInstruction drawInstruction{
-					frameAndSpritePointer->sprite,
-					10000,
-					wasp::math::Vector2{ 0.0f, 0.0f},
-					tick / 100.0f,
-					1.0f
-				};
-				wasp::math::Rectangle subSpriteRect{
-					0.0f,
-					0.0f,
-					config::graphicsWidth / 2.0f,
-					config::graphicsHeight
-				};
-				window.getGraphicsWrapper().drawSubSprite(
-					point,
-					drawInstruction,
-					subSpriteRect
-				);
-				drawInstruction.setDepth(-10000);
-				window.getGraphicsWrapper().drawSprite(
-					point,
-					drawInstruction
-				);
-				window.getGraphicsWrapper().present();
-				++tick;
+				//todo: game.render for draw func?
 			}
 		};
 		
