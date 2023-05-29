@@ -528,7 +528,7 @@ namespace wasp::sound::midi {
 		//where we are on our compiled track
 		size_t compiledIndex { 0 };
 		
-		//find and insert events by chronological order
+		//find and insert events by chronological depth
 		while( individualTracks.size() > 1 ) {
 			//find next event to insert
 			uint32_t lowestDeltaTime { std::numeric_limits<uint32_t>::max() };
@@ -626,7 +626,7 @@ namespace wasp::sound::midi {
 		//where we are on our compiled track
 		size_t compiledIndex { 0 };
 		
-		//find and insert events by chronological order
+		//find and insert events by chronological depth
 		bool placedLoopStart { false };
 		bool placedLoopEnd { false };
 		int64_t realTime { 0 };

@@ -19,7 +19,7 @@
 #include "Input\KeyInputTable.h"
 #include "Sound\MidiHub.h"
 #include "ComLibraryGuard.h"
-//#include "Game/Game.h"
+#include "Game/Game.h"
 #include "Settings.h"
 
 //debug
@@ -103,7 +103,6 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 		//init midi
 		wasp::sound::midi::MidiHub midiHub { settings.muted };
 		
-		/*
 		//init Game
 		Game Game{
 				&settings,
@@ -114,22 +113,24 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 		};
 
 		Game.setUpdateFullscreenCallback(
-				[&]() {
-					if (settings.fullscreen) {
-						window.changeWindowMode(windowmodes::fullscreen);
-					}
-					else {
-						window.changeWindowMode(windowmodes::windowed);
-					}
+			[&]() {
+				if (settings.fullscreen) {
+					window.changeWindowMode(windowmodes::fullscreen);
 				}
+				else {
+					window.changeWindowMode(windowmodes::windowed);
+				}
+			}
 		);
 
 		Game.setWriteSettingsCallback(
-				[&]() {
-					settings::writeSettingsToFile(settings, config::mainConfigPath);
-				}
+			[&]() {
+				wasp::game::settings::writeSettingsToFile(
+					settings,
+					config::mainConfigPath
+				);
+			}
 		);
-		 */
 		
 		//note: unlike previous engines, no interpolation thus no render scheduler
 		game::GameLoop gameLoop {
@@ -137,7 +138,7 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 			config::maxUpdatesWithoutFrame,
 			//update function
 			[&] {
-				//Game.update();
+				Game.update();
 				pumpMessages();
 			},
 			//draw function
@@ -149,7 +150,7 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 		auto stopGameLoopCallback { [&] { gameLoop.stop(); } };
 		
 		window.setDestroyCallback(stopGameLoopCallback);
-		//Game.setExitCallback(stopGameLoopCallback);
+		Game.setExitCallback(stopGameLoopCallback);
 		
 		//make the Game visible and begin running
 		window.show(windowShowMode);

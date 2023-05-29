@@ -294,7 +294,7 @@ namespace wasp::ecs {
             return entityHandle;
         }
 
-        //returns entityIDs in order
+        //returns entityIDs in depth
         template <typename... Ts, typename... Us>
         std::vector<EntityHandle> addEntities(
             const AddEntityOrder<Ts...>& addEntityOrder, 
