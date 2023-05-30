@@ -81,6 +81,9 @@ namespace process::game::systems {
 
 						//max power clear by adding death spawn to the pickup
 						//ideally should refactor into some sort of message but whatever
+						
+						//todo: collision death spawn
+						/*
 						dataStorage.addComponent<DeathCommand>({
 							pickupHandle,
 							{ DeathCommand::Commands::deathSpawn }
@@ -91,6 +94,7 @@ namespace process::game::systems {
 								programsPointer->pickupPrograms.maxPowerClearSpawnProgram
 							}}
 						});
+						 */
 					}
 				}
 		}

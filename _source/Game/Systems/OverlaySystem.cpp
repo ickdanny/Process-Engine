@@ -3,17 +3,20 @@
 namespace process::game::systems {
 
     namespace {
+		using Point2 = wasp::math::Point2;
+		using Vector2 = wasp::math::Vector2;
+		
         constexpr float initX{ 242.0f };
         constexpr float initY{ 28.0f };
 
         constexpr float xOffset{ 13.0f };
         constexpr float yOffset{ 27.0f };
 
-        constexpr math::Vector2 offset{ xOffset, 0.0f };
+        constexpr Vector2 offset{ xOffset, 0.0f };
 
-        constexpr math::Point2 lifeInitPos{ initX, initY };
-        constexpr math::Point2 bombInitPos{ initX, initY + yOffset };
-        constexpr math::Point2 powerMeterPos{
+        constexpr Point2 lifeInitPos{ initX, initY };
+        constexpr Point2 bombInitPos{ initX, initY + yOffset };
+        constexpr Point2 powerMeterPos{
             initX - 5.0f,
             bombInitPos.y + yOffset
         };
@@ -21,7 +24,7 @@ namespace process::game::systems {
 
 	void OverlaySystem::operator()(Scene& scene) {
         //get the group iterator for PlayerData
-        static const Topic<ecs::component::Group*> groupPointerStorageTopic{};
+        static const Topic<wasp::ecs::component::Group*> groupPointerStorageTopic{};
         auto groupPointer{
             getGroupPointer<PlayerData>(
                 scene,
@@ -108,18 +111,18 @@ namespace process::game::systems {
     }
 
     OverlaySystem::IconComponentTuple OverlaySystem::makeIcon(
-        const math::Point2& initPos,
-        const math::Vector2& offset,
+        const Point2& initPos,
+        const Vector2& offset,
         int index,
         const std::wstring& imageName
     ) const {
-        math::Point2 position{ initPos + (offset * static_cast<float>(index)) };
+        Point2 position{ initPos + (offset * static_cast<float>(index)) };
         return EntityBuilder::makePosition(
             position,
             SpriteInstruction{
-                bitmapStoragePointer->get(imageName)->d2dBitmap
-            },
-            DrawOrder{ config::foregroundDrawOrder + 1 }
+                spriteStoragePointer->get(imageName)->sprite,
+				config::foregroundDrawOrder + 1
+            }
         );
     }
 
@@ -208,34 +211,38 @@ namespace process::game::systems {
         if (currentPower == 0) {
             if (dataStorage.containsComponent<VisibleMarker>(powerMeterHandle)) {
                 dataStorage.removeComponent(
-                    ecs::RemoveComponentOrder<VisibleMarker>{ powerMeterHandle }
+                    wasp::ecs::RemoveComponentOrder<VisibleMarker>{ powerMeterHandle }
                 );
             }
         }
         //otherwise, make sure the power meter is visible
         else if (!dataStorage.containsComponent<VisibleMarker>(powerMeterHandle)) {
             dataStorage.addComponent(
-                ecs::AddComponentOrder<VisibleMarker>{ powerMeterHandle, {} }
+                wasp::ecs::AddComponentOrder<VisibleMarker>{ powerMeterHandle, {} }
             );
         }
         //if power is not max, set the sprite to the non-max version
         if (currentPower != config::maxPower) {
-            spriteInstruction.setBitmap(
-                bitmapStoragePointer->get(L"ui_power")->d2dBitmap
+            spriteInstruction.setSprite(
+                spriteStoragePointer->get(L"ui_power")->sprite
             );
         }
         //otherwise, set the sprite to the max version
         else {
-            spriteInstruction.setBitmap(
-                bitmapStoragePointer->get(L"ui_power_max")->d2dBitmap
+            spriteInstruction.setSprite(
+				spriteStoragePointer->get(L"ui_power_max")->sprite
             );
         }
         //update our subimage
-        auto& subImage{ dataStorage.getComponent<SubImage>(powerMeterHandle) };
+        auto& subImage{
+			dataStorage.getComponent<SubImage>(powerMeterHandle)
+		};
         subImage.width = static_cast<float>(currentPower);
 
         //update our position
-        auto& position{ dataStorage.getComponent<Position>(powerMeterHandle) };
-        position.x = powerMeterPos.x + static_cast<float>(currentPower) / 2;
+        auto& position{
+			dataStorage.getComponent<Position>(powerMeterHandle)
+		};
+        position.x = powerMeterPos.x + static_cast<float>(currentPower) / 2.0f;
     }
 }

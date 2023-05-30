@@ -1,6 +1,6 @@
 #include "Game/Systems/PlayerBombSystem.h"
 
-#include "Game/Systems/Programs/PlayerPrograms.h"
+//#include "Game/Systems/Programs/PlayerPrograms.h"
 #include "Logging.h"
 
 namespace process::game::systems {
@@ -34,6 +34,8 @@ namespace process::game::systems {
 		auto& spawnProgramList{ 
 			dataStorage.getComponent<SpawnProgramList>(playerHandle) 
 		};
+		//todo:: player bomb programs
+		/*
 		if (playerData.shotType == ShotType::shotA) {
 			spawnProgramList.push_back(
 				{ programsPointer->playerPrograms.bombASpawnProgram }
@@ -47,6 +49,7 @@ namespace process::game::systems {
 		else {
 			throw std::runtime_error("unexpected player shot type!");
 		}
+		 */
 		--playerData.bombs;
 	}
 }

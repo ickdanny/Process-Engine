@@ -43,6 +43,8 @@ namespace process::window {
 		
 		void present();
 		
+		void clearDepth();
+		
 		ComPtr<ID3D11Device> getDevicePointer() {
 			return devicePointer;
 		}

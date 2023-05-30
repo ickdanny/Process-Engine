@@ -7,10 +7,10 @@ namespace process::game::systems {
 	class GameOverSystem {
 	private:
 		//fields
-		channel::ChannelSet* globalChannelSetPointer{};
+		wasp::channel::ChannelSet* globalChannelSetPointer{};
 
 	public:
-		GameOverSystem(channel::ChannelSet* globalChannelSetPointer)
+		GameOverSystem(wasp::channel::ChannelSet* globalChannelSetPointer)
 			: globalChannelSetPointer{ globalChannelSetPointer } {
 		}
 

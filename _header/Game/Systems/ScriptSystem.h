@@ -9,19 +9,19 @@ namespace process::game::systems {
 	class ScriptSystem {
 	private:
 		//typedefs
-		using ScriptInstructions = components::ScriptInstructions;
-		using ScriptNode = components::ScriptNode;
-		using ScriptProgram = components::ScriptProgram;
+		using ScriptInstructions = wasp::game::components::ScriptInstructions;
+		using ScriptNode = wasp::game::components::ScriptNode;
+		using ScriptProgram = wasp::game::components::ScriptProgram;
 		template <typename Internal, typename External>
-		using ScriptNodeData = components::ScriptNodeData<Internal, External>;
+		using ScriptNodeData = wasp::game::components::ScriptNodeData<Internal, External>;
 		
-		using EntityID = ecs::entity::EntityID;
+		using EntityID = wasp::ecs::entity::EntityID;
 
 		//fields
-		channel::ChannelSet* globalChannelSetPointer{};
+		wasp::channel::ChannelSet* globalChannelSetPointer{};
 
 	public:
-		ScriptSystem(channel::ChannelSet* globalChannelSetPointer);
+		ScriptSystem(wasp::channel::ChannelSet* globalChannelSetPointer);
 		void operator()(Scene& scene);
 
 	private:

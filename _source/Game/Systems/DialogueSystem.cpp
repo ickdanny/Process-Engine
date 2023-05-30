@@ -10,7 +10,7 @@ namespace process::game::systems {
         constexpr float leftX{ 45.0f };
         constexpr float rightX{ 270.0f };
 
-        constexpr math::Point2 textPos{ 85.0f, 170.0f };
+        constexpr wasp::math::Point2 textPos{ 85.0f, 170.0f };
 
         constexpr float imageOpacity{ 1.0f };
 
@@ -18,12 +18,12 @@ namespace process::game::systems {
     }
 
 	DialogueSystem::DialogueSystem(
-        channel::ChannelSet* globalChannelSetPointer,
-		resources::BitmapStorage* bitmapStoragePointer,
+        wasp::channel::ChannelSet* globalChannelSetPointer,
+		resources::SpriteStorage* spriteStoragePointer,
 		resources::DialogueStorage* dialogueStoragePointer
 	) 
         : globalChannelSetPointer{ globalChannelSetPointer }
-		, bitmapStoragePointer{ bitmapStoragePointer }
+		, spriteStoragePointer{ spriteStoragePointer }
 		, dialogueStoragePointer{ dialogueStoragePointer }
 	{
 	}
@@ -63,15 +63,13 @@ namespace process::game::systems {
             //left image
             spriteHandles[0] = dataStorage.addEntity(
                 EntityBuilder::makeVisible(
-                    { leftX, portraitY },
-                    DrawOrder{ config::foregroundDrawOrder }
+                    { leftX, portraitY }
                 ).package()
             );
             //right image
             spriteHandles[1] = dataStorage.addEntity(
                 EntityBuilder::makeVisible(
-                    { rightX, portraitY },
-                    DrawOrder{ config::foregroundDrawOrder }
+                    { rightX, portraitY }
                 ).package()
             );
             //text
@@ -144,7 +142,8 @@ namespace process::game::systems {
         dataStorage.setComponent<SpriteInstruction>({
             entityHandle,
             SpriteInstruction{ 
-                bitmapStoragePointer->get(id)->d2dBitmap,
+                spriteStoragePointer->get(id)->sprite,
+				config::foregroundDrawOrder,
                 {},		//offset
                 0.0f,	//rotation
                 imageOpacity

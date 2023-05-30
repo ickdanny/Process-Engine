@@ -2,8 +2,10 @@
 
 namespace process::game {
 
-	template <typename T = utility::Void>
-	using Topic = channel::Topic<T>;
+	/*
+	template <typename T>
+	using Topic = wasp::channel::Topic<T>;
+	 */
 
 	//global topics
 	const Topic<SceneNames> GlobalTopics::sceneEntry{};
@@ -23,19 +25,18 @@ namespace process::game {
 	const Topic<systems::MenuNavigationCommands> 
 		SceneTopics::menuNavigationCommands{};
 	const Topic<components::MenuCommand> SceneTopics::keyboardBackMenuCommand{};
-	const Topic<ecs::entity::EntityHandle> SceneTopics::currentSelectedElement{};
-	const Topic<std::tuple<ecs::entity::EntityHandle, bool>>
+	const Topic<wasp::ecs::entity::EntityHandle> SceneTopics::currentSelectedElement{};
+	const Topic<std::tuple<wasp::ecs::entity::EntityHandle, bool>>
 		SceneTopics::elementSelection{};
 	const Topic<systems::GameBuilderCommands> SceneTopics::gameBuilderCommands{};
 	const Topic<> SceneTopics::readDialogueFlag{};
 	const Topic<config::PrngType> SceneTopics::random{};
 	const Topic<systems::GameCommands> SceneTopics::gameCommands{};
-	const Topic<std::tuple<ecs::entity::EntityHandle, systems::PlayerStates>> 
+	const Topic<std::tuple<wasp::ecs::entity::EntityHandle, systems::PlayerStates>>
 		SceneTopics::playerStateEntry{};
-	const Topic<ecs::entity::EntityHandle> SceneTopics::playerHits{};
-	const Topic<ecs::entity::EntityHandle> SceneTopics::deaths{};
-	const Topic<ecs::entity::EntityHandle> SceneTopics::bossDeaths{};
+	const Topic<wasp::ecs::entity::EntityHandle> SceneTopics::playerHits{};
+	const Topic<wasp::ecs::entity::EntityHandle> SceneTopics::deaths{};
+	const Topic<wasp::ecs::entity::EntityHandle> SceneTopics::bossDeaths{};
 	const Topic<> SceneTopics::pauseFlag{};
-	const Topic<float> SceneTopics::lastDeltaTime{};
 	const Topic<> SceneTopics::winFlag{};
 }

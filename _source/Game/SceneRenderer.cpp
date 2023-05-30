@@ -2,22 +2,22 @@
 
 namespace process::game {
 
-	SceneRenderer::SceneRenderer(window::WindowPainter* windowPainterPointer)
-		: renderSystem{ windowPainterPointer }
-		, textRenderSystem{ windowPainterPointer }
+	SceneRenderer::SceneRenderer(window::GraphicsWrapper* graphicsWrapperPointer)
+		: renderSystem{ graphicsWrapperPointer }
+		, textRenderSystem{ graphicsWrapperPointer }
 
 		#ifdef _DEBUG
-		, debugRenderSystem{ windowPainterPointer }
+		, debugRenderSystem{ graphicsWrapperPointer }
 		#endif
 	{
 	}
 
-	void SceneRenderer::operator()(Scene& scene, float deltaTime) {
-		renderSystem(scene, deltaTime);
+	void SceneRenderer::operator()(Scene& scene) {
+		renderSystem(scene);
 		textRenderSystem(scene);
 
 		#ifdef _DEBUG
-		debugRenderSystem(scene, deltaTime);
+		debugRenderSystem(scene);
 		#endif
 	}
 }

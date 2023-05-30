@@ -1,7 +1,7 @@
 #include "Game/Systems/DeathHandlerSystem.h"
 
 #include "Game/Systems/EntityBuilder.h"
-#include "Game/Systems/Programs/ScriptProgramUtil.h"
+//#include "Game/Systems/Programs/ScriptProgramUtil.h"
 
 #include "Logging.h"
 
@@ -32,10 +32,14 @@ namespace process::game::systems {
 
 	DeathHandlerSystem::DeathHandlerSystem()
 		: ghostProgram{
+			//todo: death handler system ghost program
+			std::make_shared<ScriptNode>(ScriptInstructions::error)
+			/*
 			ScriptProgramUtil::makeStallingIfNode(
 				std::make_shared<ScriptNode>(ScriptInstructions::isNotSpawning),
 				std::make_shared<ScriptNode>(ScriptInstructions::removeEntity)
 			)
+			 */
 		} 
 	{
 	}
@@ -149,8 +153,4 @@ namespace process::game::systems {
 			dataStorage.removeEntity(entityHandle);
 		}
 	}
-
-	
-
-	
 }

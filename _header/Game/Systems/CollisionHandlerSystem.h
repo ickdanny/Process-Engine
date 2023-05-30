@@ -1,7 +1,7 @@
 #pragma once
 
 #include "systemInclude.h"
-//#include "Programs/Programs.h"
+#include "Programs/Programs.h"
 
 namespace process::game::systems {
 
@@ -12,7 +12,7 @@ namespace process::game::systems {
 		using CollisionCommands = components::CollisionCommands;
 
 		//fields
-		//Programs* programsPointer{};
+		Programs* programsPointer{};
 
 	public:
 		CollisionHandlerSystem(Programs* programsPointer);

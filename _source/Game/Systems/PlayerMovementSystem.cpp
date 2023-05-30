@@ -49,7 +49,7 @@ namespace process::game::systems {
             if (twoFramePlayerInputData != twoFramePlayerInputData.getPast()) {
                 Vector2 velocity = calculateVelocity(twoFramePlayerInputData);
 
-                static const Topic<ecs::component::Group*> groupPointerStorageTopic{};
+                static const Topic<wasp::ecs::component::Group*> groupPointerStorageTopic{};
 
                 auto groupPointer{
                     getGroupPointer<PlayerData, Velocity>(
@@ -104,7 +104,7 @@ namespace process::game::systems {
     }
 
     //converts a PlayerInputData object into a Vector2 object
-    math::Vector2 PlayerMovementSystem::calculateVelocity(
+    wasp::math::Vector2 PlayerMovementSystem::calculateVelocity(
         const PlayerInputData inputData
     ) {
         //return the zero vector if either no direction is pressed or all directions are
@@ -132,7 +132,7 @@ namespace process::game::systems {
             float magnitude = inputData.isFocused() 
                 ? config::focusedSpeed 
                 : config::playerSpeed;
-            velocity *= magnitude / math::getMagnitude(velocity);
+            velocity *= magnitude / wasp::math::getMagnitude(velocity);
             return velocity;
         }
         else {

@@ -4,8 +4,8 @@
 
 namespace process::game::systems {
 
-	using namespace ecs;
-	using namespace ecs::entity;
+	using namespace wasp::ecs;
+	using namespace wasp::ecs::entity;
 
 	#define NODE_HANDLER_ARGS \
 			Scene& scene, \
@@ -14,7 +14,7 @@ namespace process::game::systems {
 			int tick, \
 			SpawnList& spawnList
 
-	SpawnSystem::SpawnSystem(channel::ChannelSet* globalChannelSetPointer)
+	SpawnSystem::SpawnSystem(wasp::channel::ChannelSet* globalChannelSetPointer)
 		: globalChannelSetPointer{ globalChannelSetPointer } {
 	}
 
@@ -23,7 +23,7 @@ namespace process::game::systems {
 		SpawnList spawnList{};
 
 		//get the group iterator for SpawnProgramList
-		static const Topic<ecs::component::Group*> groupPointerStorageTopic{};
+		static const Topic<wasp::ecs::component::Group*> groupPointerStorageTopic{};
 		auto groupPointer{
 			getGroupPointer<SpawnProgramList>(
 				scene,
@@ -222,7 +222,7 @@ namespace process::game::systems {
 				break;
 			}
 			case SpawnInstructions::entityPosition: {
-				math::Point2 pos{
+				wasp::math::Point2 pos{
 					scene.getDataStorage().getComponent<Position>(entityID)
 				};
 
@@ -244,7 +244,7 @@ namespace process::game::systems {
 				break;
 			}
 			case SpawnInstructions::entityOffset: {
-				math::Point2 basePos{
+				wasp::math::Point2 basePos{
 					scene.getDataStorage().getComponent<Position>(entityID)
 				};
 				Velocity offset{ evaluateVelocityNode(
@@ -255,7 +255,7 @@ namespace process::game::systems {
 					spawnList
 				) };
 
-				math::Point2 pos{ basePos + offset };
+				wasp::math::Point2 pos{ basePos + offset };
 				
 				auto posConsumerSharedPointer{
 					currentSpawnNodePointer->linkedNodePointers[1]
@@ -289,7 +289,7 @@ namespace process::game::systems {
 						tick,
 						spawnList
 				) };
-				math::Point2 pos{ x, y };
+				wasp::math::Point2 pos{ x, y };
 
 				auto posConsumerSharedPointer{
 					currentSpawnNodePointer->linkedNodePointers[2]
@@ -333,7 +333,7 @@ namespace process::game::systems {
 						currentSpawnNodePointer.get()
 						)->data;
 				//get the position
-				math::Point2 pos{ evaluatePointNode(
+				wasp::math::Point2 pos{ evaluatePointNode(
 					scene,
 					entityID,
 					currentSpawnNodePointer->linkedNodePointers[0],
@@ -358,7 +358,7 @@ namespace process::game::systems {
 						currentSpawnNodePointer.get()
 						)->data;
 				//get the position
-				math::Point2 pos{ evaluatePointNode(
+				wasp::math::Point2 pos{ evaluatePointNode(
 					scene,
 					entityID,
 					currentSpawnNodePointer->linkedNodePointers[0],
@@ -382,7 +382,7 @@ namespace process::game::systems {
 			}
 			case SpawnInstructions::mirrorFormation: {
 				//get the base position
-				math::Point2 basePos{ evaluatePointNode(
+				wasp::math::Point2 basePos{ evaluatePointNode(
 					scene,
 					entityID,
 					currentSpawnNodePointer->linkedNodePointers[0],
@@ -409,7 +409,7 @@ namespace process::game::systems {
 				//in point slope form, our new X n follows the equation
 				// n - a = -(o - a)
 				// where a is our axis and o is the old X
-				math::Point2 mirrorPos{ -basePos.x + (2 * axis), basePos.y };
+				wasp::math::Point2 mirrorPos{ -basePos.x + (2 * axis), basePos.y };
 				Velocity mirrorVel{
 					baseVel.getMagnitude(),
 					baseVel.getAngle().flipY()
@@ -449,7 +449,7 @@ namespace process::game::systems {
 			}
 			case SpawnInstructions::mirrorPosFormation: {
 				//get the base position
-				math::Point2 basePos{ evaluatePointNode(
+				wasp::math::Point2 basePos{ evaluatePointNode(
 					scene,
 					entityID,
 					{ currentSpawnNodePointer->linkedNodePointers[0] },
@@ -468,7 +468,7 @@ namespace process::game::systems {
 				//in point slope form, our new X n follows the equation
 				// n - a = -(o - a)
 				// where a is our axis and o is the old X
-				math::Point2 mirrorPos{ -basePos.x + (2 * axis), basePos.y };
+				wasp::math::Point2 mirrorPos{ -basePos.x + (2 * axis), basePos.y };
 
 				//pass both normal and reflected pos
 				auto posConsumerSharedPointer{
@@ -524,8 +524,8 @@ namespace process::game::systems {
 					spawnList
 				) };
 				float speed{ baseVel.getMagnitude() };
-				math::Angle baseAngle{ baseVel.getAngle() };
-				math::Angle angle{
+				wasp::math::Angle baseAngle{ baseVel.getAngle() };
+				wasp::math::Angle angle{
 					static_cast<float>(baseAngle) -
 					((symmetry - 1) * angleIncrement / 2.0f)
 				};
@@ -567,9 +567,9 @@ namespace process::game::systems {
 				) };
 
 				float speed{ baseVel.getMagnitude() };
-				math::Angle angle{ baseVel.getAngle() };
+				wasp::math::Angle angle{ baseVel.getAngle() };
 
-				float angleIncrement{ math::fullAngleDivide(symmetry) };
+				float angleIncrement{ wasp::math::fullAngleDivide(symmetry) };
 
 				for (int i{ 0 }; i < symmetry; ++i) {
 					auto velConsumerSharedPointer{
@@ -642,7 +642,7 @@ namespace process::game::systems {
 
 	void SpawnSystem::runSpawnNodePassingPos(
 		NODE_HANDLER_ARGS, 
-		const math::Point2& pos
+		const wasp::math::Point2& pos
 	) {
 		switch (currentSpawnNodePointer->spawnInstruction) {
 			case SpawnInstructions::error:
@@ -685,9 +685,9 @@ namespace process::game::systems {
 				) };
 
 				float speed{ baseVel.getMagnitude() };
-				math::Angle angle{ baseVel.getAngle() };
+				wasp::math::Angle angle{ baseVel.getAngle() };
 
-				float angleIncrement{ math::fullAngleDivide(symmetry) };
+				float angleIncrement{ wasp::math::fullAngleDivide(symmetry) };
 
 				for (int i{ 0 }; i < symmetry; ++i) {
 					auto velConsumerSharedPointer{
@@ -732,7 +732,7 @@ namespace process::game::systems {
 					)->data;
 
 				//evaluate pos node
-				math::Point2 pos{ evaluatePointNode(
+				wasp::math::Point2 pos{ evaluatePointNode(
 					scene,
 					entityID,
 					currentSpawnNodePointer->linkedNodePointers[0],
@@ -776,10 +776,10 @@ namespace process::game::systems {
 				break;
 			}
 			case SpawnInstructions::entityOffset: {
-				math::Point2 basePos{
+				wasp::math::Point2 basePos{
 					scene.getDataStorage().getComponent<Position>(entityID)
 				};
-				math::Point2 pos{ basePos + vel };
+				wasp::math::Point2 pos{ basePos + vel };
 
 				auto posConsumerSharedPointer{
 					currentSpawnNodePointer->linkedNodePointers[0]
@@ -837,7 +837,7 @@ namespace process::game::systems {
 			}
 			case SpawnInstructions::mirrorFormation: {
 				//get the base position
-				math::Point2 basePos{ evaluatePointNode(
+				wasp::math::Point2 basePos{ evaluatePointNode(
 					scene,
 					entityID,
 					currentSpawnNodePointer->linkedNodePointers[0],
@@ -856,7 +856,7 @@ namespace process::game::systems {
 				//in point slope form, our new X n follows the equation
 				// n - a = -(o - a)
 				// where a is our axis and o is the old X
-				math::Point2 mirrorPos{ -basePos.x + (2 * axis), basePos.y };
+				wasp::math::Point2 mirrorPos{ -basePos.x + (2 * axis), basePos.y };
 				Velocity mirrorVel{
 					vel.getMagnitude(),
 					vel.getAngle().flipY()
@@ -910,8 +910,8 @@ namespace process::game::systems {
 					spawnList
 				) };
 				float speed{ vel.getMagnitude() };
-				math::Angle baseAngle{ vel.getAngle() };
-				math::Angle angle{
+				wasp::math::Angle baseAngle{ vel.getAngle() };
+				wasp::math::Angle angle{
 					static_cast<float>(baseAngle) -
 					((symmetry - 1) * angleIncrement / 2.0f)
 				};
@@ -945,9 +945,9 @@ namespace process::game::systems {
 				) };
 
 				float speed{ vel.getMagnitude() };
-				math::Angle angle{ vel.getAngle() };
+				wasp::math::Angle angle{ vel.getAngle() };
 
-				float angleIncrement{ math::fullAngleDivide(symmetry) };
+				float angleIncrement{ wasp::math::fullAngleDivide(symmetry) };
 
 				for (int i{ 0 }; i < symmetry; ++i) {
 					auto velConsumerSharedPointer{
@@ -977,7 +977,7 @@ namespace process::game::systems {
 
 	void SpawnSystem::runSpawnNodePassingPosVel(
 		NODE_HANDLER_ARGS,
-		const math::Point2& pos,
+		const wasp::math::Point2& pos,
 		const Velocity& vel
 	) {
 		switch (currentSpawnNodePointer->spawnInstruction) {
@@ -1015,7 +1015,7 @@ namespace process::game::systems {
 				//in point slope form, our new X n follows the equation
 				// n - a = -(o - a)
 				// where a is our axis and o is the old X
-				math::Point2 mirrorPos{ -pos.x + (2 * axis), pos.y };
+				wasp::math::Point2 mirrorPos{ -pos.x + (2 * axis), pos.y };
 				Velocity mirrorVel{
 					vel.getMagnitude(),
 					vel.getAngle().flipY()
@@ -1178,13 +1178,13 @@ namespace process::game::systems {
 				return std::max(a, b);
 			}
 			case SpawnInstructions::entityX: {
-				math::Point2 pos{
+				wasp::math::Point2 pos{
 					scene.getDataStorage().getComponent<Position>(entityID)
 				};
 				return pos.x;
 			}
 			case SpawnInstructions::entityY: {
-				math::Point2 pos{
+				wasp::math::Point2 pos{
 					scene.getDataStorage().getComponent<Position>(entityID)
 				};
 				return pos.y;
@@ -1242,7 +1242,7 @@ namespace process::game::systems {
 				return distribution(prng);
 			}
 			case SpawnInstructions::pickupInitSpeed: {
-				math::Point2 pos{
+				wasp::math::Point2 pos{
 					scene.getDataStorage().getComponent<Position>(entityID)
 				};
 
@@ -1254,12 +1254,12 @@ namespace process::game::systems {
 				return config::pickupInitSpeedBase * speedMulti;
 			}
 			case SpawnInstructions::angleToPlayer: {
-				math::Point2 pos{
+				wasp::math::Point2 pos{
 					scene.getDataStorage().getComponent<Position>(entityID)
 				};
 
 				//get the iterator for players
-				static const Topic<ecs::component::Group*>
+				static const Topic<wasp::ecs::component::Group*>
 					playerGroupPointerStorageTopic{};
 
 				auto playerGroupPointer{
@@ -1275,7 +1275,7 @@ namespace process::game::systems {
 				if (playerGroupIterator.isValid()) {
 					//just grab the first player
 					const auto [playerPos] = *playerGroupIterator;
-					return math::getAngleFromAToB(pos, playerPos);
+					return wasp::math::getAngleFromAToB(pos, playerPos);
 				}
 				else {
 					return 0.0f;
@@ -1497,21 +1497,21 @@ namespace process::game::systems {
 				return Velocity{ magnitude, angle };
 			}
 			case SpawnInstructions::velocityToPoint: {
-				math::Point2 a{ evaluatePointNode(
+				wasp::math::Point2 a{ evaluatePointNode(
 					scene,
 					entityID,
 					currentSpawnNodePointer->linkedNodePointers[0],
 					tick,
 					spawnList
 				) };
-				math::Point2 b{ evaluatePointNode(
+				wasp::math::Point2 b{ evaluatePointNode(
 					scene,
 					entityID,
 					currentSpawnNodePointer->linkedNodePointers[1],
 					tick,
 					spawnList
 				) };
-				return math::vectorFromAToB(a, b);
+				return wasp::math::vectorFromAToB(a, b);
 			}
 			case SpawnInstructions::conditionElse: {
 				//if our predicate is met, evaluate truenode
@@ -1551,7 +1551,7 @@ namespace process::game::systems {
 		switch (currentSpawnNodePointer->spawnInstruction) {
 			case SpawnInstructions::value: {
 				const auto [value] =
-					dynamic_cast<const SpawnNodeData<math::Point2>*>(
+					dynamic_cast<const SpawnNodeData<wasp::math::Point2>*>(
 						currentSpawnNodePointer.get()
 						)->data;
 				return value;
@@ -1559,7 +1559,7 @@ namespace process::game::systems {
 			case SpawnInstructions::valueDifficulty: {
 				const auto& [valueArray] =
 					dynamic_cast<
-					const SpawnNodeData<std::array<math::Point2, 4>>*
+					const SpawnNodeData<std::array<wasp::math::Point2, 4>>*
 					>(
 						currentSpawnNodePointer.get()
 						)->data;
@@ -1569,7 +1569,7 @@ namespace process::game::systems {
 				return scene.getDataStorage().getComponent<Position>(entityID);
 			}
 			case SpawnInstructions::entityOffset: {
-				math::Point2 basePos{
+				wasp::math::Point2 basePos{
 					scene.getDataStorage().getComponent<Position>(entityID)
 				};
 				Velocity offset{ evaluateVelocityNode(
@@ -1596,7 +1596,7 @@ namespace process::game::systems {
 						tick,
 						spawnList
 				) };
-				return math::Point2{ x, y };
+				return wasp::math::Point2{ x, y };
 			}
 			default:
 				throw std::runtime_error{ "not a point instruction!" };

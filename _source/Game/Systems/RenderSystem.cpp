@@ -30,12 +30,12 @@ namespace process::game::systems {
 			else {
 				drawSprite(position, spriteInstruction);
 			}
+			++groupIterator;
 		}
 	}
 
 	//helper functions
-
-
+	
 	void RenderSystem::drawSprite(
 		const Position& position,
 		const SpriteInstruction& drawInstruction

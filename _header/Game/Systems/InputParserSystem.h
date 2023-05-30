@@ -8,9 +8,9 @@ namespace process::game::systems {
 	class InputParserSystem {
 	private:
 		//typedefs
-		using IKeyInputTable = input::IKeyInputTable;
-		using KeyValues = input::KeyValues;
-		using KeyState = input::KeyState;
+		using IKeyInputTable = wasp::input::IKeyInputTable;
+		using KeyValues = wasp::input::KeyValues;
+		using KeyState = wasp::input::KeyState;
 
 		//fields
 		IKeyInputTable* keyInputTablePointer{};

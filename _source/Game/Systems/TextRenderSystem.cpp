@@ -1,13 +1,11 @@
 #include "Game/Systems/TextRenderSystem.h"
 
-#include <algorithm>
-
 namespace process::game::systems {
 
 	//beginDraw and endDraw are called in the RenderScheduler
 	void TextRenderSystem::operator()(Scene& scene) {
 
-		static const Topic<ecs::component::Group*> groupPointerStorageTopic{};
+		static const Topic<wasp::ecs::component::Group*> groupPointerStorageTopic{};
 
 		auto groupPointer{
 			getGroupPointer<Position, VisibleMarker, TextInstruction>(
@@ -29,10 +27,13 @@ namespace process::game::systems {
 		const Position& position,
 		const TextInstruction& textInstruction
 	) {
-		windowPainterPointer->drawText(
+		//todo: text rendering to graphics wrapper
+		/*
+		graphicsWrapperPointer->drawText(
 			position, 
 			textInstruction.text, 
 			textInstruction.bounds
 		);
+		 */
 	}
 }

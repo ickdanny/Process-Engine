@@ -7,12 +7,12 @@ namespace process::game::systems {
 	class DeathHandlerSystem {
 	private:
 		//typedefs
-		using EntityHandle = ecs::entity::EntityHandle;
-		using ScriptNode = components::ScriptNode;
-		using ScriptInstructions = components::ScriptInstructions;
+		using EntityHandle = wasp::ecs::entity::EntityHandle;
+		using ScriptNode = wasp::game::components::ScriptNode;
+		using ScriptInstructions = wasp::game::components::ScriptInstructions;
 
 		//fields
-		components::ScriptProgram ghostProgram;		//uninitialized!
+		wasp::game::components::ScriptProgram ghostProgram;		//uninitialized!
 
 	public:
 		DeathHandlerSystem();

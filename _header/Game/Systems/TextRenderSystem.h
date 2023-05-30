@@ -1,21 +1,21 @@
 #pragma once
 
 #include "systemInclude.h"
-#include "Window/WindowPainter.h"
+#include "Window/GraphicsWrapper.h"
 
 namespace process::game::systems {
 
 	class TextRenderSystem {
 	private:
 		//typedefs
-		using EntityID = ecs::entity::EntityID;
+		using EntityID = wasp::ecs::entity::EntityID;
 
 		//fields
-		window::WindowPainter* windowPainterPointer{};
+		window::GraphicsWrapper* graphicsWrapperPointer{};
 
 	public:
-		TextRenderSystem(window::WindowPainter* windowPainterPointer)
-			: windowPainterPointer{ windowPainterPointer } {
+		TextRenderSystem(window::GraphicsWrapper* graphicsWrapperPointer)
+			: graphicsWrapperPointer{ graphicsWrapperPointer } {
 		}
 
 		//beginDraw and endDraw are called in the RenderScheduler

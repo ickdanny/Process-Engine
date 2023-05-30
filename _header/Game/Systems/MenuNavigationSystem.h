@@ -10,14 +10,14 @@ namespace process::game::systems {
     private:
         //typedefs
         using MenuCommand = components::MenuCommand;
-        using DataStorage = ecs::DataStorage;
-        using EntityHandle = ecs::entity::EntityHandle;
+        using DataStorage = wasp::ecs::DataStorage;
+        using EntityHandle = wasp::ecs::entity::EntityHandle;
 
         //fields
-        channel::ChannelSet* globalChannelSetPointer{};
+        wasp::channel::ChannelSet* globalChannelSetPointer{};
 
     public:
-        MenuNavigationSystem(channel::ChannelSet* globalChannelSetPointer) 
+        MenuNavigationSystem(wasp::channel::ChannelSet* globalChannelSetPointer)
             : globalChannelSetPointer{ globalChannelSetPointer } {
         }
 

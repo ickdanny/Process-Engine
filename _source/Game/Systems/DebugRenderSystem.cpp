@@ -6,9 +6,8 @@
 #endif
 
 namespace process::game::systems {
-
-	//beginDraw and endDraw are called in the RenderScheduler
-	void DebugRenderSystem::operator()(Scene& scene, float deltaTime) {
+	
+	void DebugRenderSystem::operator()(Scene& scene) {
 		#ifdef _DEBUG
 		
 		static constexpr float smoothing{ 0.9f };
@@ -21,16 +20,18 @@ namespace process::game::systems {
 		static float timeToDraw{ 1.0 };
 		static float fps{ 1.0 };
 
-		windowPainterPointer->drawText(
+		/*
+		graphicsWrapperPointer->drawText(
 			{ 5.0f, 5.0f },
 			{ L"frame#: " + std::to_wstring(frameCount++)},
 			{ 300.0f, 500.0f }
 		);
-		windowPainterPointer->drawText(
+		graphicsWrapperPointer->drawText(
 			{ 5.0f, 15.0f },
 			{ L"FPS:    " + std::to_wstring(static_cast<int>(1.0f / fps))},
 			{ 400.0f, 300.0f }
 		);
+		 */
 
 		lastDraw = thisDraw;
 		thisDraw = std::chrono::steady_clock::now();

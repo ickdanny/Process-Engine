@@ -8,14 +8,18 @@
 namespace process::game::resources {
 	
 	class DirectoryStorage
-		: public resource::ParentResourceStorage, public resource::FileLoadable, public resource::ManifestLoadable {
+		: public resource::ParentResourceStorage
+		, public resource::FileLoadable
+		, public resource::ManifestLoadable
+	{
 	
 	private:
 		using ResourceBase = wasp::resource::ResourceBase;
 	
 	public:
 		DirectoryStorage()
-			: FileLoadable { { file::directoryExtension } }, ManifestLoadable { { L"directory" } } {
+			: FileLoadable { { file::directoryExtension } }
+			, ManifestLoadable { { L"directory" } } {
 		}
 		
 		void reload(const std::wstring& id) override;

@@ -1,21 +1,21 @@
 #pragma once
 
 #include "systemInclude.h"
-#include "Window/WindowPainter.h"
+#include "Window/GraphicsWrapper.h"
 
 namespace process::game::systems {
 
 	class DebugRenderSystem {
 	private:
 		//fields
-		window::WindowPainter* windowPainterPointer{};
+		window::GraphicsWrapper* graphicsWrapperPointer{};
 
 	public:
-		DebugRenderSystem(window::WindowPainter* windowPainterPointer)
-			: windowPainterPointer{ windowPainterPointer } {
+		DebugRenderSystem(window::GraphicsWrapper* graphicsWrapperPointer)
+			: graphicsWrapperPointer{ graphicsWrapperPointer } {
 		}
 
 		//beginDraw and endDraw are called in the RenderScheduler
-		void operator()(Scene& scene, float deltaTime);
+		void operator()(Scene& scene);
 	};
 }

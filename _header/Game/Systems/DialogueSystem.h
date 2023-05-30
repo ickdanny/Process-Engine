@@ -2,7 +2,7 @@
 
 #include "systemInclude.h"
 
-#include "Game/Resources/BitmapStorage.h"
+#include "Game/Resources/SpriteStorage.h"
 #include "Game/Resources/DialogueStorage.h"
 #include "EntityBuilder.h"
 
@@ -11,9 +11,9 @@ namespace process::game::systems {
 	class DialogueSystem {
 	private:
 		//typedefs
-		using EntityHandle = ecs::entity::EntityHandle;
-		using DialogueCommand = resources::DialogueCommand;
-		using Dialogue = resources::Dialogue;
+		using EntityHandle = wasp::ecs::entity::EntityHandle;
+		using DialogueCommand = wasp::game::resources::DialogueCommand;
+		using Dialogue = wasp::game::resources::Dialogue;
 
 			//dialogue, dialoguePos, spriteHandles
 			//spriteHandles are 0 - left image, 1 - right image, 2 - text
@@ -24,14 +24,14 @@ namespace process::game::systems {
 		>;
 
 		//fields
-		channel::ChannelSet* globalChannelSetPointer{};
-		resources::BitmapStorage* bitmapStoragePointer{};
+		wasp::channel::ChannelSet* globalChannelSetPointer{};
+		resources::SpriteStorage* spriteStoragePointer{};
 		resources::DialogueStorage* dialogueStoragePointer{};
 
 	public:
 		DialogueSystem(
-			channel::ChannelSet* globalChannelSetPointer,
-			resources::BitmapStorage* bitmapStoragePointer,
+			wasp::channel::ChannelSet* globalChannelSetPointer,
+			resources::SpriteStorage* spriteStoragePointer,
 			resources::DialogueStorage* dialogueStoragePointer
 		);
 		void operator()(Scene& scene);

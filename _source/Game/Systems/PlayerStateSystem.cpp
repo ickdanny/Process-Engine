@@ -7,6 +7,8 @@ namespace process::game::systems {
     namespace {
 
         constexpr int noTimer{ -1 };
+		
+		using EntityHandle = wasp::ecs::entity::EntityHandle;
 
         bool isPlayerBomb(Scene& scene, PlayerData& playerData) {
             if (playerData.bombs > 0) {
@@ -25,7 +27,7 @@ namespace process::game::systems {
         //Perfoms entry operations as defined by the CURRENT state of the state machine.
         void onEntry(
             Scene& scene, 
-            const ecs::entity::EntityHandle& playerHandle, 
+            const EntityHandle& playerHandle,
             PlayerData& playerData
         ) {
 
@@ -64,7 +66,7 @@ namespace process::game::systems {
         //Updates the state machine and returns the next state.
         PlayerStates onUpdate(
             Scene& scene, 
-            const ecs::entity::EntityHandle& playerHandle, 
+            const EntityHandle& playerHandle,
             PlayerData& playerData
         ) {
             switch (playerData.stateMachine.playerState) {
@@ -146,7 +148,7 @@ namespace process::game::systems {
         //Performs exit operations as defined by the CURRENT state of the state machine.
         void onExit(
             Scene& scene, 
-            const ecs::entity::EntityHandle& playerHandle,
+            const EntityHandle& playerHandle,
             PlayerData& playerData
         ) {
             switch (playerData.stateMachine.playerState) {
@@ -172,7 +174,7 @@ namespace process::game::systems {
 
         void updatePlayerStateMachine(
             Scene& scene, 
-            const ecs::entity::EntityHandle& playerHandle,
+            const EntityHandle& playerHandle,
             PlayerData& playerData
         ) {
             PlayerStates nextState{ onUpdate(scene, playerHandle, playerData) };
@@ -193,7 +195,7 @@ namespace process::game::systems {
         scene.getChannel(SceneTopics::playerStateEntry).clear();
 
         //get the group iterator for PlayerData
-        static const Topic<ecs::component::Group*> groupPointerStorageTopic{};
+        static const Topic<wasp::ecs::component::Group*> groupPointerStorageTopic{};
         auto groupPointer{
             getGroupPointer<PlayerData>(
                 scene,

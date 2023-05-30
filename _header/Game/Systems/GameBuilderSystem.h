@@ -8,9 +8,9 @@ namespace process::game::systems {
 
 	private:
 		//fields
-		channel::ChannelSet* globalChannelSetPointer{};
+		wasp::channel::ChannelSet* globalChannelSetPointer{};
 	public:
-		GameBuilderSystem(channel::ChannelSet* globalChannelSetPointer)
+		GameBuilderSystem(wasp::channel::ChannelSet* globalChannelSetPointer)
 			: globalChannelSetPointer{ globalChannelSetPointer } {
 		}
 

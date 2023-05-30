@@ -6,7 +6,7 @@
 
 
 
-//#include "Game/Systems/Programs/Programs.h"
+#include "Game/Systems/Programs/Programs.h"
 
 #include "Game/Systems/InitSystem.h"
 #include "Game/Systems/MiscellaneousSystem.h"
@@ -49,7 +49,7 @@ namespace process::game {
 	private:
 		
 		//fields
-		//systems::Programs programs;								//not initialized!
+		systems::Programs programs;								//not initialized!
 
 		//systems
 		systems::InitSystem initSystem;							//not initialized!

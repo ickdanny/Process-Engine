@@ -8,17 +8,17 @@ namespace process::game::systems {
 	class ComponentOrderQueue {
 	private:
 		//typedefs
-		using EntityHandle = ecs::entity::EntityHandle;
+		using EntityHandle = wasp::ecs::entity::EntityHandle;
 
 		//inner types
 		struct QueuedOrderBase {
 			virtual ~QueuedOrderBase() = default;
-			virtual void apply(ecs::DataStorage& dataStorage) = 0;
+			virtual void apply(wasp::ecs::DataStorage& dataStorage) = 0;
 		};
 
 		template <typename T>
 		struct QueuedAddComponentOrder : QueuedOrderBase {
-			ecs::AddComponentOrder<T> addComponentOrder;
+			wasp::ecs::AddComponentOrder<T> addComponentOrder;
 
 			QueuedAddComponentOrder(
 				const EntityHandle& entityHandle,
@@ -29,14 +29,14 @@ namespace process::game::systems {
 
 			~QueuedAddComponentOrder() override = default;
 
-			void apply(ecs::DataStorage& dataStorage) override {
+			void apply(wasp::ecs::DataStorage& dataStorage) override {
 				dataStorage.addComponent(addComponentOrder);
 			}
 		};
 
 		template <typename T>
 		struct QueuedSetComponentOrder : QueuedOrderBase {
-			ecs::SetComponentOrder<T> setComponentOrder;
+			wasp::ecs::SetComponentOrder<T> setComponentOrder;
 
 			QueuedSetComponentOrder(
 				const EntityHandle& entityHandle,
@@ -47,14 +47,14 @@ namespace process::game::systems {
 
 			~QueuedSetComponentOrder() override = default;
 
-			void apply(ecs::DataStorage& dataStorage) override {
+			void apply(wasp::ecs::DataStorage& dataStorage) override {
 				dataStorage.setComponent(setComponentOrder);
 			}
 		};
 
 		template <typename T>
 		struct QueuedRemoveComponentOrder : QueuedOrderBase {
-			ecs::RemoveComponentOrder<T> removeComponentOrder;
+			wasp::ecs::RemoveComponentOrder<T> removeComponentOrder;
 
 			QueuedRemoveComponentOrder(const EntityHandle& entityHandle)
 				: removeComponentOrder{ entityHandle } {
@@ -62,13 +62,13 @@ namespace process::game::systems {
 
 			~QueuedRemoveComponentOrder() override = default;
 
-			void apply(ecs::DataStorage& dataStorage) override {
+			void apply(wasp::ecs::DataStorage& dataStorage) override {
 				dataStorage.removeComponent(removeComponentOrder);
 			}
 		};
 
 		struct QueuedRemoveEntityOrder : QueuedOrderBase {
-			ecs::RemoveEntityOrder removeEntityOrder;
+			wasp::ecs::RemoveEntityOrder removeEntityOrder;
 
 			QueuedRemoveEntityOrder(const EntityHandle& entityHandle)
 				: removeEntityOrder{ entityHandle } {
@@ -76,7 +76,7 @@ namespace process::game::systems {
 
 			~QueuedRemoveEntityOrder() override = default;
 
-			void apply(ecs::DataStorage& dataStorage) override {
+			void apply(wasp::ecs::DataStorage& dataStorage) override {
 				dataStorage.removeEntity(removeEntityOrder);
 			}
 		};
@@ -129,7 +129,7 @@ namespace process::game::systems {
 			);
 		}
 
-		void apply(ecs::DataStorage& dataStorage) {
+		void apply(wasp::ecs::DataStorage& dataStorage) {
 			for (auto& order : queuedOrders) {
 				order->apply(dataStorage);
 			}

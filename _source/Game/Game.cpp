@@ -5,11 +5,11 @@
 namespace process::game {
 
 	Game::Game(
-		Settings* settingsPointer,
+		wasp::game::Settings* settingsPointer,
 		resources::ResourceMasterStorage* resourceMasterStoragePointer,
-		window::WindowPainter* windowPainterPointer,
-		input::IKeyInputTable* keyInputTablePointer,
-		sound::midi::MidiHub* midiHubPointer
+		window::GraphicsWrapper* graphicsWrapperPointer,
+		wasp::input::IKeyInputTable* keyInputTablePointer,
+		wasp::sound::midi::MidiHub* midiHubPointer
 	)
 		: sceneList{ std::move(makeSceneList()) }
 		, sceneUpdater{ 
@@ -17,9 +17,10 @@ namespace process::game {
 			keyInputTablePointer, 
 			&globalChannelSet 
 		}
-		, sceneRenderer{ windowPainterPointer }
+		, sceneRenderer{ graphicsWrapperPointer }
 		, settingsPointer{ settingsPointer }
 		, resourceMasterStoragePointer{ resourceMasterStoragePointer }
+		, graphicsWrapperPointer{ graphicsWrapperPointer }
 		, keyInputTablePointer{ keyInputTablePointer }
 		, midiHubPointer{ midiHubPointer }
 	{
@@ -106,8 +107,8 @@ namespace process::game {
 				midiHubPointer->start(midiSequencePointer);
 			}
 			else {
-				debug::log("can't find midisequence called:");
-				debug::log(lastTrackName);
+				wasp::debug::log("can't find midisequence called:");
+				wasp::debug::log(lastTrackName);
 			}
 			startMusicChannel.clear();
 		}
@@ -146,18 +147,19 @@ namespace process::game {
 		}
 	}
 
-	void Game::render(float deltaTime) {
-		recursiveRenderHelper(deltaTime, sceneList.rbegin());
+	void Game::render() {
+		recursiveRenderHelper(sceneList.rbegin());
 	}
 
-	void Game::recursiveRenderHelper(
-		float deltaTime,
-		const SceneList::ReverseIterator& itr
-	) {
+	void Game::recursiveRenderHelper(const SceneList::ReverseIterator& itr) {
 		auto& scene{ *(*itr) };	//dereference itr and shared_ptr
-		if (itr != sceneList.rend() && scene.isTransparent(SystemChainIDs::render)) {
-			recursiveRenderHelper(deltaTime, itr + 1);
+		if (itr != sceneList.rend()
+				&& scene.isTransparent(SystemChainIDs::render))
+		{
+			recursiveRenderHelper(itr + 1);
 		}
-		sceneRenderer(scene, deltaTime);
+		sceneRenderer(scene);
+		//for each scene, we need to clear the depth since painters algorithm
+		graphicsWrapperPointer->clearDepth();
 	}
 }

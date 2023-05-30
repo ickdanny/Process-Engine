@@ -1,6 +1,6 @@
 #include "Game/Systems/PlayerShotSystem.h"
 
-#include "Game/Systems/Programs/PlayerPrograms.h"
+//#include "Game/Systems/Programs/PlayerPrograms.h"
 
 namespace process::game::systems {
 
@@ -24,7 +24,7 @@ namespace process::game::systems {
 
 	void PlayerShotSystem::addPlayerShot(Scene& scene) {
 		//get the iterator for players
-		static const Topic<ecs::component::Group*> groupPointerStorageTopic{};
+		static const Topic<wasp::ecs::component::Group*> groupPointerStorageTopic{};
 		auto groupPointer{
 			getGroupPointer<PlayerData, Position, SpawnProgramList>(
 				scene,
@@ -49,6 +49,8 @@ namespace process::game::systems {
 
 			//if there is no pre-existing shot program, add one
 			if (!isPlayerAlreadyShooting) {
+				//todo: player shot programs
+				/*
 				if (playerData.shotType == ShotType::shotA) {
 					spawnProgramList.push_back(
 						{ programsPointer->playerPrograms.shotASpawnProgram }
@@ -62,6 +64,7 @@ namespace process::game::systems {
 				else {
 					throw std::runtime_error("unexpected player shot type!");
 				}
+				 */
 			}
 			++groupIterator;
 		}

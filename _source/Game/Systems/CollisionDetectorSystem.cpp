@@ -7,6 +7,10 @@
 namespace process::game::systems {
 
 	namespace {
+		using Group = wasp::ecs::component::Group;
+		using EntityID = wasp::ecs::entity::EntityID;
+		using EntityHandle = wasp::ecs::entity::EntityHandle;
+		
 		template <typename CollisionType>
 		void detectCollisions(Scene& scene) {
 
@@ -20,7 +24,7 @@ namespace process::game::systems {
 
 			//get the group iterator for Position, Hitbox, CollidableMarker, and our
 			//source type
-			static const Topic<ecs::component::Group*> sourceGroupPointerStorageTopic{};
+			static const Topic<Group*> sourceGroupPointerStorageTopic{};
 			auto sourceGroupPointer{
 				getGroupPointer<
 					Position, 
@@ -37,10 +41,10 @@ namespace process::game::systems {
 			};
 
 			//insert all source entities into a quadTree
-			QuadTree<ecs::entity::EntityID> quadTree{ config::collisionBounds };
+			QuadTree<EntityID> quadTree{ config::collisionBounds };
 			while (sourceGroupIterator.isValid()) {
 				const auto [position, hitbox] = *sourceGroupIterator;
-				ecs::entity::EntityID id{ sourceGroupIterator.getEntityID() };
+				EntityID id{ sourceGroupIterator.getEntityID() };
 				quadTree.insert(id, hitbox, position);
 				++sourceGroupIterator;
 			}
@@ -52,7 +56,7 @@ namespace process::game::systems {
 
 			//get the group iterator for Position, Hitbox, CollidableMarker, and our
 			//target type
-			static const Topic<ecs::component::Group*> targetGroupPointerStorageTopic{};
+			static const Topic<Group*> targetGroupPointerStorageTopic{};
 			auto targetGroupPointer{
 				getGroupPointer<
 					Position,
@@ -76,13 +80,13 @@ namespace process::game::systems {
 				};
 
 				if (!collidedEntities.empty()) {
-					ecs::entity::EntityID targetID{ targetGroupIterator.getEntityID() };
-					for (ecs::entity::EntityID sourceID : collidedEntities) {
+					EntityID targetID{ targetGroupIterator.getEntityID() };
+					for (EntityID sourceID : collidedEntities) {
 						if (sourceID != targetID) {
-							ecs::entity::EntityHandle sourceHandle{
+							EntityHandle sourceHandle{
 								dataStorage.makeHandle(sourceID)
 							};
-							ecs::entity::EntityHandle targetHandle{
+							EntityHandle targetHandle{
 								dataStorage.makeHandle(targetID)
 							};
 							collisionChannel.addMessage({ sourceHandle, targetHandle });

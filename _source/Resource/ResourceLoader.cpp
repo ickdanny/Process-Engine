@@ -39,7 +39,10 @@ namespace process::resource {
 		const ManifestOrigin& manifestOrigin
 	) const {
 		const std::wstring& prefix { manifestOrigin.manifestArguments[0] };
-		return manifestPrefixMap.at(prefix)->loadFromManifest(manifestOrigin, *this);
+		return manifestPrefixMap.at(prefix)->loadFromManifest(
+			manifestOrigin,
+			*this
+		);
 	}
 }
 

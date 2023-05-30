@@ -2,7 +2,7 @@
 
 #include "systemInclude.h"
 
-#include "Game/Resources/BitmapStorage.h"
+#include "Game/Resources/SpriteStorage.h"
 #include "EntityBuilder.h"
 
 namespace process::game::systems {
@@ -10,7 +10,7 @@ namespace process::game::systems {
 	class OverlaySystem {
 	private:
 		//typedefs
-		using EntityHandle = ecs::entity::EntityHandle;
+		using EntityHandle = wasp::ecs::entity::EntityHandle;
 		using SceneData = std::tuple<
 			std::array<EntityHandle, config::maxLives>,		//life icons
 			std::array<EntityHandle, config::maxBombs>,		//bomb icons
@@ -20,18 +20,19 @@ namespace process::game::systems {
 		>;
 		using IconComponentTuple = ComponentTuple<
 			Position,
-			SpriteInstruction,
-			Depth
+			SpriteInstruction
 		>;
+		using Point2 = wasp::math::Point2;
+		using Vector2 = wasp::math::Vector2;
 
 		//fields
-		resources::BitmapStorage* bitmapStoragePointer{};
+		resources::SpriteStorage* spriteStoragePointer{};
 
 	public:
 		OverlaySystem(
-			resources::BitmapStorage* bitmapStoragePointer
+			resources::SpriteStorage* spriteStoragePointer
 		)
-			: bitmapStoragePointer{ bitmapStoragePointer } {
+			: spriteStoragePointer{ spriteStoragePointer } {
 		}
 
 		void operator()(Scene& scene);
@@ -41,8 +42,8 @@ namespace process::game::systems {
 		void updateOverlay(Scene& scene, const PlayerData& playerData);
 		SceneData& getSceneData(Scene& scene, const PlayerData& playerData);
 		IconComponentTuple makeIcon(
-			const math::Point2& initPos,
-			const math::Vector2& offset,
+			const Point2& initPos,
+			const Vector2& offset,
 			int index,
 			const std::wstring& imageName
 		) const;

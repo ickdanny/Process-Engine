@@ -7,10 +7,10 @@ namespace process::game::systems {
 	class PauseSystem {
 	private:
 		//fields
-		channel::ChannelSet* globalChannelSetPointer{};
+		wasp::channel::ChannelSet* globalChannelSetPointer{};
 
 	public:
-		PauseSystem(channel::ChannelSet* globalChannelSetPointer)
+		PauseSystem(wasp::channel::ChannelSet* globalChannelSetPointer)
 			: globalChannelSetPointer{ globalChannelSetPointer } {
 		}
 

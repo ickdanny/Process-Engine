@@ -4,14 +4,16 @@
 
 namespace process::game::systems {
 
-	using namespace ecs;
-	using namespace ecs::entity;
+	using namespace wasp::ecs;
+	using namespace wasp::ecs::entity;
 
-	using ScriptInstructions = components::ScriptInstructions;
-	using ScriptNode = components::ScriptNode;
-	using ScriptProgram = components::ScriptProgram;
+	using ScriptInstructions = wasp::game::components::ScriptInstructions;
+	using ScriptNode = wasp::game::components::ScriptNode;
+	using ScriptProgram = wasp::game::components::ScriptProgram;
 	template <typename Internal, typename External>
-	using ScriptNodeData = components::ScriptNodeData<Internal, External>;
+	using ScriptNodeData = wasp::game::components::ScriptNodeData<Internal, External>;
+	
+	using SpawnProgram = wasp::game::components::SpawnProgram;
 
 	namespace {
 
@@ -74,7 +76,7 @@ namespace process::game::systems {
 			ComponentOrderQueue& componentOrderQueue
 	}
 
-	ScriptSystem::ScriptSystem(channel::ChannelSet* globalChannelSetPointer)
+	ScriptSystem::ScriptSystem(wasp::channel::ChannelSet* globalChannelSetPointer)
 		: globalChannelSetPointer{ globalChannelSetPointer } {
 	}
 
@@ -83,7 +85,7 @@ namespace process::game::systems {
 		ComponentOrderQueue componentOrderQueue{};
 
 		//get the group iterator for ScriptProgramList
-		static const Topic<ecs::component::Group*> groupPointerStorageTopic{};
+		static const Topic<wasp::ecs::component::Group*> groupPointerStorageTopic{};
 		auto groupPointer{
 			getGroupPointer<ScriptProgramList>(
 				scene,
@@ -138,9 +140,10 @@ namespace process::game::systems {
 	}
 
 	bool ScriptSystem::runScriptNode(NODE_HANDLER_ARGS) {
-		debug::log(
+		wasp::debug::log(
 			std::to_string(static_cast<int>(
-				currentScriptNodePointer->scriptInstruction)));
+				currentScriptNodePointer->scriptInstruction))
+		);
 		switch (currentScriptNodePointer->scriptInstruction) {
 			case ScriptInstructions::error:
 				throw std::runtime_error{ "error script instruction" };
@@ -224,7 +227,7 @@ namespace process::game::systems {
 				}
 				//grab our stored script program
 				auto dataNodePointer{
-					dynamic_cast<ScriptNodeData<utility::Void, ScriptProgram>*>(
+					dynamic_cast<ScriptNodeData<wasp::utility::Void, ScriptProgram>*>(
 						currentScriptNodePointer.get()
 					)
 				};
@@ -269,7 +272,7 @@ namespace process::game::systems {
 			}
 			case ScriptInstructions::timer: {
 				auto dataNodePointer{
-					dynamic_cast<ScriptNodeData<int, utility::Ticker>*>(
+					dynamic_cast<ScriptNodeData<int, wasp::utility::Ticker>*>(
 						currentScriptNodePointer.get()
 					)
 				};
@@ -279,9 +282,9 @@ namespace process::game::systems {
 					) {
 					int maxTick{ dataNodePointer->internalData };
 					externalData[currentScriptNodePointer.get()]
-						= new utility::Ticker{ maxTick, false };
+						= new wasp::utility::Ticker{ maxTick, false };
 				}
-				utility::Ticker& ticker{
+				wasp::utility::Ticker& ticker{
 					*dataNodePointer->getDataPointer(
 						externalData[currentScriptNodePointer.get()]
 					)
@@ -308,7 +311,7 @@ namespace process::game::systems {
 			}
 			case ScriptInstructions::setSpriteInstruction: {
 				auto dataNodePointer{
-					dynamic_cast<ScriptNodeData<SpriteInstruction, utility::Void>*>(
+					dynamic_cast<ScriptNodeData<SpriteInstruction, wasp::utility::Void>*>(
 						currentScriptNodePointer.get()
 					)
 				};
@@ -344,7 +347,7 @@ namespace process::game::systems {
 			}
 			case ScriptInstructions::setHealth: {
 				auto dataNodePointer{
-					dynamic_cast<ScriptNodeData<int, utility::Void>*>(
+					dynamic_cast<ScriptNodeData<int, wasp::utility::Void>*>(
 						currentScriptNodePointer.get()
 					)
 				};
@@ -369,7 +372,7 @@ namespace process::game::systems {
 			}
 			case ScriptInstructions::setDamage: {
 				auto dataNodePointer{
-					dynamic_cast<ScriptNodeData<int, utility::Void>*>(
+					dynamic_cast<ScriptNodeData<int, wasp::utility::Void>*>(
 						currentScriptNodePointer.get()
 					)
 				};
@@ -398,7 +401,8 @@ namespace process::game::systems {
 					) {
 					auto dataNodePointer{
 						dynamic_cast<
-							ScriptNodeData<components::SpawnProgram, utility::Void>*
+							ScriptNodeData<wasp::game::components::SpawnProgram,
+											wasp::utility::Void>*
 						>(
 							currentScriptNodePointer.get()
 						)
@@ -413,7 +417,7 @@ namespace process::game::systems {
 			case ScriptInstructions::setSpawn: {
 				auto dataNodePointer{
 					dynamic_cast<
-						ScriptNodeData<components::SpawnProgram, utility::Void>*
+						ScriptNodeData<SpawnProgram, wasp::utility::Void>*
 					>(
 						currentScriptNodePointer.get()
 					)
@@ -459,7 +463,7 @@ namespace process::game::systems {
 			}
 			case ScriptInstructions::setVelocityToPlayer: {
 				auto dataNodePointer{
-					dynamic_cast<ScriptNodeData<float, utility::Void>*>(
+					dynamic_cast<ScriptNodeData<float, wasp::utility::Void>*>(
 						currentScriptNodePointer.get()
 					)
 				};
@@ -468,12 +472,12 @@ namespace process::game::systems {
 					scene.getDataStorage().makeHandle(entityID)
 				};
 
-				math::Point2 pos{
+				wasp::math::Point2 pos{
 					scene.getDataStorage().getComponent<Position>(entityHandle)
 				};
 
 				//get the iterator for players
-				static const Topic<ecs::component::Group*>
+				static const Topic<wasp::ecs::component::Group*>
 					playerGroupPointerStorageTopic{};
 
 				auto playerGroupPointer{
@@ -490,7 +494,7 @@ namespace process::game::systems {
 				if (playerGroupIterator.isValid()) {
 					//just grab the first player
 					const auto [playerPos] = *playerGroupIterator;
-					angle = math::getAngleFromAToB(pos, playerPos);
+					angle = wasp::math::getAngleFromAToB(pos, playerPos);
 				}
 				Velocity velocity{ speed, angle };
 				componentOrderQueue.queueSetComponent<Velocity>(
@@ -502,7 +506,7 @@ namespace process::game::systems {
 			}
 			case ScriptInstructions::setInbound: {
 				auto dataNodePointer{
-					dynamic_cast<ScriptNodeData<float, utility::Void>*>(
+					dynamic_cast<ScriptNodeData<float, wasp::utility::Void>*>(
 						currentScriptNodePointer.get()
 					)
 				};
@@ -674,7 +678,7 @@ namespace process::game::systems {
 
 				auto dataNodePointer{
 					dynamic_cast<ScriptNodeData<
-						std::tuple<Velocity, math::Angle, int>,
+						std::tuple<Velocity, wasp::math::Angle, int>,
 						std::tuple<float, float>
 					>*>(
 						currentScriptNodePointer.get()
@@ -751,7 +755,7 @@ namespace process::game::systems {
 
 					if (!hasReachedAngle) {
 						//increment angle
-						math::Angle newAngle{
+						wasp::math::Angle newAngle{
 							static_cast<float>(oldAngle) + angleIncrement
 						};
 
@@ -789,7 +793,7 @@ namespace process::game::systems {
 
 				auto dataNodePointer{
 					dynamic_cast<ScriptNodeData<
-						std::tuple<Velocity, math::Angle, int>,
+						std::tuple<Velocity, wasp::math::Angle, int>,
 						std::tuple<float, float>
 					>*>(
 						currentScriptNodePointer.get()
@@ -866,7 +870,7 @@ namespace process::game::systems {
 
 					if (!hasReachedAngle) {
 						//increment angle
-						math::Angle newAngle{
+						wasp::math::Angle newAngle{
 							static_cast<float>(oldAngle) + angleIncrement
 						};
 
@@ -903,7 +907,7 @@ namespace process::game::systems {
 
 				auto dataNodePointer{
 					dynamic_cast<ScriptNodeData<
-						std::tuple<math::Angle, math::Angle, int>,
+						std::tuple<wasp::math::Angle, wasp::math::Angle, int>,
 						float
 					>*>(
 						currentScriptNodePointer.get()
@@ -947,7 +951,7 @@ namespace process::game::systems {
 					}
 
 					//increment angle
-					math::Angle newAngle{
+					wasp::math::Angle newAngle{
 						static_cast<float>(oldAngle) + angleIncrement
 					};
 
@@ -984,7 +988,7 @@ namespace process::game::systems {
 
 				auto dataNodePointer{
 					dynamic_cast<ScriptNodeData<
-						std::tuple<math::Angle, math::Angle, int>,
+						std::tuple<wasp::math::Angle, wasp::math::Angle, int>,
 						float
 					>*>(
 						currentScriptNodePointer.get()
@@ -1028,7 +1032,7 @@ namespace process::game::systems {
 					}
 
 					//increment angle
-					math::Angle newAngle{
+					wasp::math::Angle newAngle{
 						static_cast<float>(oldAngle) + angleIncrement
 					};
 
@@ -1066,7 +1070,7 @@ namespace process::game::systems {
 				auto dataNodePointer{
 					dynamic_cast<ScriptNodeData<
 						std::tuple<float, float>,
-						utility::Void
+						wasp::utility::Void
 					>*>(
 						currentScriptNodePointer.get()
 					)
@@ -1115,7 +1119,7 @@ namespace process::game::systems {
 
 				auto dataNodePointer{
 					dynamic_cast<ScriptNodeData<
-						std::tuple<math::Point2, float>,
+						std::tuple<wasp::math::Point2, float>,
 						float
 					>*>(
 						currentScriptNodePointer.get()
@@ -1127,7 +1131,7 @@ namespace process::game::systems {
 				bool hasReachedPos{ false };
 
 				//test if we have already reached our target position
-				float currentDistance{ math::distanceFromAToB(position, targetPos) };
+				float currentDistance{ wasp::math::distanceFromAToB(position, targetPos) };
 				if (currentDistance < pointEquivalenceEpsilon) {
 					position = targetPos;
 					hasReachedPos = true;
@@ -1151,14 +1155,14 @@ namespace process::game::systems {
 						externalData[currentScriptNodePointer.get()]
 							= new float{ initDistance };
 					}
-					const auto& angle{ math::getAngleFromAToB(position, targetPos) };
+					const auto& angle{ wasp::math::getAngleFromAToB(position, targetPos) };
 					float speed{ calculateGotoDeceleratingSpeed(
 						currentDistance,
 						initDistance,
 						maxSpeed
 					) };
 
-					debug::log("goto decelerating angle speed " +
+					wasp::debug::log("goto decelerating angle speed " +
 						std::to_string(angle) + std::to_string(speed));
 
 					//alter velocity
@@ -1201,8 +1205,8 @@ namespace process::game::systems {
 
 				auto dataNodePointer{
 					dynamic_cast<ScriptNodeData<
-						std::tuple<math::AABB, float, float, float>,
-						std::tuple<math::Point2, float>
+						std::tuple<wasp::math::AABB, float, float, float>,
+						std::tuple<wasp::math::Point2, float>
 					>*>(
 						currentScriptNodePointer.get()
 					)
@@ -1212,7 +1216,7 @@ namespace process::game::systems {
 					dataNodePointer->internalData;
 
 				//set or retrieve our target and initDist
-				math::Point2 targetPos{};
+				wasp::math::Point2 targetPos{};
 				float initDistance{};
 
 				if (externalData.find(currentScriptNodePointer.get())
@@ -1244,19 +1248,19 @@ namespace process::game::systems {
 								radiusDistribution(prng)
 							)
 						};
-						math::Angle angle{
+						wasp::math::Angle angle{
 								angleDistribution(prng)
 						};
 						targetPos = position + Velocity{ radius, angle };
-					} while (!math::isPointWithinAABB(targetPos, bounds));
+					} while (!wasp::math::isPointWithinAABB(targetPos, bounds));
 
 					float currentDistance{
-						math::distanceFromAToB(position, targetPos)
+						wasp::math::distanceFromAToB(position, targetPos)
 					};
 
 					initDistance = currentDistance;
 					externalData[currentScriptNodePointer.get()]
-						= new std::tuple<math::Point2, float>{
+						= new std::tuple<wasp::math::Point2, float>{
 							targetPos,
 							initDistance
 					};
@@ -1267,14 +1271,14 @@ namespace process::game::systems {
 
 				//test if we have already reached our target position
 				float currentDistance{	//recalculating it here but whatever
-					math::distanceFromAToB(position, targetPos)
+					wasp::math::distanceFromAToB(position, targetPos)
 				};
 				if (currentDistance < pointEquivalenceEpsilon) {
 					position = targetPos;
 					hasReachedPos = true;
 				}
 				else {
-					const auto& angle{ math::getAngleFromAToB(position, targetPos) };
+					const auto& angle{ wasp::math::getAngleFromAToB(position, targetPos) };
 					float speed{ calculateGotoDeceleratingSpeed(
 						currentDistance,
 						initDistance,
@@ -1328,7 +1332,7 @@ namespace process::game::systems {
 			}
 			case ScriptInstructions::showDialogue: {
 				auto dataNodePointer{
-					dynamic_cast<ScriptNodeData<std::wstring, utility::Void>*>(
+					dynamic_cast<ScriptNodeData<std::wstring, wasp::utility::Void>*>(
 						currentScriptNodePointer.get()
 					)
 				};
@@ -1388,7 +1392,7 @@ namespace process::game::systems {
 							sceneEntryChannel.addMessage(SceneNames::load);
 
 							//send player data to global
-							static const Topic<ecs::component::Group*>
+							static const Topic<wasp::ecs::component::Group*>
 								playerGroupPointerStorageTopic{};
 
 							auto playerGroupPointer{
@@ -1447,7 +1451,7 @@ namespace process::game::systems {
 		switch (currentScriptNodePointer->scriptInstruction) {
 			case ScriptInstructions::value: {
 				auto dataNodePointer{
-					dynamic_cast<ScriptNodeData<Velocity, utility::Void>*>(
+					dynamic_cast<ScriptNodeData<Velocity, wasp::utility::Void>*>(
 						currentScriptNodePointer.get()
 					)
 				};
@@ -1512,7 +1516,7 @@ namespace process::game::systems {
 				if (dataStorage.containsComponent<Position>(entityID)) {
 					auto& position{ dataStorage.getComponent<Position>(entityID) };
 					auto dataNodePointer{
-						dynamic_cast<ScriptNodeData<float, utility::Void>*>(
+						dynamic_cast<ScriptNodeData<float, wasp::utility::Void>*>(
 							currentScriptNodePointer.get()
 						)
 					};
@@ -1526,7 +1530,7 @@ namespace process::game::systems {
 				if (dataStorage.containsComponent<Position>(entityID)) {
 					auto& position{ dataStorage.getComponent<Position>(entityID) };
 					auto dataNodePointer{
-						dynamic_cast<ScriptNodeData<float, utility::Void>*>(
+						dynamic_cast<ScriptNodeData<float, wasp::utility::Void>*>(
 							currentScriptNodePointer.get()
 						)
 					};
@@ -1540,7 +1544,7 @@ namespace process::game::systems {
 				if (dataStorage.containsComponent<Position>(entityID)) {
 					auto& position{ dataStorage.getComponent<Position>(entityID) };
 					auto dataNodePointer{
-						dynamic_cast<ScriptNodeData<float, utility::Void>*>(
+						dynamic_cast<ScriptNodeData<float, wasp::utility::Void>*>(
 							currentScriptNodePointer.get()
 						)
 					};
@@ -1554,7 +1558,7 @@ namespace process::game::systems {
 				if (dataStorage.containsComponent<Position>(entityID)) {
 					auto& position{ dataStorage.getComponent<Position>(entityID) };
 					auto dataNodePointer{
-						dynamic_cast<ScriptNodeData<float, utility::Void>*>(
+						dynamic_cast<ScriptNodeData<float, wasp::utility::Void>*>(
 							currentScriptNodePointer.get()
 						)
 					};

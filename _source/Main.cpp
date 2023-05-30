@@ -103,8 +103,8 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 		//init midi
 		wasp::sound::midi::MidiHub midiHub { settings.muted };
 		
-		//init Game
-		Game Game{
+		//init game
+		Game game{
 				&settings,
 				&resourceMasterStorage,
 				&window.getGraphicsWrapper(),
@@ -112,7 +112,7 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 				&midiHub
 		};
 
-		Game.setUpdateFullscreenCallback(
+		game.setUpdateFullscreenCallback(
 			[&]() {
 				if (settings.fullscreen) {
 					window.changeWindowMode(windowmodes::fullscreen);
@@ -123,7 +123,7 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 			}
 		);
 
-		Game.setWriteSettingsCallback(
+		game.setWriteSettingsCallback(
 			[&]() {
 				wasp::game::settings::writeSettingsToFile(
 					settings,
@@ -138,25 +138,28 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 			config::maxUpdatesWithoutFrame,
 			//update function
 			[&] {
-				Game.update();
+				game.update();
 				pumpMessages();
+				wasp::debug::log("update");
 			},
 			//draw function
 			[&]() {
-				//todo: game.render for draw func?
+				game.render();
+				window.getGraphicsWrapper().present();
+				wasp::debug::log("render");
 			}
 		};
 		
 		auto stopGameLoopCallback { [&] { gameLoop.stop(); } };
 		
 		window.setDestroyCallback(stopGameLoopCallback);
-		Game.setExitCallback(stopGameLoopCallback);
+		game.setExitCallback(stopGameLoopCallback);
 		
-		//make the Game visible and begin running
+		//make the game visible and begin running
 		window.show(windowShowMode);
 		gameLoop.run();
 		
-		//after the Game has ended, write settings and exit
+		//after the game has ended, write settings and exit
 		wasp::game::settings::writeSettingsToFile(settings, config::mainConfigPath);
 		return 0;
 	}

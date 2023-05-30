@@ -3,7 +3,7 @@
 namespace process::game::systems {
 
 	void VelocitySystem::operator()(Scene& scene) {
-		static const Topic<ecs::component::Group*> groupPointerStorageTopic{};
+		static const Topic<wasp::ecs::component::Group*> groupPointerStorageTopic{};
 
 		auto groupPointer{
 			getGroupPointer<Position, Velocity>(

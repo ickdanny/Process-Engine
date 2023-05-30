@@ -4,7 +4,7 @@ namespace process::game::systems {
 
 	//Returns true if the given position is outside of the bounds specified,
 	//false otherwise
-	bool isOutOfBounds(math::Point2 pos, float bound) {
+	bool isOutOfBounds(wasp::math::Point2 pos, float bound) {
 		float lowXBound = bound + config::gameOffset.x;
 		float lowYBound = bound + config::gameOffset.y;
 		float highXBound = config::gameWidth - bound + config::gameOffset.x;

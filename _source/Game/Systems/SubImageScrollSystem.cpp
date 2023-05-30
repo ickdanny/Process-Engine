@@ -25,7 +25,7 @@ namespace process::game::systems {
 	}
 
 	void SubImageScrollSystem::operator()(Scene& scene) {
-		static const Topic<ecs::component::Group*> groupPointerStorageTopic{};
+		static const Topic<wasp::ecs::component::Group*> groupPointerStorageTopic{};
 
 		auto groupPointer{
 			getGroupPointer<SubImage, SubImageScroll>(

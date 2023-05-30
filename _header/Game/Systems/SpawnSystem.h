@@ -9,20 +9,20 @@ namespace process::game::systems {
 
 	private:
 		//typedefs
-		using EntityID = ecs::entity::EntityID;
+		using EntityID = wasp::ecs::entity::EntityID;
 		using SpawnList = std::vector<std::shared_ptr<ComponentTupleBase>>;
-		using SpawnProgram = components::SpawnProgram;
-		using Point2 = math::Point2;
-		using SpawnInstructions = components::SpawnInstructions;
+		using SpawnProgram = wasp::game::components::SpawnProgram;
+		using Point2 = wasp::math::Point2;
+		using SpawnInstructions = wasp::game::components::SpawnInstructions;
 		template <typename T>
-		using SpawnNodeData = components::SpawnNodeData<T>;
-		using SpawnNode = components::SpawnNode;
+		using SpawnNodeData = wasp::game::components::SpawnNodeData<T>;
+		using SpawnNode = wasp::game::components::SpawnNode;
 
 		//fields
-		channel::ChannelSet* globalChannelSetPointer{};
+		wasp::channel::ChannelSet* globalChannelSetPointer{};
 
 	public:
-		SpawnSystem(channel::ChannelSet* globalChannelSetPointer);
+		SpawnSystem(wasp::channel::ChannelSet* globalChannelSetPointer);
 		void operator()(Scene& scene);
 
 	private:
@@ -45,7 +45,7 @@ namespace process::game::systems {
 		#define NODE_HANDLER_ARGS \
 			Scene& scene, \
 			EntityID entityID, \
-			std::shared_ptr<components::SpawnNode>& currentSpawnNodePointer, \
+			std::shared_ptr<wasp::game::components::SpawnNode>& currentSpawnNodePointer, \
 			int tick, \
 			SpawnList& spawnList
 
@@ -54,7 +54,7 @@ namespace process::game::systems {
 		void runSpawnNodePassingVel(NODE_HANDLER_ARGS, const Velocity& vel);
 		void runSpawnNodePassingPosVel(
 			NODE_HANDLER_ARGS,
-			const math::Point2& pos,
+			const wasp::math::Point2& pos,
 			const Velocity& vel
 		);
 		int evaluateIntNode(NODE_HANDLER_ARGS);

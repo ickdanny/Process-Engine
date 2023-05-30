@@ -7,10 +7,10 @@ namespace process::game::systems {
 	class LoadSystem {
 	private:
 		//fields
-		channel::ChannelSet* globalChannelSetPointer{};
+		wasp::channel::ChannelSet* globalChannelSetPointer{};
 
 	public:
-		LoadSystem(channel::ChannelSet* globalChannelSetPointer);
+		LoadSystem(wasp::channel::ChannelSet* globalChannelSetPointer);
 		void operator()(Scene& scene);
 	};
 }

@@ -9,7 +9,7 @@ namespace process::game::systems {
 	class PlayerBombSystem {
 	private:
 		//typedefs
-		using EntityHandle = ecs::entity::EntityHandle;
+		using EntityHandle = wasp::ecs::entity::EntityHandle;
 
 		//fields
 		Programs* programsPointer{};

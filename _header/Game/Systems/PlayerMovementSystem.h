@@ -12,8 +12,8 @@ namespace process::game::systems {
         class PlayerInputData;
 
         //typedefs
-        using TwoFramePlayerInputData = utility::TwoFrame<PlayerInputData>;
-        using Vector2 = math::Vector2;
+        using TwoFramePlayerInputData = wasp::utility::TwoFrame<PlayerInputData>;
+        using Vector2 = wasp::math::Vector2;
 
     public:
         void operator()(Scene& scene);
@@ -21,7 +21,7 @@ namespace process::game::systems {
     private:
         //helper functions
         void parseGameCommand(GameCommands gameCommand, PlayerInputData& inputData);
-        math::Vector2 calculateVelocity(PlayerInputData inputData);
+        Vector2 calculateVelocity(PlayerInputData inputData);
 
         //private class
         class PlayerInputData {

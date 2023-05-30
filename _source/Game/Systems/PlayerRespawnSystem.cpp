@@ -28,12 +28,12 @@ namespace process::game::systems {
 
 		//make the player collidable
 		dataStorage.addComponent<CollidableMarker>(
-			ecs::AddComponentOrder<CollidableMarker>{ playerHandle, {} }
+			wasp::ecs::AddComponentOrder<CollidableMarker>{ playerHandle, {} }
 		);
 
 		//reset the player's position to spawn
 		dataStorage.setComponent<Position>(
-			ecs::SetComponentOrder<Position>{ playerHandle, config::playerSpawn }
+			wasp::ecs::SetComponentOrder<Position>{ playerHandle, config::playerSpawn }
 		);
 
 		PlayerData& playerData{ dataStorage.getComponent<PlayerData>(playerHandle) };

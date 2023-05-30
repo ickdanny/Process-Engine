@@ -1,5 +1,7 @@
 #include "Game\GameLoop.h"
 
+#include "Logging.h"
+
 namespace process::game {
 	
 	void GameLoop::run() {

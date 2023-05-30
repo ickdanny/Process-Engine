@@ -20,8 +20,8 @@ namespace process::game {
 
 	public:
 
-		SceneRenderer(window::WindowPainter* windowPainterPointer);
+		SceneRenderer(window::GraphicsWrapper* graphicsWrapperPointer);
 
-		void operator()(Scene& scene, float deltaTime);
+		void operator()(Scene& scene);
 	};
 }

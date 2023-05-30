@@ -8,9 +8,13 @@
 #include "Sound/MidiHub.h"
 #include "Settings.h"
 
-namespace process::game {
+#pragma warning(suppress : 4068) //suppress unknown pragma
+#pragma clang diagnostic push
+#pragma warning(suppress : 4068) //suppress unknown pragma
+#pragma clang diagnostic ignored "-Wshadow"
 
-	//stores and acts upon the logical state of the game
+namespace process::game {
+	
 	class Game {
 	private:
 		//typedefs
@@ -23,10 +27,11 @@ namespace process::game {
 		SceneUpdater sceneUpdater;		//not initialized!
 		SceneRenderer sceneRenderer;	//not initialized!
 
-		Settings* settingsPointer{};
+		wasp::game::Settings* settingsPointer{};
 		resources::ResourceMasterStorage* resourceMasterStoragePointer{};
-		input::IKeyInputTable* keyInputTablePointer{};
-		sound::midi::MidiHub* midiHubPointer{};
+		window::GraphicsWrapper* graphicsWrapperPointer{};
+		wasp::input::IKeyInputTable* keyInputTablePointer{};
+		wasp::sound::midi::MidiHub* midiHubPointer{};
 
 		std::function<void()> exitCallback{};
 		std::function<void()> updateFullscreenCallback{};
@@ -35,11 +40,11 @@ namespace process::game {
 	public:
 		//constructor
 		Game(
-			Settings* settingsPointer,
+			wasp::game::Settings* settingsPointer,
 			resources::ResourceMasterStorage* resourceMasterStoragePointer,
-			window::WindowPainter* windowPainterPointer,
-			input::IKeyInputTable* keyInputTablePointer,
-			sound::midi::MidiHub* midiHubPointer
+			window::GraphicsWrapper* graphicsWrapperPointer,
+			wasp::input::IKeyInputTable* keyInputTablePointer,
+			wasp::sound::midi::MidiHub* midiHubPointer
 		);
 
 		void update();
@@ -69,9 +74,8 @@ namespace process::game {
 		void updateMusic();
 		void updateSettings();
 
-		void recursiveRenderHelper(
-			float deltaTime, 
-			const SceneList::ReverseIterator& itr
-		);
+		void recursiveRenderHelper(const SceneList::ReverseIterator& itr);
 	};
 }
+#pragma warning(suppress : 4068) //suppress unknown pragma
+#pragma clang diagnostic pop

@@ -8,14 +8,18 @@
 namespace process::game::resources {
 	
 	class ManifestStorage
-		: public resource::ParentResourceStorage, public resource::FileLoadable, public resource::ManifestLoadable {
+		: public resource::ParentResourceStorage
+		, public resource::FileLoadable
+		, public resource::ManifestLoadable
+	{
 	
 	private:
 		using ResourceBase = wasp::resource::ResourceBase;
 	
 	public:
 		ManifestStorage()
-			: FileLoadable { { L"mfst" } }, ManifestLoadable { { L"manifest" } } {
+			: FileLoadable { { L"mfst" } }
+			, ManifestLoadable { { L"manifest" } } {
 		}
 		
 		void reload(const std::wstring& id) override;

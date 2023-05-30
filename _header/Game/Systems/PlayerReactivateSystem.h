@@ -7,7 +7,7 @@ namespace process::game::systems {
 	class PlayerReactivateSystem {
 	private:
 		//typedefs
-		using EntityHandle = ecs::entity::EntityHandle;
+		using EntityHandle = wasp::ecs::entity::EntityHandle;
 
 	public:
 		void operator()(Scene& scene);

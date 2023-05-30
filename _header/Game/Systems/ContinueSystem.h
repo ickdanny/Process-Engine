@@ -14,7 +14,7 @@ namespace process::game::systems {
 		wasp::channel::ChannelSet* globalChannelSetPointer{};
 
 	public:
-		ContinueSystem(channel::ChannelSet* globalChannelSetPointer)
+		ContinueSystem(wasp::channel::ChannelSet* globalChannelSetPointer)
 			: globalChannelSetPointer{ globalChannelSetPointer } {
 		}
 
