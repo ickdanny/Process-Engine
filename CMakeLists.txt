@@ -30,6 +30,7 @@ endmacro()
 add_subdirectory(./_header)
 add_subdirectory(./_source)
 add_subdirectory(./wasp)
+add_subdirectory(./darkness)
 add_subdirectory(./_shaders)
 
 include_directories(${PROJECT_DIRECTORIES})

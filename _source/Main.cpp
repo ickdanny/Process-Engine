@@ -26,6 +26,9 @@
 #include "ConsoleOutput.h"
 #include "Logging.h"
 
+//todo: testing darkness
+#include "TestMain.h"
+
 using namespace process;
 using namespace process::game;
 
@@ -41,6 +44,11 @@ void pumpMessages();
 int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode) {
 	try {
 		wasp::debug::initConsoleOutput();
+		
+		//todo: testing darkness
+		darkness::test();
+		while(true){}
+		std::exit(0);
 		
 		//read settings
 		wasp::game::Settings settings {
