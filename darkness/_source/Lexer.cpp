@@ -39,15 +39,21 @@ namespace darkness{
 				case '"': toRet.push_back(extractString(input)); break;
 				
 				//single char operators
-				case '+': toRet.push_back({ TokenType::plus, "+" }); break;
-				case '-': toRet.push_back({ TokenType::minus, "-" }); break;
-				case '*': toRet.push_back({ TokenType::asterisk, "*" }); break;
-				case '/': toRet.push_back({ TokenType::fSlash, "/" }); break;
+				case '+': toRet.push_back({ TokenType::mathOp, "+" }); break;
+				case '-': toRet.push_back({ TokenType::mathOp, "-" }); break;
+				case '*': toRet.push_back({ TokenType::mathOp, "*" }); break;
+				case '/': toRet.push_back({ TokenType::mathOp, "/" }); break;
 				case '=': toRet.push_back({ TokenType::equals, "=" }); break;
+				case '.': toRet.push_back({ TokenType::dot, "." }); break;
+				case ',': toRet.push_back({ TokenType::comma, "," }); break;
 				case '(': toRet.push_back({ TokenType::lParen, "(" }); break;
 				case ')': toRet.push_back({ TokenType::rParen, ")" }); break;
 				case '{': toRet.push_back({ TokenType::lCurly, "{" }); break;
 				case '}': toRet.push_back({ TokenType::rCurly, "}" }); break;
+				case '[': toRet.push_back({ TokenType::lBrace, "[" }); break;
+				case ']': toRet.push_back({ TokenType::rBrace, "]" }); break;
+				case '<': toRet.push_back({ TokenType::lPointy, "<" }); break;
+				case '>': toRet.push_back({ TokenType::rPointy, ">" }); break;
 				case ';': toRet.push_back({ TokenType::semicolon, ";" }); break;
 				default:
 					throw std::runtime_error{
