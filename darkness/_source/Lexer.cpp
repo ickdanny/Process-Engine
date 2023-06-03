@@ -1,15 +1,24 @@
 #include "Lexer.h"
+#include "Logging.h"
 
 #include <cctype>
 
 namespace darkness{
+	
+	namespace{
+		bool shouldSkip(unsigned char c){
+			static unsigned char lastValidAsciiChar{ 127 };
+			return std::isspace(c) || std::iscntrl(c) || c > lastValidAsciiChar;
+		}
+	}
+	
 	std::vector<Token> Lexer::lex(std::istringstream& input) {
 		std::vector<Token> toRet{};
 		while(input.good() && !input.eof()) {
 			current = input.get();
 			
-			//skip whitespaces
-			if(std::isspace(current)) {
+			//skip whitespaces and other stuff
+			if(shouldSkip(current)) {
 				continue;
 			}
 			
@@ -60,7 +69,7 @@ namespace darkness{
 				valueOutputStream << current;
 			}
 			//if the next character is a space, we have reached the end of the symbol
-			else if(isspace(current)){
+			else if(shouldSkip(current)){
 				break;
 			}
 			//if the next character is anything else, throw an error
@@ -104,12 +113,15 @@ namespace darkness{
 		//do NOT insert the first character, since it is the opening double quote
 		while(input.good() && !input.eof()) {
 			current = input.get();
-			//if the next character is a double quote, we are done
+			//if the next character is the closing double quote, we are done
 			if(current == '"'){
 				break;
 			}
 			//otherwise, append to the output stream
 			valueOutputStream << current;
+		}
+		if(current != '"'){
+			throw std::runtime_error{ "Darkness lexer string no close quote!" };
 		}
 		if(!input.good()){
 			throw std::runtime_error{ "Darkness lexer input stringstream bad!" };

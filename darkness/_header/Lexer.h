@@ -8,7 +8,7 @@
 namespace darkness{
 	class Lexer{
 	private:
-		char current{};
+		unsigned char current{};
 		
 	public:
 		std::vector<Token> lex(std::istringstream& input);
