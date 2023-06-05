@@ -8,25 +8,40 @@ namespace darkness{
 	enum class AstType{
 		error,
 		
-		list,		//a list of statements basically
 		call,		//a function call
+		intLit,		//an integer literal
+		floatLit,	//a float literal
+		stringLit,	//a string literal
 		
 		numAstTypes
 	};
 	
 	struct AstNode; //forward declare
 	
-	struct AstListData{
-		std::vector<AstNode> children{};
-	};
-	
 	struct AstCallData{
 		std::string functionName{};
 		std::vector<AstNode> arguments{};
 	};
 	
+	struct AstIntLitData{
+		int value{};
+	};
+	
+	struct AstFloatLitData{
+		float value{};
+	};
+	
+	struct AstStringLitData{
+		std::string value{};
+	};
+	
 	struct AstNode{
 		AstType type{};
-		std::variant<AstListData, AstCallData> dataVariant{};
+		std::variant<
+			AstCallData,
+			AstIntLitData,
+			AstFloatLitData,
+			AstStringLitData
+		> dataVariant{};
 	};
 }

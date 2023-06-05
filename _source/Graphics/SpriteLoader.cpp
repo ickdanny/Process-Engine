@@ -42,7 +42,7 @@ namespace process::graphics {
 		using ComPtr = Microsoft::WRL::ComPtr<T>;
 		
 		std::unordered_map<WICPixelFormatGUID, DXGI_FORMAT> wicToD3DFormatMap{
-			{GUID_WICPixelFormat128bppRGBAFloat, DXGI_FORMAT_R32G32B32A32_FLOAT },
+			{ GUID_WICPixelFormat128bppRGBAFloat, DXGI_FORMAT_R32G32B32A32_FLOAT },
 			{ GUID_WICPixelFormat64bppRGBAHalf ,DXGI_FORMAT_R16G16B16A16_FLOAT },
 			{ GUID_WICPixelFormat64bppRGBA, DXGI_FORMAT_R16G16B16A16_UNORM },
 			{ GUID_WICPixelFormat32bppRGBA, DXGI_FORMAT_R8G8B8A8_UNORM },

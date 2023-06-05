@@ -8,15 +8,27 @@
 namespace darkness{
 	class Lexer{
 	private:
-		unsigned char current{};
+		std::string_view input{};
+		std::size_t nextPos{};
+		unsigned char currentChar{};
+		std::vector<Token> output{};
 		
 	public:
-		std::vector<Token> lex(std::istringstream& input);
+		std::vector<Token> lex(const std::string_view& input);
 		
 	private:
 		//helper methods
-		Token extractSymbol(std::istringstream& input);
-		Token extractNumber(std::istringstream& input);
-		Token extractString(std::istringstream& input);
+		void extractToken();
+		void discardComment();
+		void extractSymbol();
+		void extractNumber();
+		void extractString();
+		
+		void pushToken(const Token& token);
+		void advance();
+		bool advanceIfMatch(unsigned char testFor);
+		char peek();
+		
+		bool isEndOfInput();
 	};
 }

@@ -2,6 +2,7 @@
 #include "Logging.h"
 
 #include <cctype>
+#include <unordered_map>
 
 namespace darkness{
 	
@@ -12,127 +13,217 @@ namespace darkness{
 		}
 	}
 	
-	std::vector<Token> Lexer::lex(std::istringstream& input) {
-		std::vector<Token> toRet{};
-		while(input.good() && !input.eof()) {
-			current = input.get();
+	#pragma warning(suppress : 4068) //suppress unknown pragma
+	#pragma clang diagnostic push
+	#pragma warning(suppress : 4068) //suppress unknown pragma
+	#pragma clang diagnostic ignored "-Wshadow"
+	std::vector<Token> Lexer::lex(const std::string_view& input) {
+		this->input = input;
+		output.clear();
+		nextPos = 0;
+		while(!isEndOfInput()) {
+			extractToken();
+		}
+		pushToken({ TokenType::endMarker });
+		return std::move(output);
+	}
+	#pragma warning(suppress : 4068) //suppress unknown pragma
+	#pragma clang diagnostic pop
+	
+	void Lexer::extractToken(){
+		advance();
+		
+		//skip whitespaces and other stuff
+		if(shouldSkip(currentChar)) {
+			return;
+		}
+		
+		switch(currentChar){
+			//comments begin with a '#' character and last until the end of the line
+			case '#': discardComment(); break;
 			
-			//skip whitespaces and other stuff
-			if(shouldSkip(current)) {
-				continue;
-			}
+			//strings begin with a double quote
+			case '"': extractString(); break;
 			
-			//symbols must begin with a letter
-			if(std::isalpha(current)) {
-				toRet.push_back(extractSymbol(input));
-				continue;
-			}
+			//single char operators
+			case '+': pushToken({ TokenType::plus }); break;
+			case '-': pushToken({ TokenType::minus }); break;
+			case '*': pushToken({ TokenType::star }); break;
+			case '/': pushToken({ TokenType::fSlash }); break;
+			case '.': pushToken({ TokenType::dot }); break;
+			case ',': pushToken({ TokenType::comma }); break;
+			case '(': pushToken({ TokenType::lParen }); break;
+			case ')': pushToken({ TokenType::rParen }); break;
+			case '{': pushToken({ TokenType::lCurly }); break;
+			case '}': pushToken({ TokenType::rCurly }); break;
+			case '[': pushToken({ TokenType::lBrace }); break;
+			case ']': pushToken({ TokenType::rBrace }); break;
+			case ';': pushToken({ TokenType::semicolon }); break;
+			case '&': pushToken({ TokenType::ampersand }); break;
+			case '|': pushToken({ TokenType::verticalBar }); break;
 			
-			//numbers must begin with a digit (dots not acceptable)
-			if(std::isdigit(current)) {
-				toRet.push_back(extractNumber(input));
-				continue;
-			}
+			//multi char operators
+			case '!':
+				pushToken({advanceIfMatch('=')
+					? TokenType::bangEqual : TokenType::bang
+				});
+				break;
+			case '=':
+				pushToken({advanceIfMatch('=')
+					? TokenType::dualEqual : TokenType::equal
+				});
+				break;
+			case '<':
+				pushToken({advanceIfMatch('=')
+					? TokenType::lessEqual : TokenType::less
+				});
+				break;
+			case '>':
+				pushToken({advanceIfMatch('=')
+					? TokenType::greaterEqual : TokenType::greater
+				});
+				break;
 			
-			switch(current){
-				//strings begin with a double quote
-				case '"': toRet.push_back(extractString(input)); break;
-				
-				//single char operators
-				case '+': toRet.push_back({ TokenType::mathOp, "+" }); break;
-				case '-': toRet.push_back({ TokenType::mathOp, "-" }); break;
-				case '*': toRet.push_back({ TokenType::mathOp, "*" }); break;
-				case '/': toRet.push_back({ TokenType::mathOp, "/" }); break;
-				case '=': toRet.push_back({ TokenType::equals, "=" }); break;
-				case '.': toRet.push_back({ TokenType::dot, "." }); break;
-				case ',': toRet.push_back({ TokenType::comma, "," }); break;
-				case '(': toRet.push_back({ TokenType::lParen, "(" }); break;
-				case ')': toRet.push_back({ TokenType::rParen, ")" }); break;
-				case '{': toRet.push_back({ TokenType::lCurly, "{" }); break;
-				case '}': toRet.push_back({ TokenType::rCurly, "}" }); break;
-				case '[': toRet.push_back({ TokenType::lBrace, "[" }); break;
-				case ']': toRet.push_back({ TokenType::rBrace, "]" }); break;
-				case '<': toRet.push_back({ TokenType::lPointy, "<" }); break;
-				case '>': toRet.push_back({ TokenType::rPointy, ">" }); break;
-				case ';': toRet.push_back({ TokenType::semicolon, ";" }); break;
-				default:
+			//numbers, identifiers, and keywords
+			default:
+				if(std::isdigit(currentChar)) {
+					extractNumber();
+				}
+				else if(std::isalpha(currentChar)){
+					extractSymbol();
+				}
+				else{
 					throw std::runtime_error{
-						"Darkness lexer bad base char: " + std::to_string(current)
+						"Darkness lexer bad base char: "
+									+ std::to_string(currentChar)
 					};
-			}
+				}
 		}
-		return toRet;
 	}
 	
-	Token Lexer::extractSymbol(std::istringstream& input) {
+	void Lexer::discardComment(){
+		while(currentChar != '\n' && !isEndOfInput()){
+			advance();
+		}
+	}
+	
+	void Lexer::extractSymbol() {
+		static std::unordered_map<std::string, TokenType> keywordMap{
+			{ "if", TokenType::keyIf },
+			{ "else", TokenType::keyElse },
+			{ "true", TokenType::keyTrue },
+			{ "false", TokenType::keyFalse },
+			{ "func", TokenType::keyFunc },
+			{ "while", TokenType::keyWhile },
+			{ "for", TokenType::keyFor },
+			{ "let", TokenType::keyLet },
+			{ "return", TokenType::keyReturn },
+		};
+		
 		std::ostringstream valueOutputStream{};
-		//insert the first char of the symbol onto the output
-		valueOutputStream << current;
-		while(input.good() && !input.eof()) {
-			current = input.get();
-			//if the next character is a letter, number, or underscore, it's part of the symbol
-			if(isalnum(current) || current == '_') {
-				valueOutputStream << current;
-			}
-			//if the next character is a space, we have reached the end of the symbol
-			else if(shouldSkip(current)){
-				break;
-			}
-			//if the next character is anything else, throw an error
-			else{
-				throw std::runtime_error{
-					"Darkness lexer bad symbol char: " + std::to_string(current)
-				};
-			}
+		std::string valueString;
+		
+		//insert the first char of the symbol
+		valueOutputStream << currentChar;
+		//insert the following chars of the symbol
+		while(( isalnum(peek()) || peek() == '_' ) && !isEndOfInput()) {
+			advance();
+			valueOutputStream << currentChar;
 		}
-		if(!input.good()){
-			throw std::runtime_error{ "Darkness lexer input stringstream bad!" };
+		
+		valueString = valueOutputStream.str();
+		auto found{ keywordMap.find(valueString) };
+		
+		//if we found a matching keyword, push that token
+		if(found != keywordMap.end()){
+			pushToken({ found->second });
 		}
-		return { TokenType::symbol, valueOutputStream.str() };
+		//otherwise, this is an identifier
+		else{
+			pushToken({ TokenType::identifier, valueString });
+		}
 	}
 	
-	Token Lexer::extractNumber(std::istringstream& input) {
+	void Lexer::extractNumber() {
 		std::ostringstream valueOutputStream{};
-		//insert the first char of the number onto the output
-		valueOutputStream << current;
-		while(input.good() && !input.eof()) {
-			current = input.peek();
-			//if the next character is a number or dot, it's part of the number
-			if(isdigit(current) || current == '.') {
-				valueOutputStream << current;
-				//advance input
-				input.get();
-			}
-			//if the next character is anything else, we have reached the end of the number
-			else {
-				break;
-			}
+		std::string valueString;
+		
+		//insert the first char of the number
+		valueOutputStream << currentChar;
+		//insert following chars of the number
+		while(std::isdigit(peek()) && !isEndOfInput()){
+			advance();
+			valueOutputStream << currentChar;
 		}
-		if(!input.good()){
-			throw std::runtime_error{ "Darkness lexer input stringstream bad!" };
+		
+		//if we stopped reading chars because the next char was a dot, this is a float
+		if (peek() == '.') {
+			advance();
+			valueOutputStream << currentChar;
+			//insert rest of the chars of the float
+			while(std::isdigit(peek()) && !isEndOfInput()){
+				advance();
+				valueOutputStream << currentChar;
+			}
+			//push float token
+			valueString = valueOutputStream.str();
+			float value{ std::stof(valueString) };
+			pushToken({ TokenType::floating, value });
 		}
-		return { TokenType::number, valueOutputStream.str() };
+		else{
+			//push int token if we stopped reading chars for any other reason
+			valueString = valueOutputStream.str();
+			int value{ std::stoi(valueString) };
+			pushToken({ TokenType::integer, value });
+		}
 	}
 	
-	Token Lexer::extractString(std::istringstream& input) {
+	void Lexer::extractString() {
 		std::ostringstream valueOutputStream{};
 		//do NOT insert the first character, since it is the opening double quote
-		while(input.good() && !input.eof()) {
-			current = input.get();
+		while(currentChar != '"' && !isEndOfInput()) {
+			advance();
 			//if the next character is the closing double quote, we are done
-			if(current == '"'){
+			if(currentChar == '"'){
 				break;
 			}
 			//otherwise, append to the output stream
-			valueOutputStream << current;
+			valueOutputStream << currentChar;
 		}
-		if(current != '"'){
+		if(currentChar != '"'){
 			throw std::runtime_error{ "Darkness lexer string no close quote!" };
 		}
-		if(!input.good()){
-			throw std::runtime_error{ "Darkness lexer input stringstream bad!" };
-		}
-		return { TokenType::string, valueOutputStream.str() };
+		pushToken({ TokenType::string, valueOutputStream.str() });
 	}
 	
+	void Lexer::pushToken(const Token& token){
+		output.push_back(token);
+	}
+	
+	void Lexer::advance(){
+		currentChar = input.at(nextPos);
+		++nextPos;
+	}
+	
+	bool Lexer::advanceIfMatch(unsigned char testFor) {
+		if( isEndOfInput()){
+			return false;
+		}
+		if(input.at(nextPos) != testFor){
+			return false;
+		}
+		++nextPos;
+		return true;
+	}
+	
+	char Lexer::peek(){
+		if( isEndOfInput()){
+			return '\0';
+		}
+		return input.at(nextPos);
+	}
+	
+	bool Lexer::isEndOfInput() {
+		return nextPos >= input.size();
+	}
 }
