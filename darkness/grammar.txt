@@ -1,0 +1,33 @@
+Darkness grammar
+
+Each .dk source file is a script named after its file name
+
+script          -> declaration* END
+declaration     -> funcDecl | varDecl | statement
+
+funcDecl        -> "func" function
+function        -> IDENT "(" parameters? ")" block
+parameters      -> IDENT ( "," IDENT )*
+
+varDecl         -> "let" IDENT ( "=" expression )? ";"
+
+statement       -> exprStmt | ifStmt | whileStmt | forStmt | returnStmt | block
+exprStmt        -> expression ";"
+ifStmt          -> "if" "(" expression ")" statement ( "else" statement )?
+whileStmt       -> "while" "(" expression ")" statement
+forStmt         -> "for" "(" ( varDecl | exprStmt | ";" ) expression? ";" expression? ")" statement
+returnStmt      -> "return" expression? ";"
+block           -> "{" declaration* "}"
+
+expression      -> assignment
+assignment      -> IDENT "=" assignment | orOp
+orOp            -> andOp ( "&" andOp )*
+andOp           -> equalityOp ( "|" equalityOp )*
+equalityOp      -> comparisonOp ( ( "!=" | "==" ) comparisonOp )*
+comparisonOp    -> termOp ( ( ">" | ">=" | "<" | "<=" ) termOp )*
+termOp          -> factorOp ( ( "-" | "+" ) factorOp )*
+factorOp        -> unaryOp ( ( "/" | "*" ) unaryOp )*
+unaryOp         -> ( "!" | "+" | "-" ) unaryOp | funcCall
+funcCall        -> primary ( "(" arguments? ")" )*
+arguments       -> expression ( "," expression )*
+primary         -> "true" | "false" | IDENT | STRING | INT | FLOAT | "(" expression ")"
