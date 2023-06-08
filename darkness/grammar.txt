@@ -3,6 +3,7 @@ Darkness grammar
 Each .dk source file is a script named after its file name
 
 script          -> declaration* END
+
 declaration     -> funcDecl | varDecl | statement
 
 funcDecl        -> "func" function
