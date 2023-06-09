@@ -12,7 +12,13 @@ namespace darkness{
 		script,				// the base of every darkness script
 		
 		//statement types
+		stmtVarDeclare,		// a variable declaration
+		stmtIf,				// if ( ... )
+		stmtWhile,			// while ( ... )
+		stmtBlock,			// { ... }
+		
 		stmtExpression,		// an expression statement
+		
 		
 		//binary expr types
 		binPlus,			// a + b
@@ -27,11 +33,14 @@ namespace darkness{
 		binLessEqual,		// a <= b
 		binAmpersand,		// a & b
 		binVerticalBar,		// a | b
+		binAssign,			// var = a
 		
 		//unary expr types
 		unaryBang,			// !a
 		unaryPlus,			// +a
 		unaryMinus,			// -a
+		
+		variable,			// foo, bar, etc...
 		
 		//literal expr types
 		litBool,			// true or false
@@ -39,12 +48,34 @@ namespace darkness{
 		litFloat,			// any float literal
 		litString,			// any string literal
 		
+		parenths,			// ( ... )
+		
 		call,				// a function call
 		
 		numAstTypes
 	};
 	
 	struct AstNode; //forward declare
+	
+	struct AstStmtVarDeclareData{
+		std::string varName{};
+		std::unique_ptr<AstNode> initializer{};
+	};
+	
+	struct AstStmtIfData{
+		std::unique_ptr<AstNode> condition{};
+		std::unique_ptr<AstNode> trueBranch{};
+		std::unique_ptr<AstNode> falseBranch{};
+	};
+	
+	struct AstStmtWhileData{
+		std::unique_ptr<AstNode> condition{};
+		std::unique_ptr<AstNode> body{};
+	};
+	
+	struct AstStmtBlockData{
+		std::vector<AstNode> statements{};
+	};
 	
 	struct AstStmtExpressionData{
 		std::unique_ptr<AstNode> expression{};
@@ -55,6 +86,11 @@ namespace darkness{
 		std::unique_ptr<AstNode> right{};
 	};
 	
+	struct AstAssignData{
+		std::string varName{};
+		std::unique_ptr<AstNode> right{};
+	};
+	
 	struct AstUnaryData{
 		std::unique_ptr<AstNode> arg{};
 	};
@@ -62,6 +98,10 @@ namespace darkness{
 	struct AstCallData{
 		std::string functionName{};
 		std::vector<AstNode> arguments{};
+	};
+	
+	struct AstVariableData{
+		std::string varName{};
 	};
 	
 	struct AstLitBoolData{
@@ -80,17 +120,32 @@ namespace darkness{
 		std::string value{};
 	};
 	
+	struct AstParenthsData{
+		std::unique_ptr<AstNode> inside{};
+	};
+	
 	struct AstNode{
 		AstType type{};
 		std::variant<
+			AstStmtVarDeclareData,
+			AstStmtIfData,
+			AstStmtWhileData,
+			AstStmtBlockData,
 			AstStmtExpressionData,
 			AstBinData,
+			AstAssignData,
 			AstUnaryData,
+			AstVariableData,
 			AstLitBoolData,
 			AstLitIntData,
 			AstLitFloatData,
 			AstLitStringData,
+			AstParenthsData,
 			AstCallData
 		> dataVariant{};
+		
+		operator bool() const {
+			return type != AstType::error && type != AstType::numAstTypes;
+		}
 	};
 }

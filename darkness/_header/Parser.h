@@ -19,11 +19,19 @@ namespace darkness{
 		
 		//statements
 		AstNode parseDeclaration();
+		AstNode parseVariableDeclaration();
 		AstNode parseStatement();
+		AstNode parseIf();
+		AstNode parseWhile();
+		AstNode parseFor();
+		AstNode parseBlock();
 		AstNode parseExpressionStatement();
 		
 		//expressions
 		AstNode parseExpression();
+		AstNode parseAssignment();
+		AstNode parseOr();
+		AstNode parseAnd();
 		AstNode parseEquality();
 		AstNode parseComparison();
 		AstNode parseTerm();
