@@ -11,7 +11,16 @@ namespace darkness{
 	AstNode Parser::parse(const std::vector<Token>& input) {
 		this->input = input;
 		nextPos = 0u;
-		return parseExpression();
+		
+		std::vector<AstNode> statements{};
+		while(!isEndOfInput()){
+			statements.push_back(parseDeclaration());
+		}
+		
+		return{
+			AstType::script,
+			AstScriptData{ std::move(statements)	}
+		};
 	}
 	#pragma warning(suppress : 4068) //suppress unknown pragma
 	#pragma clang diagnostic pop
@@ -20,12 +29,18 @@ namespace darkness{
 		if(advanceIfMatch<TokenType::keyLet>()){
 			return parseVariableDeclaration();
 		}
+		if(advanceIfMatch<TokenType::keyFunc>()){
+			return parseFunctionDeclaration();
+		}
 		return parseStatement();
 	}
 	
 	AstNode Parser::parseVariableDeclaration() {
 		Token& token{
-			consumeOrThrow(TokenType::identifier, "need var name")
+			consumeOrThrow(
+				TokenType::identifier,
+				"Darkness parser need var name"
+			)
 		};
 		std::string name{ std::get<std::string>(token.value) };
 		auto initializerPointer{
@@ -46,6 +61,46 @@ namespace darkness{
 		};
 	}
 	
+	AstNode Parser::parseFunctionDeclaration() {
+		Token& token{
+			consumeOrThrow(
+				TokenType::identifier,
+				"Darkness parser need func name"
+			)
+		};
+		std::string funcName{ std::get<std::string>(token.value) };
+		consumeOrThrow(
+			TokenType::lParen,
+			"Darkness parser expect '(' after func name"
+		);
+		std::vector<std::string> paramNames{};
+		if(!match(TokenType::rParen)){
+			do{
+				paramNames.push_back(
+					std::get<std::string>(
+						consumeOrThrow(
+							TokenType::identifier,
+							"Darkness parser expect parameter name"
+						).value
+					)
+				);
+			} while(advanceIfMatch<TokenType::comma>());
+		}
+		consumeOrThrow(
+			TokenType::lBrace,
+			"Darkness parser expect '{' before func body"
+		);
+		AstNode body{ parseBlock() };
+		return{
+			AstType::stmtFuncDeclare,
+			AstStmtFuncDeclareData{
+				std::move(funcName),
+				std::move(paramNames),
+				std::make_unique<AstNode>(std::move(body))
+			}
+		};
+	}
+	
 	AstNode Parser::parseStatement() {
 		if(advanceIfMatch<TokenType::keyIf>()){
 			return parseIf();
@@ -55,6 +110,9 @@ namespace darkness{
 		}
 		if(advanceIfMatch<TokenType::keyFor>()){
 			return parseFor();
+		}
+		if(advanceIfMatch<TokenType::keyReturn>()){
+			return parseReturn();
 		}
 		if(advanceIfMatch<TokenType::lBrace>()){
 			return parseBlock();
@@ -113,32 +171,31 @@ namespace darkness{
 			"Darkness parser missing '('!"
 		);
 		
-		std::unique_ptr<AstNode> initializer{ nullptr };
+		AstNode initializer{};
 		if(advanceIfMatch<TokenType::semicolon>()){
 			//do nothing
 		}
 		else if(advanceIfMatch<TokenType::keyLet>()){
-			initializer = std::make_unique<AstNode>(parseVariableDeclaration());
+			initializer = parseVariableDeclaration();
 		}
 		else{
-			initializer = std::make_unique<AstNode>(parseExpressionStatement());
+			initializer = parseExpressionStatement();
 		}
 		
-		//todo: instead of nullptr unique ptrs, just use error code stuff
-		
-		std::unique_ptr<AstNode> condition{ nullptr };
+		AstNode condition{};
 		if(!match(TokenType::semicolon)){
-			condition = std::make_unique<AstNode>(parseExpression());
+			condition = parseExpression();
 		}
 		consumeOrThrow(
 			TokenType::semicolon,
 			"Darkness parser missing ';'!"
 		);
 		
-		std::unique_ptr<AstNode> increment{ nullptr };
+		AstNode increment{};
 		if(!match(TokenType::rParen)){
-			increment = std::make_unique<AstNode>(parseExpression());
+			increment = parseExpression();
 		}
+		
 		consumeOrThrow(
 			TokenType::rParen,
 			"Darkness parser missing ')'!"
@@ -147,14 +204,56 @@ namespace darkness{
 		AstNode body{ parseStatement() };
 		
 		if(increment){
+			std::vector<AstNode> blockStatements{};
+			blockStatements.push_back(std::move(body));
+			blockStatements.push_back(std::move(increment));
 			body = {
 				AstType::stmtBlock,
-				AstStmtBlockData{ {
-					std::move(body),
-					std::move(*increment.release())
-				} }
+				AstStmtBlockData{ std::move(blockStatements) }
 			};
 		}
+		if(!condition){
+			condition = {
+				AstType::litBool,
+				AstLitBoolData{ true }
+			};
+		}
+		body = {
+			AstType::stmtWhile,
+			AstStmtWhileData{
+				std::make_unique<AstNode>(std::move(condition)),
+				std::make_unique<AstNode>(std::move(body))
+			}
+		};
+		if(initializer){
+			std::vector<AstNode> blockStatements{};
+			blockStatements.push_back(std::move(initializer));
+			blockStatements.push_back(std::move(body));
+			body = {
+				AstType::stmtBlock,
+				AstStmtBlockData{ std::move(blockStatements) }
+			};
+		}
+		
+		return body;
+	}
+	
+	AstNode Parser::parseReturn(){
+		AstNode value{};
+		if(!match(TokenType::semicolon)){
+			value = parseExpression();
+		}
+		consumeOrThrow(
+			TokenType::semicolon,
+			"Darkness parser missing semicolon!"
+		);
+		return{
+			AstType::stmtReturn,
+			AstStmtReturnData{
+				static_cast<bool>(value),
+				std::make_unique<AstNode>(std::move(value))
+			}
+		};
 	}
 	
 	AstNode Parser::parseBlock(){
@@ -366,7 +465,32 @@ namespace darkness{
 				}
 			};
 		}
-		return parsePrimary();
+		return parseCall();
+	}
+	
+	AstNode Parser::parseCall(){
+		AstNode call{ parsePrimary() };
+		std::vector<AstNode> args{};
+		while(advanceIfMatch<TokenType::lParen>()){
+			args.clear();
+			if(!match(TokenType::rParen)){
+				do{
+					args.push_back(parseExpression());
+				} while(advanceIfMatch<TokenType::comma>());
+			}
+			consumeOrThrow(
+				TokenType::rParen,
+				"Darkness parser missing closing ')' !"
+			);
+			call = {
+				AstType::call,
+				AstCallData{
+					std::make_unique<AstNode>(std::move(call)),
+					std::move(args)
+				}
+			};
+		}
+		return call;
 	}
 	
 	AstNode Parser::parsePrimary() {

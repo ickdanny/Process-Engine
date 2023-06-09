@@ -20,10 +20,12 @@ namespace darkness{
 		//statements
 		AstNode parseDeclaration();
 		AstNode parseVariableDeclaration();
+		AstNode parseFunctionDeclaration();
 		AstNode parseStatement();
 		AstNode parseIf();
 		AstNode parseWhile();
 		AstNode parseFor();
+		AstNode parseReturn();
 		AstNode parseBlock();
 		AstNode parseExpressionStatement();
 		
@@ -37,16 +39,17 @@ namespace darkness{
 		AstNode parseTerm();
 		AstNode parseFactor();
 		AstNode parseUnary();
+		AstNode parseCall();
 		AstNode parsePrimary();
 		
-		template <TokenType T, TokenType... Ts>
+		template <TokenType tokenType, TokenType... Ts>
 		bool advanceIfMatch() {
-			if(match(T)){
+			if(match(tokenType)){
 				advance();
 				return true;
 			}
 			
-			if constexpr(sizeof...(Ts)){
+			if constexpr(static_cast<bool>(sizeof...(Ts))){
 				return advanceIfMatch<Ts...>();
 			}
 			else{

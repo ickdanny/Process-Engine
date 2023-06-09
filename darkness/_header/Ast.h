@@ -13,8 +13,10 @@ namespace darkness{
 		
 		//statement types
 		stmtVarDeclare,		// a variable declaration
+		stmtFuncDeclare,	// a function declaration
 		stmtIf,				// if ( ... )
 		stmtWhile,			// while ( ... )
+		stmtReturn,			// a return from a function
 		stmtBlock,			// { ... }
 		
 		stmtExpression,		// an expression statement
@@ -42,24 +44,35 @@ namespace darkness{
 		
 		variable,			// foo, bar, etc...
 		
+		call,				// a function call
+		
 		//literal expr types
 		litBool,			// true or false
 		litInt,				// any integer literal
 		litFloat,			// any float literal
+		
 		litString,			// any string literal
 		
 		parenths,			// ( ... )
-		
-		call,				// a function call
 		
 		numAstTypes
 	};
 	
 	struct AstNode; //forward declare
 	
+	struct AstScriptData{
+		std::vector<AstNode> statements{};
+	};
+	
 	struct AstStmtVarDeclareData{
 		std::string varName{};
 		std::unique_ptr<AstNode> initializer{};
+	};
+	
+	struct AstStmtFuncDeclareData{
+		std::string funcName{};
+		std::vector<std::string> paramNames{};
+		std::unique_ptr<AstNode> body{};
 	};
 	
 	struct AstStmtIfData{
@@ -71,6 +84,11 @@ namespace darkness{
 	struct AstStmtWhileData{
 		std::unique_ptr<AstNode> condition{};
 		std::unique_ptr<AstNode> body{};
+	};
+	
+	struct AstStmtReturnData{
+		bool hasValue{};
+		std::unique_ptr<AstNode> value{};
 	};
 	
 	struct AstStmtBlockData{
@@ -95,13 +113,13 @@ namespace darkness{
 		std::unique_ptr<AstNode> arg{};
 	};
 	
-	struct AstCallData{
-		std::string functionName{};
-		std::vector<AstNode> arguments{};
-	};
-	
 	struct AstVariableData{
 		std::string varName{};
+	};
+	
+	struct AstCallData{
+		std::unique_ptr<AstNode> funcExpr{};
+		std::vector<AstNode> args{};
 	};
 	
 	struct AstLitBoolData{
@@ -127,24 +145,27 @@ namespace darkness{
 	struct AstNode{
 		AstType type{};
 		std::variant<
+			AstScriptData,
 			AstStmtVarDeclareData,
+			AstStmtFuncDeclareData,
 			AstStmtIfData,
 			AstStmtWhileData,
+			AstStmtReturnData,
 			AstStmtBlockData,
 			AstStmtExpressionData,
 			AstBinData,
 			AstAssignData,
 			AstUnaryData,
 			AstVariableData,
+			AstCallData,
 			AstLitBoolData,
 			AstLitIntData,
 			AstLitFloatData,
 			AstLitStringData,
-			AstParenthsData,
-			AstCallData
+			AstParenthsData
 		> dataVariant{};
 		
-		operator bool() const {
+		explicit operator bool() const {
 			return type != AstType::error && type != AstType::numAstTypes;
 		}
 	};
