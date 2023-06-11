@@ -50,7 +50,6 @@ namespace darkness{
 		litBool,			// true or false
 		litInt,				// any integer literal
 		litFloat,			// any float literal
-		
 		litString,			// any string literal
 		
 		parenths,			// ( ... )
