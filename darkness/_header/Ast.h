@@ -71,7 +71,7 @@ namespace darkness{
 	struct AstStmtFuncDeclareData{
 		std::string funcName{};
 		std::vector<std::string> paramNames{};
-		std::unique_ptr<AstNode> body{};
+		std::shared_ptr<AstNode> body{};	//use a shared pointer for the body for interpreting
 	};
 	
 	struct AstStmtIfData{
