@@ -52,7 +52,7 @@ namespace darkness{
 		litFloat,			// any float literal
 		litString,			// any string literal
 		
-		parenths,			// ( ... )
+		parenthesis,		// ( ... )
 		
 		numAstTypes
 	};

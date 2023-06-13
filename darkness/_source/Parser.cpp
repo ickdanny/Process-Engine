@@ -87,7 +87,11 @@ namespace darkness{
 			} while(advanceIfMatch<TokenType::comma>());
 		}
 		consumeOrThrow(
-			TokenType::lBrace,
+			TokenType::rParen,
+			"Darkness parser expect ')' after func params!"
+		);
+		consumeOrThrow(
+			TokenType::lCurly,
 			"Darkness parser expect '{' before func body"
 		);
 		AstNode body{ parseBlock() };
@@ -114,7 +118,7 @@ namespace darkness{
 		if(advanceIfMatch<TokenType::keyReturn>()){
 			return parseReturn();
 		}
-		if(advanceIfMatch<TokenType::lBrace>()){
+		if(advanceIfMatch<TokenType::lCurly>()){
 			return parseBlock();
 		}
 		return parseExpressionStatement();
@@ -194,6 +198,10 @@ namespace darkness{
 		AstNode increment{};
 		if(!match(TokenType::rParen)){
 			increment = parseExpression();
+			increment = AstNode{
+				AstType::stmtExpression,
+				AstStmtExpressionData{ std::make_unique<AstNode>(std::move(increment)) }
+			};
 		}
 		
 		consumeOrThrow(
@@ -264,12 +272,12 @@ namespace darkness{
 		auto& statements{
 			std::get<AstStmtBlockData>(blockNode.dataVariant).statements
 		};
-		while(!match(TokenType::rBrace) && !isEndOfInput()){
+		while(!match(TokenType::rCurly) && !isEndOfInput()){
 			statements.push_back(parseDeclaration());
 		}
 		consumeOrThrow(
-			TokenType::rBrace,
-			"Darkness parser missing right brace!"
+			TokenType::rCurly,
+			"Darkness parser missing right curly!"
 		);
 		return blockNode;
 	}
@@ -534,13 +542,13 @@ namespace darkness{
 			);
 			//needed to distinguish l and r values
 			return {
-				AstType::parenths,
+				AstType::parenthesis,
 				AstParenthsData{
 					std::make_unique<AstNode>(std::move(expression))
 				}
 			};
 		}
-		throw std::runtime_error{ "Darkness parser expecting expression!" };
+		throw std::runtime_error{ "Darkness parser failed primary expecting expression!" };
 	}
 	
 	bool Parser::match(TokenType type){

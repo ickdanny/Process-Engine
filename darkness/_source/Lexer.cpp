@@ -181,14 +181,15 @@ namespace darkness{
 	void Lexer::extractString() {
 		std::ostringstream valueOutputStream{};
 		//do NOT insert the first character, since it is the opening double quote
+		advance();
 		while(currentChar != '"' && !isEndOfInput()) {
-			advance();
 			//if the next character is the closing double quote, we are done
 			if(currentChar == '"'){
 				break;
 			}
 			//otherwise, append to the output stream
 			valueOutputStream << currentChar;
+			advance();
 		}
 		if(currentChar != '"'){
 			throw std::runtime_error{ "Darkness lexer string no close quote!" };

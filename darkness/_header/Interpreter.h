@@ -55,9 +55,17 @@ namespace darkness{
 		class Environment;
 		
 		//fields
-		std::shared_ptr<Environment> nativeEnvironment{};
-		std::shared_ptr<Environment> innermostEnvironmentPointer{ nativeEnvironment };
+		std::shared_ptr<Environment> nativeEnvironmentPointer{};
+		std::shared_ptr<Environment> innermostEnvironmentPointer{};
+		
 	public:
+		Interpreter()
+			: nativeEnvironmentPointer{ std::make_shared<Environment>() }
+			, innermostEnvironmentPointer{
+				std::make_shared<Environment>(nativeEnvironmentPointer)
+			}{
+		}
+		
 		//Runs a darkness script. If the given AstNode is of any other type, throws an error.
 		void runScript(const AstNode& script){
 			//todo: maybe let scripts return stuff? Can define functions in different scripts
@@ -66,6 +74,30 @@ namespace darkness{
 			for(const auto& statement : statements){
 				runStatement(statement);
 			}
+		}
+		
+	protected:
+		void addNativeFunction(const std::string& name, const NativeFunction& function){
+			if(nativeEnvironmentPointer->contains(name)){
+				throw std::runtime_error{
+					"Darkness interpreter trying to define native function " + name + " but "
+						+ name + " is an already defined variable in the native environment"
+				};
+			}
+			nativeEnvironmentPointer->define(
+				name,
+				DataType{ FunctionWrapper{ NativeFunctionWrapper{ function } } }
+			);
+		}
+		
+		void addNativeVariable(const std::string& name, const DataType& data){
+			if(nativeEnvironmentPointer->contains(name)){
+				throw std::runtime_error{
+					"Darkness interpreter trying to define native variable " + name + " but "
+						+ name + " is an already defined variable in the native environment"
+				};
+			}
+			nativeEnvironmentPointer->define(name, data);
 		}
 	
 	private:
@@ -91,9 +123,11 @@ namespace darkness{
 					break;
 				case AstType::stmtExpression:
 					runExpression(
-						std::get<AstStmtExpressionData>(statement.dataVariant).expression
+						*std::get<AstStmtExpressionData>(statement.dataVariant).expression
 					);
 					break;
+				default:
+					throw std::runtime_error{ "Darkness interpreter not a statement!" };
 			}
 		}
 		
@@ -105,7 +139,7 @@ namespace darkness{
 			const auto& initializer{ data.initializer };
 			DataType initData;	//uninitialized!
 			if(initializer){
-				initData = runExpression(initializer);
+				initData = runExpression(*initializer);
 			}
 			else{
 				initData = DataType{ false };
@@ -130,32 +164,32 @@ namespace darkness{
 		void runIf(const AstNode& ifStatement){
 			throwIfNotType(ifStatement, AstType::stmtIf, "not an if statement!");
 			const auto& data{ std::get<AstStmtIfData>(ifStatement.dataVariant) };
-			DataType conditionValue{ runExpression(data.condition) };
+			DataType conditionValue{ runExpression(*data.condition) };
 			if(conditionValue.index() != boolIndex){
 				throw std::runtime_error{
 					"Darkness interpreter if statement condition was not bool!"
 				};
 			}
 			if(std::get<bool>(conditionValue)){
-				runStatement(data.trueBranch);
+				runStatement(*data.trueBranch);
 			}
 			else if(data.falseBranch){
-				runStatement(data.falseBranch);
+				runStatement(*data.falseBranch);
 			}
 		}
 		
 		void runWhile(const AstNode& whileStatement){
 			throwIfNotType(whileStatement, AstType::stmtWhile, "not a while statement!");
 			const auto& data{ std::get<AstStmtWhileData>(whileStatement.dataVariant) };
-			DataType conditionValue{ runExpression(data.condition) };
+			DataType conditionValue{ runExpression(*data.condition) };
 			if(conditionValue.index() != boolIndex){
 				throw std::runtime_error{
 					"Darkness interpreter while statement condition was not bool!"
 				};
 			}
 			while(std::get<bool>(conditionValue)){
-				runStatement(data.body);
-				conditionValue = runExpression(data.condition);
+				runStatement(*data.body);
+				conditionValue = runExpression(*data.condition);
 				if(conditionValue.index() != boolIndex){
 					throw std::runtime_error{
 						"Darkness interpreter while statement condition was not bool!"
@@ -167,8 +201,15 @@ namespace darkness{
 		void runReturn(const AstNode& returnStatement){
 			throwIfNotType(returnStatement, AstType::stmtReturn, "not a return statement!");
 			const auto& data{ std::get<AstStmtReturnData>(returnStatement.dataVariant) };
-			//todo: returning void -> throw a flag struct? returning object -> throw dataType?
-			//blocks will reset environment even if throw, so will functions
+			
+			//void returns actually just return false
+			if(data.hasValue){
+				throw runExpression(*data.value);
+			}
+			else{
+				throw DataType{ false };
+			}
+			//blocks and functions will reset environment even if throw
 		}
 		
 		void runBlock(const AstNode& block){
@@ -202,9 +243,9 @@ namespace darkness{
 					return std::get<AstLitFloatData>(expression.dataVariant).value;
 				case AstType::litString:
 					return std::get<AstLitStringData>(expression.dataVariant).value;
-				case AstType::parenths:
+				case AstType::parenthesis:
 					return runExpression(
-						std::get<AstParenthsData>(expression.dataVariant).inside
+						*std::get<AstParenthsData>(expression.dataVariant).inside
 					);
 				case AstType::unaryBang:
 					return runUnaryBang(expression);
@@ -243,26 +284,29 @@ namespace darkness{
 					return runVariable(expression);
 				case AstType::call:
 					return runCall(expression);
+					
+				default:
+					throw std::runtime_error{ "Darkness interpreter not an expression!" };
 			}
 		}
 		
 		DataType runUnaryBang(const AstNode& unary){
 			throwIfNotType(unary, AstType::unaryBang, "not unary bang!");
 			DataType argValue{ runExpression(
-				std::get<AstUnaryData>(unary.dataVariant).arg
+				*std::get<AstUnaryData>(unary.dataVariant).arg
 			) };
 			if(holdsAlternatives<bool>(argValue)){
 				return !std::get<bool>(argValue);
 			}
-			if(holdsAlternatives<int, float, std::string, NativeFunctionWrapper>(argValue)){
+			if(holdsAlternatives<int, float, std::string, FunctionWrapper>(argValue)){
 				throw std::runtime_error{
 					"Darkness interpreter bad arg for unary bang!"
 				};
 			}
 			//our arg is NOT a built-in type! look for a native function
 			const NativeFunction nativeFunction{
-				unwrapNativeFunction(
-					nativeEnvironment.get(
+				unwrapNativeFunctionFromData(
+					nativeEnvironmentPointer->get(
 						reservedFunctionNames::unaryBang,
 						"no native unary bang function!"
 					)
@@ -273,9 +317,9 @@ namespace darkness{
 		DataType runUnaryPlus(const AstNode& unary){
 			throwIfNotType(unary, AstType::unaryPlus, "not unary plus!");
 			DataType argValue{ runExpression(
-				std::get<AstUnaryData>(unary.dataVariant).arg
+				*std::get<AstUnaryData>(unary.dataVariant).arg
 			) };
-			if(holdsAlternatives<bool, std::string, NativeFunctionWrapper>(argValue)){
+			if(holdsAlternatives<bool, std::string, FunctionWrapper>(argValue)){
 				throw std::runtime_error{
 					"Darkness interpreter bad arg for unary plus!"
 				};
@@ -285,8 +329,8 @@ namespace darkness{
 			}
 			//our arg is NOT a built-in type! look for a native function
 			const NativeFunction nativeFunction{
-				unwrapNativeFunction(
-					nativeEnvironment.get(
+				unwrapNativeFunctionFromData(
+					nativeEnvironmentPointer->get(
 						reservedFunctionNames::unaryPlus,
 						"no native unary plus function!"
 					)
@@ -297,9 +341,9 @@ namespace darkness{
 		DataType runUnaryMinus(const AstNode& unary){
 			throwIfNotType(unary, AstType::unaryMinus, "not unary minus!");
 			DataType argValue{ runExpression(
-				std::get<AstUnaryData>(unary.dataVariant).arg
+				*std::get<AstUnaryData>(unary.dataVariant).arg
 			) };
-			if(holdsAlternatives<bool, std::string, NativeFunctionWrapper>(argValue)){
+			if(holdsAlternatives<bool, std::string, FunctionWrapper>(argValue)){
 				throw std::runtime_error{
 					"Darkness interpreter bad arg for unary minus!"
 				};
@@ -312,8 +356,8 @@ namespace darkness{
 			}
 			//our arg is NOT a built-in type! look for a native function
 			const NativeFunction nativeFunction{
-				unwrapNativeFunction(
-					nativeEnvironment.get(
+				unwrapNativeFunctionFromData(
+					nativeEnvironmentPointer->get(
 						reservedFunctionNames::unaryMinus,
 						"no native unary minus function!"
 					)
@@ -324,10 +368,10 @@ namespace darkness{
 		DataType runBinaryPlus(const AstNode& binary){
 			throwIfNotType(binary, AstType::binPlus, "not binary plus!");
 			DataType leftValue{ runExpression(
-				std::get<AstBinData>(binary.dataVariant).left
+				*std::get<AstBinData>(binary.dataVariant).left
 			) };
 			DataType rightValue{ runExpression(
-				std::get<AstBinData>(binary.dataVariant).right
+				*std::get<AstBinData>(binary.dataVariant).right
 			) };
 			auto leftIndex{ leftValue.index() };
 			auto rightIndex{ rightValue.index() };
@@ -398,8 +442,8 @@ namespace darkness{
 			}
 			//one of our args is NOT a built-in type! look for a native function
 			const NativeFunction nativeFunction{
-				unwrapNativeFunction(
-					nativeEnvironment.get(
+				unwrapNativeFunctionFromData(
+					nativeEnvironmentPointer->get(
 						reservedFunctionNames::binaryPlus,
 						"no native binary plus function!"
 					)
@@ -410,10 +454,10 @@ namespace darkness{
 		DataType runBinaryMinus(const AstNode& binary){
 			throwIfNotType(binary, AstType::binMinus, "not binary minus!");
 			DataType leftValue{ runExpression(
-				std::get<AstBinData>(binary.dataVariant).left
+				*std::get<AstBinData>(binary.dataVariant).left
 			) };
 			DataType rightValue{ runExpression(
-				std::get<AstBinData>(binary.dataVariant).right
+				*std::get<AstBinData>(binary.dataVariant).right
 			) };
 			auto leftIndex{ leftValue.index() };
 			auto rightIndex{ rightValue.index() };
@@ -464,8 +508,8 @@ namespace darkness{
 			}
 			//one of our args is NOT a built-in type! look for a native function
 			const NativeFunction nativeFunction{
-				unwrapNativeFunction(
-					nativeEnvironment.get(
+				unwrapNativeFunctionFromData(
+					nativeEnvironmentPointer->get(
 						reservedFunctionNames::binaryMinus,
 						"no native binary minus function!"
 					)
@@ -476,10 +520,10 @@ namespace darkness{
 		DataType runBinaryStar(const AstNode& binary){
 			throwIfNotType(binary, AstType::binStar, "not binary star!");
 			DataType leftValue{ runExpression(
-				std::get<AstBinData>(binary.dataVariant).left
+				*std::get<AstBinData>(binary.dataVariant).left
 			) };
 			DataType rightValue{ runExpression(
-				std::get<AstBinData>(binary.dataVariant).right
+				*std::get<AstBinData>(binary.dataVariant).right
 			) };
 			auto leftIndex{ leftValue.index() };
 			auto rightIndex{ rightValue.index() };
@@ -530,8 +574,8 @@ namespace darkness{
 			}
 			//one of our args is NOT a built-in type! look for a native function
 			const NativeFunction nativeFunction{
-				unwrapNativeFunction(
-					nativeEnvironment.get(
+				unwrapNativeFunctionFromData(
+					nativeEnvironmentPointer->get(
 						reservedFunctionNames::binaryStar,
 						"no native binary star function!"
 					)
@@ -542,10 +586,10 @@ namespace darkness{
 		DataType runBinaryForwardSlash(const AstNode& binary){
 			throwIfNotType(binary, AstType::binForwardSlash, "not binary forward slash!");
 			DataType leftValue{ runExpression(
-				std::get<AstBinData>(binary.dataVariant).left
+				*std::get<AstBinData>(binary.dataVariant).left
 			) };
 			DataType rightValue{ runExpression(
-				std::get<AstBinData>(binary.dataVariant).right
+				*std::get<AstBinData>(binary.dataVariant).right
 			) };
 			auto leftIndex{ leftValue.index() };
 			auto rightIndex{ rightValue.index() };
@@ -596,8 +640,8 @@ namespace darkness{
 			}
 			//one of our args is NOT a built-in type! look for a native function
 			const NativeFunction nativeFunction{
-				unwrapNativeFunction(
-					nativeEnvironment.get(
+				unwrapNativeFunctionFromData(
+					nativeEnvironmentPointer->get(
 						reservedFunctionNames::binaryForwardSlash,
 						"no native binary forward slash function!"
 					)
@@ -618,10 +662,10 @@ namespace darkness{
 		//runs a dual equal operation on two sides of a binary expression without ast checking
 		bool binaryDualEqualHelper(const AstNode& binary){
 			DataType leftValue{ runExpression(
-				std::get<AstBinData>(binary.dataVariant).left
+				*std::get<AstBinData>(binary.dataVariant).left
 			) };
 			DataType rightValue{ runExpression(
-				std::get<AstBinData>(binary.dataVariant).right
+				*std::get<AstBinData>(binary.dataVariant).right
 			) };
 			auto leftIndex{ leftValue.index() };
 			auto rightIndex{ rightValue.index() };
@@ -691,18 +735,9 @@ namespace darkness{
 						}
 					}
 					case functionIndex: {
-						if(rightIndex != functionIndex){
-							throw std::runtime_error{
-								"Darkness interpreter trying to dual equal func vs not func!"
-							};
-						}
-						const NativeFunction leftFunction{
-							unwrapNativeFunction(leftValue)
+						throw std::runtime_error{
+							"Darkness interpreter trying to dual equal a func!"
 						};
-						const NativeFunction rightFunction{
-							unwrapNativeFunction(rightValue)
-						};
-						return leftFunction == rightFunction;
 					}
 				}
 				if(leftIndex == boolIndex){
@@ -724,22 +759,30 @@ namespace darkness{
 			}
 			//one of our args is NOT a built-in type! look for a native function
 			const NativeFunction nativeFunction{
-				unwrapNativeFunction(
-					nativeEnvironment.get(
+				unwrapNativeFunctionFromData(
+					nativeEnvironmentPointer->get(
 						reservedFunctionNames::binaryDualEqual,
 						"no native binary dual equal function!"
 					)
 				)};
-			return nativeFunction({ leftValue, rightValue });
+			const DataType& nativeFunctionResult{ nativeFunction({ leftValue, rightValue }) };
+			if(std::holds_alternative<bool>(nativeFunctionResult)){
+				return std::get<bool>(nativeFunctionResult);
+			}
+			else{
+				throw std::runtime_error{
+					"Darkness interpreter bad type from native dual equal function!"
+				};
+			}
 		}
 		
 		DataType runBinaryGreater(const AstNode& binary){
 			throwIfNotType(binary, AstType::binGreater, "not binary greater!");
 			DataType leftValue{ runExpression(
-				std::get<AstBinData>(binary.dataVariant).left
+				*std::get<AstBinData>(binary.dataVariant).left
 			) };
 			DataType rightValue{ runExpression(
-				std::get<AstBinData>(binary.dataVariant).right
+				*std::get<AstBinData>(binary.dataVariant).right
 			) };
 			return binaryGreaterHelper(leftValue, rightValue);
 		}
@@ -747,10 +790,10 @@ namespace darkness{
 		DataType runBinaryGreaterEqual(const AstNode& binary){
 			throwIfNotType(binary, AstType::binGreaterEqual, "not binary greater equal!");
 			DataType leftValue{ runExpression(
-				std::get<AstBinData>(binary.dataVariant).left
+				*std::get<AstBinData>(binary.dataVariant).left
 			) };
 			DataType rightValue{ runExpression(
-				std::get<AstBinData>(binary.dataVariant).right
+				*std::get<AstBinData>(binary.dataVariant).right
 			) };
 			//switch left and right and also negate
 			return !binaryGreaterHelper(rightValue, leftValue);
@@ -759,10 +802,10 @@ namespace darkness{
 		DataType runBinaryLess(const AstNode& binary){
 			throwIfNotType(binary, AstType::binLess, "not binary less!");
 			DataType leftValue{ runExpression(
-				std::get<AstBinData>(binary.dataVariant).left
+				*std::get<AstBinData>(binary.dataVariant).left
 			) };
 			DataType rightValue{ runExpression(
-				std::get<AstBinData>(binary.dataVariant).right
+				*std::get<AstBinData>(binary.dataVariant).right
 			) };
 			//switch left and right
 			return binaryGreaterHelper(rightValue, leftValue);
@@ -771,10 +814,10 @@ namespace darkness{
 		DataType runBinaryLessEqual(const AstNode& binary){
 			throwIfNotType(binary, AstType::binLessEqual, "not binary less equal!");
 			DataType leftValue{ runExpression(
-				std::get<AstBinData>(binary.dataVariant).left
+				*std::get<AstBinData>(binary.dataVariant).left
 			) };
 			DataType rightValue{ runExpression(
-				std::get<AstBinData>(binary.dataVariant).right
+				*std::get<AstBinData>(binary.dataVariant).right
 			) };
 			//negate
 			return !binaryGreaterHelper(leftValue, rightValue);
@@ -851,19 +894,27 @@ namespace darkness{
 			}
 			//one of our args is NOT a built-in type! look for a native function
 			const NativeFunction nativeFunction{
-				unwrapNativeFunction(
-					nativeEnvironment.get(
+				unwrapNativeFunctionFromData(
+					nativeEnvironmentPointer->get(
 						reservedFunctionNames::binaryGreater,
 						"no native binary greater function!"
 					)
 				)};
-			return nativeFunction({ leftValue, rightValue });
+			const DataType& nativeFunctionResult{ nativeFunction({ leftValue, rightValue }) };
+			if(std::holds_alternative<bool>(nativeFunctionResult)){
+				return std::get<bool>(nativeFunctionResult);
+			}
+			else{
+				throw std::runtime_error{
+					"Darkness interpreter bad type from native greater function!"
+				};
+			}
 		}
 		
 		DataType runBinaryAmpersand(const AstNode& binary){
 			throwIfNotType(binary, AstType::binAmpersand, "not binary ampersand!");
 			DataType leftValue{ runExpression(
-				std::get<AstBinData>(binary.dataVariant).left
+				*std::get<AstBinData>(binary.dataVariant).left
 			) };
 			if(leftValue.index() != boolIndex){
 				throw std::runtime_error{
@@ -875,7 +926,7 @@ namespace darkness{
 				return false;
 			}
 			DataType rightValue{ runExpression(
-				std::get<AstBinData>(binary.dataVariant).right
+				*std::get<AstBinData>(binary.dataVariant).right
 			) };
 			if(rightValue.index() != boolIndex){
 				throw std::runtime_error{
@@ -889,7 +940,7 @@ namespace darkness{
 		DataType runBinaryVerticalBar(const AstNode& binary){
 			throwIfNotType(binary, AstType::binVerticalBar, "not binary vertical bar!");
 			DataType leftValue{ runExpression(
-				std::get<AstBinData>(binary.dataVariant).left
+				*std::get<AstBinData>(binary.dataVariant).left
 			) };
 			if(leftValue.index() != boolIndex){
 				throw std::runtime_error{
@@ -901,7 +952,7 @@ namespace darkness{
 				return true;
 			}
 			DataType rightValue{ runExpression(
-				std::get<AstBinData>(binary.dataVariant).right
+				*std::get<AstBinData>(binary.dataVariant).right
 			) };
 			if(rightValue.index() != boolIndex){
 				throw std::runtime_error{
@@ -917,7 +968,7 @@ namespace darkness{
 			const auto& data{
 				std::get<AstAssignData>(binary.dataVariant)
 			};
-			DataType value{ runExpression(data.right) };
+			DataType value{ runExpression(*data.right) };
 			innermostEnvironmentPointer->assign(data.varName, value);
 			return value;
 		}
@@ -935,7 +986,7 @@ namespace darkness{
 			const auto& data{ std::get<AstCallData>(call.dataVariant) };
 			
 			//get the function wrapper
-			const auto& functionWrapperData{ runExpression(data.funcExpr) };
+			const auto& functionWrapperData{ runExpression(*data.funcExpr) };
 			if(!std::holds_alternative<FunctionWrapper>(functionWrapperData)){
 				throw std::runtime_error{
 					"Darkness interpreter tried to call non-function!"
@@ -945,7 +996,7 @@ namespace darkness{
 			
 			//case 1: native function
 			if(std::holds_alternative<NativeFunctionWrapper>(functionWrapper)){
-				const auto& nativeFunction{ unwrapNativeFunction(functionWrapper) };
+				const auto& nativeFunction{ unwrapNativeFunctionFromData(functionWrapper) };
 				//evaluate all args and store in a vector
 				std::vector<DataType> args{};
 				for(const auto& argNode : data.args){
@@ -974,13 +1025,21 @@ namespace darkness{
 							runExpression(data.args[i])
 						);
 					}
-					//pass to the function body
-					runStatement(userFunctionWrapper.body);
-					//todo: returns
+					//pass to the function body which may throw a DataType as its return
+					runStatement(*userFunctionWrapper.body);
 					innermostEnvironmentPointer
 						= innermostEnvironmentPointer->getEnclosingEnvironmentPointer();
+					//if no throw/return occurred, return false
+					return DataType{ false };
+				}
+				catch(const DataType& returnValue){
+					//if we caught a DataType, that's our return value
+					innermostEnvironmentPointer
+						= innermostEnvironmentPointer->getEnclosingEnvironmentPointer();
+					return returnValue;
 				}
 				catch(...){
+					//if anything else was thrown, that's an error
 					innermostEnvironmentPointer
 						= innermostEnvironmentPointer->getEnclosingEnvironmentPointer();
 					throw;
@@ -1007,13 +1066,13 @@ namespace darkness{
 			}
 		}
 		
-		NativeFunction unwrapNativeFunction(const DataType& data){
+		NativeFunction unwrapNativeFunctionFromData(const DataType& data){
 			if(std::holds_alternative<FunctionWrapper>(data)){
-				unwrapNativeFunction(std::get<FunctionWrapper>(data));
+				return unwrapNativeFunction(std::get<FunctionWrapper>(data));
 			}
 			else{
 				throw std::runtime_error{
-					"Darkness interpreter tried to unwrapNativeFunction non-function!"
+					"Darkness interpreter tried to unwrapNativeFunctionFromData non-function!"
 				};
 			}
 		}
@@ -1026,7 +1085,7 @@ namespace darkness{
 			}
 			else{
 				throw std::runtime_error{
-					"Darkness interpreter tried to unwrapNativeFunction a user function!"
+					"Darkness interpreter tried to unwrapNativeFunctionFromData a user function!"
 				};
 			}
 		}
@@ -1095,6 +1154,11 @@ namespace darkness{
 				else{
 					throw std::runtime_error{ "Darkness interpreter " + msg };
 				}
+			}
+			
+			bool contains(const std::string& name){
+				auto& found{ identifierMap.find(name) };
+				return found != identifierMap.end();
 			}
 			
 			std::shared_ptr<Environment> getEnclosingEnvironmentPointer(){
