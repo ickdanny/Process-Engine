@@ -41,6 +41,32 @@ namespace darkness{
 		>;
 		using NativeFunction = std::function<DataType(const std::vector<DataType>&)>;
 		
+		struct StallFlag{};
+		struct StallNodeInfo{
+			AstType type{};
+			int index{};
+			
+			//special indices
+			static constexpr int ifCondition{ -10 };
+			static constexpr int ifTrue{ -11 };
+			static constexpr int ifFalse{ -12 };
+			static constexpr int whileCondition{ -20 };
+			static constexpr int whileBody{ -21 };
+			static constexpr int binLeft{ -31 };
+			static constexpr int binRight{ -32 };
+			static constexpr int callFuncExpr{ -40 };
+		};
+		struct StallingNativeFunctionCall{
+			NativeFunction stallingNativeFunction{};
+			std::vector<DataType> args{};
+			
+			DataType run(){
+				stallingNativeFunction(args);
+			}
+		};
+		
+		class Environment;	//definition at bottom of file
+		
 		//constants
 		static constexpr auto numTypes{ std::variant_size_v<DataType> };
 		static constexpr auto numCustomTypes{ sizeof...(CustomTypes) };
@@ -51,12 +77,12 @@ namespace darkness{
 		static constexpr auto stringIndex{ 3u };
 		static constexpr auto functionIndex{ 4u };
 		
-		//nested classes
-		class Environment;
-		
 		//fields
 		std::shared_ptr<Environment> nativeEnvironmentPointer{};
 		std::shared_ptr<Environment> innermostEnvironmentPointer{};
+		std::vector<std::variant<StallNodeInfo, DataType>> stallStack{};
+		StallingNativeFunctionCall stallingNativeFunctionCall{};
+		DataType stallReturn{ false };
 		
 	public:
 		Interpreter()
@@ -65,17 +91,7 @@ namespace darkness{
 				std::make_shared<Environment>(nativeEnvironmentPointer)
 			}{
 		}
-		
-		//Runs a darkness script. If the given AstNode is of any other type, throws an error.
-		void runScript(const AstNode& script){
-			//todo: maybe let scripts return stuff? Can define functions in different scripts
-			throwIfNotType(script, AstType::script, "not script!");
-			const auto& statements{ std::get<AstScriptData>(script.dataVariant).statements };
-			for(const auto& statement : statements){
-				runStatement(statement);
-			}
-		}
-		
+	
 	protected:
 		void addNativeFunction(const std::string& name, const NativeFunction& function){
 			if(nativeEnvironmentPointer->contains(name)){
@@ -99,7 +115,58 @@ namespace darkness{
 			}
 			nativeEnvironmentPointer->define(name, data);
 		}
-	
+		
+	public:
+		//Runs a darkness script. If the given AstNode is of any other type, throws an error.
+		void runScript(const AstNode& script){
+			//todo: maybe let scripts return stuff? Can define functions in different scripts
+			throwIfNotType(script, AstType::script, "trying to run not script!");
+			const auto& statements{ std::get<AstScriptData>(script.dataVariant).statements };
+			for(const auto& statement : statements){
+				runStatement(statement);
+			}
+		}
+		
+		/**
+		 * Resumes a stalled darkness script. If the given AstNode is of any other type, throws
+		 * an error.
+		 */
+		 void resumeScript(const AstNode& script){
+			throwIfNotType(script, AstType::script, "trying to resume not script!");
+			if(stallingNativeFunctionCall.stallingNativeFunction == nullptr){
+				throwError("trying to resume a script but was not stalled!");
+			}
+			try{
+				stallReturn = stallingNativeFunctionCall.run();
+			}
+			catch(const StallFlag&){
+				//stalled again on the same native function! exit prematurely
+				return;
+			}
+			//reset stalling native function call to nothing
+			stallingNativeFunctionCall = {};
+			//get the stall info
+			const StallNodeInfo& stallNodeInfo{ popLastStallNodeInfo() };
+			throwIfNotType(stallNodeInfo, AstType::script, "bad stall type: not script!");
+			//resume running the script
+			int currentIndex{ stallNodeInfo.index };
+			const auto& statements{ std::get<AstScriptData>(script.dataVariant).statements };
+			try{
+				//resume the stalled statement
+				resumeStatement(statements[currentIndex]);
+				++currentIndex;
+				//run the rest of the statements like normal
+				for(; currentIndex < statements.size(); ++currentIndex){
+					runStatement(statements[currentIndex]);
+				}
+			}
+			catch(const StallFlag&){
+				//stalled on a different native function! vomit onto the stack and exit
+				stallStack.push_back(StallNodeInfo{ AstType::script, currentIndex });
+				return;
+			}
+		 }
+		 
 	private:
 		void runStatement(const AstNode& statement){
 			switch(statement.type){
@@ -127,8 +194,12 @@ namespace darkness{
 					);
 					break;
 				default:
-					throw std::runtime_error{ "Darkness interpreter not a statement!" };
+					throwError("trying to run not a statement!");
 			}
+		}
+		
+		void resumeStatement(const AstNode& statement) {
+			//todo: stub
 		}
 		
 		void runVarDeclare(const AstNode& varDeclare){
@@ -166,9 +237,7 @@ namespace darkness{
 			const auto& data{ std::get<AstStmtIfData>(ifStatement.dataVariant) };
 			DataType conditionValue{ runExpression(*data.condition) };
 			if(conditionValue.index() != boolIndex){
-				throw std::runtime_error{
-					"Darkness interpreter if statement condition was not bool!"
-				};
+				throwError("if statement condition was not bool!");
 			}
 			if(std::get<bool>(conditionValue)){
 				runStatement(*data.trueBranch);
@@ -183,17 +252,13 @@ namespace darkness{
 			const auto& data{ std::get<AstStmtWhileData>(whileStatement.dataVariant) };
 			DataType conditionValue{ runExpression(*data.condition) };
 			if(conditionValue.index() != boolIndex){
-				throw std::runtime_error{
-					"Darkness interpreter while statement condition was not bool!"
-				};
+				throwError("while statement condition was not bool!");
 			}
 			while(std::get<bool>(conditionValue)){
 				runStatement(*data.body);
 				conditionValue = runExpression(*data.condition);
 				if(conditionValue.index() != boolIndex){
-					throw std::runtime_error{
-						"Darkness interpreter while statement condition was not bool!"
-					};
+					throwError("while statement condition was not bool!");
 				}
 			}
 		}
@@ -245,7 +310,7 @@ namespace darkness{
 					return std::get<AstLitStringData>(expression.dataVariant).value;
 				case AstType::parenthesis:
 					return runExpression(
-						*std::get<AstParenthsData>(expression.dataVariant).inside
+						*std::get<AstParenthesisData>(expression.dataVariant).inside
 					);
 				case AstType::unaryBang:
 					return runUnaryBang(expression);
@@ -286,7 +351,7 @@ namespace darkness{
 					return runCall(expression);
 					
 				default:
-					throw std::runtime_error{ "Darkness interpreter not an expression!" };
+					throwError("trying to run not an expression!");
 			}
 		}
 		
@@ -299,9 +364,7 @@ namespace darkness{
 				return !std::get<bool>(argValue);
 			}
 			if(holdsAlternatives<int, float, std::string, FunctionWrapper>(argValue)){
-				throw std::runtime_error{
-					"Darkness interpreter bad arg for unary bang!"
-				};
+				throwError("bad arg for unary bang!");
 			}
 			//our arg is NOT a built-in type! look for a native function
 			const NativeFunction nativeFunction{
@@ -320,9 +383,7 @@ namespace darkness{
 				*std::get<AstUnaryData>(unary.dataVariant).arg
 			) };
 			if(holdsAlternatives<bool, std::string, FunctionWrapper>(argValue)){
-				throw std::runtime_error{
-					"Darkness interpreter bad arg for unary plus!"
-				};
+				throwError("bad arg for unary plus!");
 			}
 			if(holdsAlternatives<int, float>(argValue)){
 				return argValue;
@@ -338,6 +399,7 @@ namespace darkness{
 			return nativeFunction({ argValue });
 		}
 		
+		//todo: continue refactoring errors
 		DataType runUnaryMinus(const AstNode& unary){
 			throwIfNotType(unary, AstType::unaryMinus, "not unary minus!");
 			DataType argValue{ runExpression(
@@ -1060,20 +1122,12 @@ namespace darkness{
 			}
 		}
 		
-		void throwIfNotType(const AstNode& node, AstType type, const std::string& msg){
-			if(node.type != type){
-				throw std::runtime_error{ "Darkness interpreter " + msg };
-			}
-		}
-		
 		NativeFunction unwrapNativeFunctionFromData(const DataType& data){
 			if(std::holds_alternative<FunctionWrapper>(data)){
 				return unwrapNativeFunction(std::get<FunctionWrapper>(data));
 			}
 			else{
-				throw std::runtime_error{
-					"Darkness interpreter tried to unwrapNativeFunctionFromData non-function!"
-				};
+				throwError("tried to unwrapNativeFunctionFromData a non-function!");
 			}
 		}
 		
@@ -1084,10 +1138,48 @@ namespace darkness{
 				);
 			}
 			else{
-				throw std::runtime_error{
-					"Darkness interpreter tried to unwrapNativeFunctionFromData a user function!"
-				};
+				throwError("tried to unwrapNativeFunctionFromData a user function!");
 			}
+		}
+		
+		void pushStallNodeInfo(const StallNodeInfo& stallNodeInfo){
+			stallStack.push_back(stallNodeInfo);
+		}
+		
+		void pushStallNodeData(const DataType& data){
+			stallStack.push_back(data);
+		}
+		
+		StallNodeInfo popLastStallNodeInfo(){
+			 return std::get<StallNodeInfo>(stallStack.pop_back());
+		}
+		
+		DataType popLastStallData(){
+			 return std::get<DataType>(stallStack.pop_back());
+		}
+		
+		static void throwIfNotType(
+			const AstNode& node,
+			AstType type,
+			const std::string& errorMsg
+		){
+			if(node.type != type){
+				throwError(errorMsg);
+			}
+		}
+		
+		static void throwIfNotType(
+			const StallNodeInfo& stallNodeInfo,
+			AstType type,
+			const std::string& errorMsg
+		){
+			if(stallNodeInfo.type != type){
+				throwError(errorMsg);
+			}
+		}
+		
+		static void throwError(const std::string& errorMsg){
+			throw std::runtime_error{ "Darkness interpreter " + errorMsg };
 		}
 	
 	protected:
@@ -1122,9 +1214,7 @@ namespace darkness{
 					enclosingEnvironmentPointer->assign(name, value);
 				}
 				else{
-					throw std::runtime_error{
-						"Darkness interpreter bad assign var name: " + name
-					};
+					throwError("bad assign var name: " + name);
 				}
 			}
 			
@@ -1137,13 +1227,11 @@ namespace darkness{
 					return enclosingEnvironmentPointer->get(name);
 				}
 				else{
-					throw std::runtime_error{
-						"Darkness interpreter bad get var name: " + name
-					};
+					throwError("bad get var name: " + name);
 				}
 			}
 			
-			DataType get(const std::string& name, const std::string& msg){
+			DataType get(const std::string& name, const std::string& errorMsg){
 				auto& found{ identifierMap.find(name) };
 				if(found != identifierMap.end()){
 					return found->second;
@@ -1152,7 +1240,7 @@ namespace darkness{
 					return enclosingEnvironmentPointer->get(name);
 				}
 				else{
-					throw std::runtime_error{ "Darkness interpreter " + msg };
+					throwError(errorMsg);
 				}
 			}
 			

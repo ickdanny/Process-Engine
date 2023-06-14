@@ -81,7 +81,7 @@ namespace process::game::systems {
 	}
 
 	void ScriptSystem::operator()(Scene& scene) {
-		//create our component depth queue
+		//create our component order queue
 		ComponentOrderQueue componentOrderQueue{};
 
 		//get the group iterator for ScriptProgramList
@@ -94,7 +94,7 @@ namespace process::game::systems {
 		};
 		auto groupIterator{ groupPointer->groupIterator<ScriptProgramList>() };
 
-		//populate our component depth queue with every component depth this tick
+		//populate our component order queue with every component order this tick
 		while (groupIterator.isValid()) {
 			auto [scriptProgramList] = *groupIterator;
 			EntityID entityID{ groupIterator.getEntityID() };

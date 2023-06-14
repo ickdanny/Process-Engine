@@ -137,7 +137,7 @@ namespace darkness{
 		std::string value{};
 	};
 	
-	struct AstParenthsData{
+	struct AstParenthesisData{
 		std::unique_ptr<AstNode> inside{};
 	};
 	
@@ -161,7 +161,7 @@ namespace darkness{
 			AstLitIntData,
 			AstLitFloatData,
 			AstLitStringData,
-			AstParenthsData
+			AstParenthesisData
 		> dataVariant{};
 		
 		explicit operator bool() const {
