@@ -9,15 +9,60 @@
 namespace darkness{
 	
 	namespace reservedFunctionNames{
+		/**
+		 * The reserved function name for the user-defined unary bang operator. Users must
+		 * guarantee that any native unary bang operator they provide to the interpreter
+		 * will never stall.
+		 */
 		static const std::string unaryBang{ "unaryBang" };
+		/**
+		 * The reserved function name for the user-defined unary plus operator. Users must
+		 * guarantee that any native unary plus operator they provide to the interpreter
+		 * will never stall.
+		 */
 		static const std::string unaryPlus{ "unaryPlus" };
+		/**
+		 * The reserved function name for the user-defined unary minus operator. Users must
+		 * guarantee that any native unary minus operator they provide to the interpreter
+		 * will never stall.
+		 */
 		static const std::string unaryMinus{ "unaryMinus" };
 		
+		/**
+		 * The reserved function name for the user-defined binary plus operator. Users must
+		 * guarantee that any native binary plus operator they provide to the interpreter
+		 * will never stall.
+		 */
 		static const std::string binaryPlus{ "binaryPlus" };
+		/**
+		 * The reserved function name for the user-defined binary minus operator. Users must
+		 * guarantee that any native binary minus operator they provide to the interpreter
+		 * will never stall.
+		 */
 		static const std::string binaryMinus{ "binaryMinus" };
+		/**
+		 * The reserved function name for the user-defined binary star operator. Users must
+		 * guarantee that any native binary star operator they provide to the interpreter
+		 * will never stall.
+		 */
 		static const std::string binaryStar{ "binaryStar" };
+		/**
+		 * The reserved function name for the user-defined binary forward slash operator.
+		 * Users must guarantee that any native binary forward slash operator they provide to
+		 * the interpreter will never stall.
+		 */
 		static const std::string binaryForwardSlash{ "binaryForwardSlash" };
+		/**
+		 * The reserved function name for the user-defined binary dual equal operator. Users
+		 * must guarantee that any native binary dual equal operator they provide to the
+		 * interpreter will never stall.
+		 */
 		static const std::string binaryDualEqual{ "binaryDualEqual" };
+		/**
+		 * The reserved function name for the user-defined binary greater operator. Users must
+		 * guarantee that any native binary greater operator they provide to the interpreter
+		 * will never stall.
+		 */
 		static const std::string binaryGreater{ "binaryGreater" };
 	}
 	
@@ -85,6 +130,10 @@ namespace darkness{
 		DataType stallReturn{ false };
 		
 	public:
+		/**
+		 * Constructs an interpreter with an empty native and base environment, with the base
+		 * environment pointing to the native environment.
+		 */
 		Interpreter()
 			: nativeEnvironmentPointer{ std::make_shared<Environment>() }
 			, innermostEnvironmentPointer{
@@ -93,12 +142,17 @@ namespace darkness{
 		}
 	
 	protected:
+		/**
+		 * Binds a native function to the native environment. If the native function is to be
+		 * an operator handler as defined by the reserved function names, users must guarantee
+		 * that those operator handlers will never stall.
+		 */
 		void addNativeFunction(const std::string& name, const NativeFunction& function){
 			if(nativeEnvironmentPointer->contains(name)){
-				throw std::runtime_error{
-					"Darkness interpreter trying to define native function " + name + " but "
-						+ name + " is an already defined variable in the native environment"
-				};
+				throwError(
+					"trying to define native function " + name + " but "
+					+ name + " is an already defined variable in the native environment"
+				);
 			}
 			nativeEnvironmentPointer->define(
 				name,
@@ -106,36 +160,54 @@ namespace darkness{
 			);
 		}
 		
+		/**
+		 * Binds a variable to the native environment. The variable can be any datatype
+		 * accepted by this interpreter.
+		 */
 		void addNativeVariable(const std::string& name, const DataType& data){
 			if(nativeEnvironmentPointer->contains(name)){
-				throw std::runtime_error{
-					"Darkness interpreter trying to define native variable " + name + " but "
-						+ name + " is an already defined variable in the native environment"
-				};
+				throwError(
+					"trying to define native variable " + name + " but "
+					+ name + " is an already defined variable in the native environment"
+				);
 			}
 			nativeEnvironmentPointer->define(name, data);
 		}
 		
 	public:
-		//Runs a darkness script. If the given AstNode is of any other type, throws an error.
+		/**
+		 * Runs a darkness script. If the given AstNode is of any other type, throws an error.
+		 * A script may stall on any of its statements.
+		 */
 		void runScript(const AstNode& script){
 			//todo: maybe let scripts return stuff? Can define functions in different scripts
 			throwIfNotType(script, AstType::script, "trying to run not script!");
+			int currentIndex{ 0 };
 			const auto& statements{ std::get<AstScriptData>(script.dataVariant).statements };
-			for(const auto& statement : statements){
-				runStatement(statement);
+			try{
+				for(; currentIndex < statements.size(); ++currentIndex){
+					runStatement(statements[currentIndex]);
+				}
+			}
+			catch(const StallFlag&){
+				//stalled on a native function! vomit onto the stack and exit
+				pushStallNodeInfo({ AstType::script, currentIndex });
+				return;
 			}
 		}
 		
 		/**
 		 * Resumes a stalled darkness script. If the given AstNode is of any other type, throws
-		 * an error.
+		 * an error. The script may stall on the same statement, or it may stall on a new
+		 * statement.
 		 */
 		 void resumeScript(const AstNode& script){
 			throwIfNotType(script, AstType::script, "trying to resume not script!");
+			//make sure interpreter was stalled
 			if(stallingNativeFunctionCall.stallingNativeFunction == nullptr){
 				throwError("trying to resume a script but was not stalled!");
 			}
+			//try rerunning the stalled native function
 			try{
 				stallReturn = stallingNativeFunctionCall.run();
 			}
@@ -143,7 +215,7 @@ namespace darkness{
 				//stalled again on the same native function! exit prematurely
 				return;
 			}
-			//reset stalling native function call to nothing
+			//successfully ran - reset stalling native function call to nothing
 			stallingNativeFunctionCall = {};
 			//get the stall info
 			const StallNodeInfo& stallNodeInfo{ popLastStallNodeInfo() };
@@ -162,12 +234,17 @@ namespace darkness{
 			}
 			catch(const StallFlag&){
 				//stalled on a different native function! vomit onto the stack and exit
-				stallStack.push_back(StallNodeInfo{ AstType::script, currentIndex });
+				pushStallNodeInfo({ AstType::script, currentIndex });
 				return;
 			}
 		 }
 		 
 	private:
+		/**
+		 * Runs a statement, which are nodes which do not evaluate to a value. Some statements
+		 * may stall, while others are guaranteed not to stall. This method checks the type
+		 * of AstNode it is given and delegates to the appropriate run method.
+		 */
 		void runStatement(const AstNode& statement){
 			switch(statement.type){
 				case AstType::stmtVarDeclare:
@@ -198,10 +275,46 @@ namespace darkness{
 			}
 		}
 		
+		/**
+		 * Resumes a statement. Statements do not evaluate to a value. This method checks the
+		 * type of AstNode it is given and delegates to the appropriate resume method. Throws
+		 * an error if it is discovered that the node should have never stalled in the first
+		 * place.
+		 */
 		void resumeStatement(const AstNode& statement) {
-			//todo: stub
+			switch(statement.type){
+				case AstType::stmtVarDeclare:
+					resumeVarDeclare(statement);
+					break;
+				case AstType::stmtFuncDeclare:
+					throwError("somehow stalled on a func declare!");
+					break;
+				case AstType::stmtIf:
+					resumeIf(statement);
+					break;
+				case AstType::stmtWhile:
+					resumeWhile(statement);
+					break;
+				case AstType::stmtReturn:
+					resumeReturn(statement);
+					break;
+				case AstType::stmtBlock:
+					resumeBlock(statement);
+					break;
+				case AstType::stmtExpression:
+					resumeExpression(
+						*std::get<AstStmtExpressionData>(statement.dataVariant).expression
+					);
+					break;
+				default:
+					throwError("trying to resume not a statement!");
+			}
 		}
 		
+		/**
+		 * Runs a var declare node. Since var declares can only stall on their initializer
+		 * expression, this type of node does not vomit onto the stack.
+		 */
 		void runVarDeclare(const AstNode& varDeclare){
 			throwIfNotType(varDeclare, AstType::stmtVarDeclare, "not var declare!");
 			const auto& data{
@@ -218,6 +331,29 @@ namespace darkness{
 			innermostEnvironmentPointer->define(data.varName, initData);
 		}
 		
+		/**
+		 * Resumes a var declare node. Since var declares can only stall on their initializer
+		 * expression, this type of node will not pop the stack.
+		 */
+		void resumeVarDeclare(const AstNode& varDeclare){
+			throwIfNotType(varDeclare, AstType::stmtVarDeclare, "not var declare!");
+			const auto& data{
+				std::get<AstStmtVarDeclareData>(varDeclare.dataVariant)
+			};
+			const auto& initializer{ data.initializer };
+			DataType initData;	//uninitialized!
+			if(initializer){
+				initData = resumeExpression(*initializer);
+			}
+			else{
+				throwError("somehow resumed var declare with no initializer");
+			}
+			innermostEnvironmentPointer->define(data.varName, initData);
+		}
+		
+		/**
+		 * Runs a func declare node. This type of node should never stall.
+		 */
 		void runFuncDeclare(const AstNode& funcDeclare){
 			throwIfNotType(funcDeclare, AstType::stmtFuncDeclare, "not func declare!");
 			const auto& data{
@@ -232,37 +368,247 @@ namespace darkness{
 			innermostEnvironmentPointer->define(data.funcName, environmentData);
 		}
 		
+		/**
+		 * Runs an if node. This type of node may stall on its condition, true,
+		 * or false branch.
+		 */
 		void runIf(const AstNode& ifStatement){
 			throwIfNotType(ifStatement, AstType::stmtIf, "not an if statement!");
 			const auto& data{ std::get<AstStmtIfData>(ifStatement.dataVariant) };
-			DataType conditionValue{ runExpression(*data.condition) };
-			if(conditionValue.index() != boolIndex){
+			DataType conditionValue;//uninitialized!
+			try {
+				conditionValue = runExpression(*data.condition);
+			}
+			catch(const StallFlag&){
+				pushStallNodeInfo({ AstType::stmtIf, StallNodeInfo::ifCondition });
+				throw;
+			}
+			if( conditionValue.index() != boolIndex ) {
 				throwError("if statement condition was not bool!");
 			}
-			if(std::get<bool>(conditionValue)){
-				runStatement(*data.trueBranch);
+			if( std::get<bool>(conditionValue) ) {
+				try {
+					runStatement(*data.trueBranch);
+				}
+				catch(const StallFlag&){
+					pushStallNodeInfo({ AstType::stmtIf, StallNodeInfo::ifTrue });
+					throw;
+				}
 			}
-			else if(data.falseBranch){
-				runStatement(*data.falseBranch);
+			else if( data.falseBranch ) {
+				try {
+					runStatement(*data.falseBranch);
+				}
+				catch(const StallFlag&){
+					pushStallNodeInfo({ AstType::stmtIf, StallNodeInfo::ifFalse });
+					throw;
+				}
 			}
 		}
 		
+		/**
+		 * Resumes an if node. The stall may have occurred on its condition, true, or false
+		 * branch.
+		 */
+		void resumeIf(const AstNode& ifStatement){
+			throwIfNotType(ifStatement, AstType::stmtIf, "not an if statement!");
+			const auto& data{ std::get<AstStmtIfData>(ifStatement.dataVariant) };
+			//get the stall info
+			const StallNodeInfo& stallNodeInfo{ popLastStallNodeInfo() };
+			throwIfNotType(stallNodeInfo, AstType::stmtIf, "bad stall type: not if!");
+			switch(stallNodeInfo.index){
+				//case 1: resume the true branch
+				case StallNodeInfo::ifTrue: {
+					//it is possible that we stall again on the true branch.
+					try {
+						resumeStatement(*data.trueBranch);
+					}
+					catch(const StallFlag&){
+						pushStallNodeInfo({ AstType::stmtIf, StallNodeInfo::ifTrue });
+						throw;
+					}
+					break;
+				}
+				//case 2: resume the false branch
+				case StallNodeInfo::ifFalse: {
+					if(!data.falseBranch){
+						throwError("trying to resume false branch but doesn't exist!");
+					}
+					//it is possible that we stall again on the false branch
+					try {
+						resumeStatement(*data.falseBranch);
+					}
+					catch(const StallFlag&){
+						pushStallNodeInfo({ AstType::stmtIf, StallNodeInfo::ifFalse });
+						throw;
+					}
+					break;
+				}
+				//case 3: try to evaluate the condition again
+				case StallNodeInfo::ifCondition: {
+					DataType conditionValue;//uninitialized!
+					//it is possible that we stall again on the condition
+					try {
+						conditionValue = resumeExpression(*data.condition);
+					}
+					catch(const StallFlag&){
+						pushStallNodeInfo({ AstType::stmtIf, StallNodeInfo::ifCondition });
+						throw;
+					}
+					if( conditionValue.index() != boolIndex ) {
+						throwError("if statement condition was not bool!");
+					}
+					//the condition did not stall, meaning we can now run either true or false
+					if( std::get<bool>(conditionValue) ) {
+						try {
+							runStatement(*data.trueBranch);
+						}
+						catch(const StallFlag&){
+							pushStallNodeInfo({ AstType::stmtIf, StallNodeInfo::ifTrue });
+							throw;
+						}
+					}
+					else if( data.falseBranch ) {
+						try {
+							runStatement(*data.falseBranch);
+						}
+						catch(const StallFlag&){
+							pushStallNodeInfo({ AstType::stmtIf, StallNodeInfo::ifFalse });
+							throw;
+						}
+					}
+					break;
+				}
+				default:
+					throwError("bad stall index for if: " + stallNodeInfo.index);
+			}
+		}
+		
+		/**
+		 * Runs a while node. This type of node may stall on its condition or its body.
+		 */
 		void runWhile(const AstNode& whileStatement){
 			throwIfNotType(whileStatement, AstType::stmtWhile, "not a while statement!");
 			const auto& data{ std::get<AstStmtWhileData>(whileStatement.dataVariant) };
-			DataType conditionValue{ runExpression(*data.condition) };
+			DataType conditionValue;//uninitialized!
+			//evaluate condition the first time
+			try {
+				conditionValue = runExpression(*data.condition);
+			}
+			catch(const StallFlag&){
+				pushStallNodeInfo({ AstType::stmtWhile, StallNodeInfo::whileCondition });
+				throw;
+			}
 			if(conditionValue.index() != boolIndex){
 				throwError("while statement condition was not bool!");
 			}
+			//while the condition evaluates to true, run the body of the loop
 			while(std::get<bool>(conditionValue)){
-				runStatement(*data.body);
-				conditionValue = runExpression(*data.condition);
+				//run body
+				try {
+					runStatement(*data.body);
+				}
+				catch(const StallFlag&){
+					pushStallNodeInfo({ AstType::stmtWhile, StallNodeInfo::whileBody });
+					throw;
+				}
+				//reevaluate condition
+				try {
+					conditionValue = runExpression(*data.condition);
+				}
+				catch(const StallFlag&){
+					pushStallNodeInfo({ AstType::stmtWhile, StallNodeInfo::whileCondition });
+					throw;
+				}
 				if(conditionValue.index() != boolIndex){
 					throwError("while statement condition was not bool!");
 				}
 			}
 		}
 		
+		/**
+		 * Resumes a while node. The stall may have occurred on its condition or its body.
+		 */
+		void resumeWhile(const AstNode& whileStatement){
+			throwIfNotType(whileStatement, AstType::stmtWhile, "not a while statement!");
+			const auto& data{ std::get<AstStmtWhileData>(whileStatement.dataVariant) };
+			//get the stall info
+			const StallNodeInfo& stallNodeInfo{ popLastStallNodeInfo() };
+			throwIfNotType(stallNodeInfo, AstType::stmtWhile, "bad stall type: not while!");
+			
+			//re-execute the stalled node
+			DataType conditionValue;//uninitialized!
+			switch(stallNodeInfo.index){
+				//case 1: stall occurred in the body - resume the body once
+				case StallNodeInfo::whileBody:{
+					//the body may stall again
+					try {
+						resumeStatement(*data.body);
+					}
+					catch(const StallFlag&){
+						pushStallNodeInfo({ AstType::stmtWhile, StallNodeInfo::whileBody });
+						throw;
+					}
+					//body did not stall again, reevaluate condition
+					try {
+						conditionValue = runExpression(*data.condition);
+					}
+					catch(const StallFlag&){
+						pushStallNodeInfo(
+							{ AstType::stmtWhile, StallNodeInfo::whileCondition }
+						);
+						throw;
+					}
+					break;
+				}
+				//case 2: stall occurred in the condition - resume the condition
+				case StallNodeInfo::whileCondition:{
+					//the condition may stall again
+					try {
+						conditionValue = resumeExpression(*data.condition);
+					}
+					catch(const StallFlag&){
+						pushStallNodeInfo(
+							{ AstType::stmtWhile, StallNodeInfo::whileCondition }
+						);
+						throw;
+					}
+					break;
+				}
+				default:
+					throwError("bad stall index for while: " + stallNodeInfo.index);
+			}
+			//resume the loop - all control paths have evaluated the condition once by now
+			if(conditionValue.index() != boolIndex){
+				throwError("while statement condition was not bool!");
+			}
+			while(std::get<bool>(conditionValue)){
+				//run body
+				try {
+					runStatement(*data.body);
+				}
+				catch(const StallFlag&){
+					pushStallNodeInfo({ AstType::stmtWhile, StallNodeInfo::whileBody });
+					throw;
+				}
+				//reevaluate condition
+				try {
+					conditionValue = runExpression(*data.condition);
+				}
+				catch(const StallFlag&){
+					pushStallNodeInfo({ AstType::stmtWhile, StallNodeInfo::whileCondition });
+					throw;
+				}
+				if(conditionValue.index() != boolIndex){
+					throwError("while statement condition was not bool!");
+				}
+			}
+		}
+		
+		/**
+		 * Runs a return node. Since returns can only stall on evaluating their value, this
+		 * type of node does not vomit onto the stack
+		 */
 		void runReturn(const AstNode& returnStatement){
 			throwIfNotType(returnStatement, AstType::stmtReturn, "not a return statement!");
 			const auto& data{ std::get<AstStmtReturnData>(returnStatement.dataVariant) };
@@ -277,27 +623,108 @@ namespace darkness{
 			//blocks and functions will reset environment even if throw
 		}
 		
+		/**
+		 * Resumes a return node. Since returns can only stall on evaluating their value, this
+		 * type of node will not pop the stack.
+		 */
+		void resumeReturn(const AstNode& returnStatement){
+			throwIfNotType(returnStatement, AstType::stmtReturn, "not a return statement!");
+			const auto& data{ std::get<AstStmtReturnData>(returnStatement.dataVariant) };
+			
+			//void returns actually just return false
+			if(data.hasValue){
+				throw resumeExpression(*data.value);
+			}
+			else{
+				throwError("somehow resumed return with no value");
+			}
+			//blocks and functions will reset environment even if throw
+		}
+		
+		/**
+		 * Runs a block node. A block may stall on any of its statements.
+		 */
 		void runBlock(const AstNode& block){
 			throwIfNotType(block, AstType::stmtBlock, "not a block!");
-			std::shared_ptr<Environment> previousEnvironment{ innermostEnvironmentPointer };
+			int currentIndex{ 0 };
 			const auto& statements{
 				std::get<AstStmtBlockData>(block.dataVariant).statements
 			};
-			innermostEnvironmentPointer = std::make_shared<Environment>(previousEnvironment);
+			//create a new environment who is a child of the old environment
+			pushEmptyEnvironment();
 			try{
-				for(const auto& statement : statements){
-					runStatement(statement);
+				for(; currentIndex < statements.size(); ++currentIndex){
+					runStatement(statements[currentIndex]);
 				}
-				innermostEnvironmentPointer
-					= innermostEnvironmentPointer->getEnclosingEnvironmentPointer();
+				//reset the environment to its parent
+				popEnvironment();
+			}
+			catch(const StallFlag&){
+				/**
+				 * stalled on a native function! vomit onto the stack and rethrow, but
+				 * DO NOT RESET THE ENVIRONMENT POINTER since we must resume in the inner-most
+				 * environment.
+				 */
+				pushStallNodeInfo({ AstType::stmtBlock, currentIndex });
+				throw;
 			}
 			catch(...){
-				innermostEnvironmentPointer
-					= innermostEnvironmentPointer->getEnclosingEnvironmentPointer();
+				//caught something else, reset environment and rethrow.
+				popEnvironment();
 				throw;
 			}
 		}
 		
+		/**
+		 * Resumes a stalled block. The block may stall on the same statement, or it may stall
+		 * on a new statement.
+		 */
+		void resumeBlock(const AstNode& block){
+			/**
+			 * This method DOES NOT CREATE A NEW ENVIRONMENT since we resume execution in the
+			 * inner-most environment.
+			 */
+			throwIfNotType(block, AstType::stmtBlock, "not a block!");
+			//get the stall info
+			const StallNodeInfo& stallNodeInfo{ popLastStallNodeInfo() };
+			throwIfNotType(stallNodeInfo, AstType::stmtBlock, "bad stall type: not block!");
+			//resume running the block
+			int currentIndex{ stallNodeInfo.index };
+			const auto& statements{
+				std::get<AstStmtBlockData>(block.dataVariant).statements
+			};
+			try{
+				//resume the stalled statement
+				resumeStatement(statements[currentIndex]);
+				++currentIndex;
+				//run the rest of the statements like normal
+				for(; currentIndex < statements.size(); ++currentIndex){
+					runStatement(statements[currentIndex]);
+				}
+				//reset the environment to its parent
+				popEnvironment();
+			}
+			catch(const StallFlag&){
+				/**
+				 * stalled on a different native function! vomit onto the stack and rethrow,
+				 * but DO NOT RESET THE ENVIRONMENT POINTER since we must resume in the
+				 * inner-most environment.
+				 */
+				pushStallNodeInfo({ AstType::stmtBlock, currentIndex });
+				throw;
+			}
+			catch(...){
+				//caught something else, reset environment and rethrow.
+				popEnvironment();
+				throw;
+			}
+		}
+		
+		/**
+		 * Runs an expression, which are nodes which evaluate to a value. Some expressions
+		 * may stall, while others are guaranteed not to stall. This method checks the type
+		 * of AstNode it is given and delegates to the appropriate run method.
+		 */
 		DataType runExpression(const AstNode& expression){
 			switch(expression.type){
 				case AstType::litBool:
@@ -355,11 +782,100 @@ namespace darkness{
 			}
 		}
 		
+		/**
+		 * Resumes an expression. Expressions evaluate to a value. This method checks the type
+		 * of AstNode it is given and delegates to the appropriate resume method. Throws an
+		 * error if it is discovered that the node should have never stalled in the first
+		 * place.
+		 */
+		DataType resumeExpression(const AstNode& expression){
+			switch(expression.type){
+				case AstType::litBool:
+				case AstType::litInt:
+				case AstType::litFloat:
+				case AstType::litString:
+					throwError("somehow stalled on a literal expression!");
+				case AstType::parenthesis:
+					return resumeExpression(
+						*std::get<AstParenthesisData>(expression.dataVariant).inside
+					);
+				case AstType::unaryBang:
+					return resumeUnaryBang(expression);
+				case AstType::unaryPlus:
+					return resumeUnaryPlus(expression);
+				case AstType::unaryMinus:
+					return resumeUnaryMinus(expression);
+				case AstType::binPlus:
+					return resumeBinaryPlus(expression);
+				case AstType::binMinus:
+					return resumeBinaryMinus(expression);
+				case AstType::binStar:
+					return resumeBinaryStar(expression);
+				case AstType::binForwardSlash:
+					return resumeBinaryForwardSlash(expression);
+				case AstType::binDualEqual:
+					return resumeBinaryDualEqual(expression);
+				case AstType::binBangEqual:
+					return resumeBinaryBangEqual(expression);
+				case AstType::binGreater:
+					return resumeBinaryGreater(expression);
+				case AstType::binGreaterEqual:
+					return resumeBinaryGreaterEqual(expression);
+				case AstType::binLess:
+					return resumeBinaryLess(expression);
+				case AstType::binLessEqual:
+					return resumeBinaryLessEqual(expression);
+				case AstType::binAmpersand:
+					return resumeBinaryAmpersand(expression);
+				case AstType::binVerticalBar:
+					return resumeBinaryVerticalBar(expression);
+				case AstType::binAssign:
+					return resumeBinaryAssignment(expression);
+				
+				case AstType::variable:
+					throwError("somehow stalled on a get-variable expression!");
+				case AstType::call:
+					return resumeCall(expression);
+				
+				default:
+					throwError("trying to resume not an expression!");
+			}
+		}
+		
+		/**
+		 * Runs a unary bang node. This node will negate a boolean arg and throw if its arg
+		 * is of any other built in type. Delegates to the native unary bang function if the
+		 * arg is of a user-defined type. Because users must guarantee that the native unary
+		 * bang function will not stall, this method will only stall on its argument. Thus,
+		 * this type of node does not vomit onto the stack.
+		 */
 		DataType runUnaryBang(const AstNode& unary){
 			throwIfNotType(unary, AstType::unaryBang, "not unary bang!");
 			DataType argValue{ runExpression(
 				*std::get<AstUnaryData>(unary.dataVariant).arg
 			) };
+			return evaluateUnaryBang(argValue);
+		}
+		
+		/**
+		 * Resumes a unary bang node. This node will negate a boolean arg and throw if its arg
+		 * is of any other built in type. Delegates to the native unary bang function if the
+		 * arg is of a user-defined type. Since unary operators can only stall on their
+		 * argument, this type of node will not pop the stack.
+		 */
+		DataType resumeUnaryBang(const AstNode& unary){
+			throwIfNotType(unary, AstType::unaryBang, "not unary bang!");
+			DataType argValue{ resumeExpression(
+				*std::get<AstUnaryData>(unary.dataVariant).arg
+			) };
+			return evaluateUnaryBang(argValue);
+		}
+		
+		/**
+		 * Given an input argument, runs either the built in unary bang or the native unary
+		 * bang on that argument, and returns the result.
+		 */
+		bool evaluateUnaryBang(const DataType& argValue){
 			if(holdsAlternatives<bool>(argValue)){
 				return !std::get<bool>(argValue);
 			}
@@ -377,11 +893,41 @@ namespace darkness{
 			return nativeFunction({ argValue });
 		}
 		
+		/**
+		 * Runs a unary plus node. This node will simply return the value of an integer or a
+		 * float. Throws an error if the arg is of any other built in type. Delegates to the
+		 * native unary plus function if the arg is of a user-defined type. Because users must
+		 * guarantee that the native unary plus function will not stall, this method will only
+		 * stall on its argument. Thus, this type of node does not vomit onto the stack.
+		 */
 		DataType runUnaryPlus(const AstNode& unary){
 			throwIfNotType(unary, AstType::unaryPlus, "not unary plus!");
 			DataType argValue{ runExpression(
 				*std::get<AstUnaryData>(unary.dataVariant).arg
 			) };
+			return evaluateUnaryPlus(argValue);
+		}
+		
+		/**
+		 * Resumes a unary plus node. This node will simply return the value of an integer or a
+		 * float. Throws an error if the arg is of any other built in type. Delegates to the
+		 * native unary plus function if the arg is of a user-defined type. Since unary
+		 * operators can only stall on their argument, this type of node will not pop
+		 * the stack.
+		 */
+		DataType resumeUnaryPlus(const AstNode& unary){
+			throwIfNotType(unary, AstType::unaryPlus, "not unary plus!");
+			DataType argValue{ resumeExpression(
+				*std::get<AstUnaryData>(unary.dataVariant).arg
+			) };
+			return evaluateUnaryPlus(argValue);
+		}
+		
+		/**
+		 * Given an input argument, runs either the built in unary plus or the native unary
+		 * plus on that argument, and returns the result.
+		 */
+		DataType evaluateUnaryPlus(const DataType& argValue){
 			if(holdsAlternatives<bool, std::string, FunctionWrapper>(argValue)){
 				throwError("bad arg for unary plus!");
 			}
@@ -399,16 +945,42 @@ namespace darkness{
 			return nativeFunction({ argValue });
 		}
 		
-		//todo: continue refactoring errors
+		/**
+		 * Runs a unary minus node. This node will negate an integer or a float and throw if
+		 * the arg is of any other built in type. Delegates to the native unary minus function
+		 * if the arg is of a user-defined type. Because users must guarantee that the native
+		 * unary minus function will not stall, this method will only stall on its argument.
+		 * Thus, this type of node does not vomit onto the stack.
+		 */
 		DataType runUnaryMinus(const AstNode& unary){
 			throwIfNotType(unary, AstType::unaryMinus, "not unary minus!");
 			DataType argValue{ runExpression(
 				*std::get<AstUnaryData>(unary.dataVariant).arg
 			) };
+			return evaluateUnaryMinus(argValue);
+		}
+		
+		/**
+		 * Resumes a unary minus node. This node will negate an integer or a float and throw
+		 * if the arg is of any other built in type. Delegates to the native unary plus
+		 * function if the arg is of a user-defined type. Since unary operators can only stall
+		 * on their argument, this type of node will not pop the stack.
+		 */
+		DataType resumeUnaryMinus(const AstNode& unary){
+			throwIfNotType(unary, AstType::unaryMinus, "not unary minus!");
+			DataType argValue{ resumeExpression(
+				*std::get<AstUnaryData>(unary.dataVariant).arg
+			) };
+			return evaluateUnaryMinus(argValue);
+		}
+		
+		/**
+		 * Given an input argument, runs either the built in unary minus or the native unary
+		 * minus on that argument, and returns the result.
+		 */
+		DataType evaluateUnaryMinus(const DataType& argValue){
 			if(holdsAlternatives<bool, std::string, FunctionWrapper>(argValue)){
-				throw std::runtime_error{
-					"Darkness interpreter bad arg for unary minus!"
-				};
+				throwError("bad arg for unary minus!");
 			}
 			if(holdsAlternatives<int>(argValue)){
 				return -std::get<int>(argValue);
@@ -426,6 +998,8 @@ namespace darkness{
 				)};
 			return nativeFunction({ argValue });
 		}
+		
+		//todo: continue refactoring and implementing stalling
 		
 		DataType runBinaryPlus(const AstNode& binary){
 			throwIfNotType(binary, AstType::binPlus, "not binary plus!");
@@ -492,14 +1066,10 @@ namespace darkness{
 					}
 				}
 				if(leftIndex == boolIndex || rightIndex == boolIndex){
-					throw std::runtime_error{
-						"Darkness interpreter trying to add a bool!"
-					};
+					throwError("trying to add a bool!");
 				}
 				if(leftIndex == functionIndex || rightIndex == functionIndex){
-					throw std::runtime_error{
-						"Darkness interpreter trying to add a function!"
-					};
+					throwError("trying to add a function!");
 				}
 			}
 			//one of our args is NOT a built-in type! look for a native function
@@ -553,19 +1123,13 @@ namespace darkness{
 					}
 				}
 				if(leftIndex == boolIndex || rightIndex == boolIndex){
-					throw std::runtime_error{
-						"Darkness interpreter trying to minus a bool!"
-					};
+					throwError("trying to minus a bool!");
 				}
 				if(leftIndex == functionIndex || rightIndex == functionIndex){
-					throw std::runtime_error{
-						"Darkness interpreter trying to minus a function!"
-					};
+					throwError("trying to minus a function!");
 				}
 				if(leftIndex == stringIndex || rightIndex == stringIndex){
-					throw std::runtime_error{
-						"Darkness interpreter trying to minus a string!"
-					};
+					throwError("trying to minus a string!");
 				}
 			}
 			//one of our args is NOT a built-in type! look for a native function
@@ -619,19 +1183,13 @@ namespace darkness{
 					}
 				}
 				if(leftIndex == boolIndex || rightIndex == boolIndex){
-					throw std::runtime_error{
-						"Darkness interpreter trying to star a bool!"
-					};
+					throwError("trying to star a bool!");
 				}
 				if(leftIndex == functionIndex || rightIndex == functionIndex){
-					throw std::runtime_error{
-						"Darkness interpreter trying to star a function!"
-					};
+					throwError("trying to star a function!");
 				}
 				if(leftIndex == stringIndex || rightIndex == stringIndex){
-					throw std::runtime_error{
-						"Darkness interpreter trying to star a string!"
-					};
+					throwError("trying to star a string!");
 				}
 			}
 			//one of our args is NOT a built-in type! look for a native function
@@ -685,19 +1243,13 @@ namespace darkness{
 					}
 				}
 				if(leftIndex == boolIndex || rightIndex == boolIndex){
-					throw std::runtime_error{
-						"Darkness interpreter trying to forward slash a bool!"
-					};
+					throwError("trying to forward slash a bool!");
 				}
 				if(leftIndex == functionIndex || rightIndex == functionIndex){
-					throw std::runtime_error{
-						"Darkness interpreter trying to forward slash a function!"
-					};
+					throwError("trying to forward slash a function!");
 				}
 				if(leftIndex == stringIndex || rightIndex == stringIndex){
-					throw std::runtime_error{
-						"Darkness interpreter trying to forward slash a string!"
-					};
+					throwError("trying to forward slash a string!");
 				}
 			}
 			//one of our args is NOT a built-in type! look for a native function
@@ -713,16 +1265,16 @@ namespace darkness{
 		
 		DataType runBinaryDualEqual(const AstNode& binary){
 			throwIfNotType(binary, AstType::binDualEqual, "not binary dual equal!");
-			return binaryDualEqualHelper(binary);
+			return evaluateBinaryDualEqual(binary);
 		}
 		
 		DataType runBinaryBangEqual(const AstNode& binary){
 			throwIfNotType(binary, AstType::binBangEqual, "not binary bang equal!");
-			return !binaryDualEqualHelper(binary);
+			return !evaluateBinaryDualEqual(binary);
 		}
 		
 		//runs a dual equal operation on two sides of a binary expression without ast checking
-		bool binaryDualEqualHelper(const AstNode& binary){
+		bool evaluateBinaryDualEqual(const AstNode& binary){
 			DataType leftValue{ runExpression(
 				*std::get<AstBinData>(binary.dataVariant).left
 			) };
@@ -749,9 +1301,7 @@ namespace darkness{
 								return std::to_string(leftInt) == rightString;
 							}
 							case functionIndex:
-								throw std::runtime_error{
-									"Darkness interpreter trying to dual equal int vs func!"
-								};
+								throwError("trying to dual equal int vs func!");
 						}
 					}
 					case floatIndex: {
@@ -770,9 +1320,7 @@ namespace darkness{
 								return std::to_string(leftFloat) == rightString;
 							}
 							case functionIndex:
-								throw std::runtime_error{
-									"Darkness interpreter trying to dual equal float vs func!"
-								};
+								throwError("trying to dual equal float vs func!");
 						}
 					}
 					case stringIndex: {
@@ -791,15 +1339,11 @@ namespace darkness{
 								return leftString == rightString;
 							}
 							case functionIndex:
-								throw std::runtime_error{
-									"Darkness interpreter trying to dual equal string vs func!"
-								};
+								throwError("trying to dual equal string vs func!");
 						}
 					}
 					case functionIndex: {
-						throw std::runtime_error{
-							"Darkness interpreter trying to dual equal a func!"
-						};
+						throwError("trying to dual equal a func!");
 					}
 				}
 				if(leftIndex == boolIndex){
@@ -807,16 +1351,12 @@ namespace darkness{
 						return std::get<bool>(leftValue) == std::get<bool>(rightValue);
 					}
 					else{
-						throw std::runtime_error{
-							"Darkness interpreter trying to use == with only 1 bool!"
-						};
+						throwError("trying to use == with only 1 bool!");
 					}
 				}
 				if(rightIndex == boolIndex){
 					//we already know the left isn't a bool, so throw
-					throw std::runtime_error{
-						"Darkness interpreter trying to use == with only 1 bool!"
-					};
+					throwError("trying to use == with only 1 bool!");
 				}
 			}
 			//one of our args is NOT a built-in type! look for a native function
@@ -832,9 +1372,7 @@ namespace darkness{
 				return std::get<bool>(nativeFunctionResult);
 			}
 			else{
-				throw std::runtime_error{
-					"Darkness interpreter bad type from native dual equal function!"
-				};
+				throwError("bad type from native dual equal function!");
 			}
 		}
 		
@@ -846,7 +1384,7 @@ namespace darkness{
 			DataType rightValue{ runExpression(
 				*std::get<AstBinData>(binary.dataVariant).right
 			) };
-			return binaryGreaterHelper(leftValue, rightValue);
+			return evaluateBinaryGreater(leftValue, rightValue);
 		}
 		
 		DataType runBinaryGreaterEqual(const AstNode& binary){
@@ -858,7 +1396,7 @@ namespace darkness{
 				*std::get<AstBinData>(binary.dataVariant).right
 			) };
 			//switch left and right and also negate
-			return !binaryGreaterHelper(rightValue, leftValue);
+			return !evaluateBinaryGreater(rightValue, leftValue);
 		}
 		
 		DataType runBinaryLess(const AstNode& binary){
@@ -870,7 +1408,7 @@ namespace darkness{
 				*std::get<AstBinData>(binary.dataVariant).right
 			) };
 			//switch left and right
-			return binaryGreaterHelper(rightValue, leftValue);
+			return evaluateBinaryGreater(rightValue, leftValue);
 		}
 		
 		DataType runBinaryLessEqual(const AstNode& binary){
@@ -882,11 +1420,11 @@ namespace darkness{
 				*std::get<AstBinData>(binary.dataVariant).right
 			) };
 			//negate
-			return !binaryGreaterHelper(leftValue, rightValue);
+			return !evaluateBinaryGreater(leftValue, rightValue);
 		}
 		
 		//runs a greater operation on two sides of a binary expression without ast checking
-		bool binaryGreaterHelper(const DataType& leftValue, const DataType& rightValue){
+		bool evaluateBinaryGreater(const DataType& leftValue, const DataType& rightValue){
 			auto leftIndex{ leftValue.index() };
 			auto rightIndex{ rightValue.index() };
 			if(leftIndex < numBuiltInTypes && rightIndex < numBuiltInTypes){
@@ -944,14 +1482,10 @@ namespace darkness{
 					}
 				}
 				if(leftIndex == boolIndex || rightIndex == boolIndex){
-					throw std::runtime_error{
-						"Darkness interpreter trying to compare a bool!"
-					};
+					throwError("trying to compare a bool!");
 				}
 				if(leftIndex == functionIndex || rightIndex == functionIndex){
-					throw std::runtime_error{
-						"Darkness interpreter trying to compare a func!"
-					};
+					throwError("trying to compare a func!");
 				}
 			}
 			//one of our args is NOT a built-in type! look for a native function
@@ -967,9 +1501,7 @@ namespace darkness{
 				return std::get<bool>(nativeFunctionResult);
 			}
 			else{
-				throw std::runtime_error{
-					"Darkness interpreter bad type from native greater function!"
-				};
+				throwError("bad type from native greater function!");
 			}
 		}
 		
@@ -979,9 +1511,7 @@ namespace darkness{
 				*std::get<AstBinData>(binary.dataVariant).left
 			) };
 			if(leftValue.index() != boolIndex){
-				throw std::runtime_error{
-					"Darkness interpreter left side of '&' not bool!"
-				};
+				throwError("left side of '&' not bool!");
 			}
 			if(!std::get<bool>(leftValue)){
 				//if the left side was false, short circuit and return false
@@ -991,9 +1521,7 @@ namespace darkness{
 				*std::get<AstBinData>(binary.dataVariant).right
 			) };
 			if(rightValue.index() != boolIndex){
-				throw std::runtime_error{
-					"Darkness interpreter right side of '&' not bool!"
-				};
+				throwError("right side of '&' not bool!");
 			}
 			//if the left side is true, the entire expression evaluates to the right side
 			return std::get<bool>(rightValue);
@@ -1005,9 +1533,7 @@ namespace darkness{
 				*std::get<AstBinData>(binary.dataVariant).left
 			) };
 			if(leftValue.index() != boolIndex){
-				throw std::runtime_error{
-					"Darkness interpreter left side of '|' not bool!"
-				};
+				throwError("left side of '|' not bool!");
 			}
 			if(std::get<bool>(leftValue)){
 				//if the left side was true, short circuit and return true
@@ -1017,9 +1543,7 @@ namespace darkness{
 				*std::get<AstBinData>(binary.dataVariant).right
 			) };
 			if(rightValue.index() != boolIndex){
-				throw std::runtime_error{
-					"Darkness interpreter right side of '|' not bool!"
-				};
+				throwError("right side of '|' not bool!");
 			}
 			//if the left side is false, the entire expression evaluates to the right side
 			return std::get<bool>(rightValue);
@@ -1050,9 +1574,7 @@ namespace darkness{
 			//get the function wrapper
 			const auto& functionWrapperData{ runExpression(*data.funcExpr) };
 			if(!std::holds_alternative<FunctionWrapper>(functionWrapperData)){
-				throw std::runtime_error{
-					"Darkness interpreter tried to call non-function!"
-				};
+				throwError("tried to call non-function!");
 			}
 			const auto& functionWrapper{ std::get<FunctionWrapper>(functionWrapperData) };
 			
@@ -1156,6 +1678,24 @@ namespace darkness{
 		
 		DataType popLastStallData(){
 			 return std::get<DataType>(stallStack.pop_back());
+		}
+		
+		/**
+		 * Sets the innermost environment pointer to a new environment which is the direct
+		 * child of the previous environment.
+		 */
+		void pushEmptyEnvironment(){
+			innermostEnvironmentPointer = std::make_shared<Environment>(
+				innermostEnvironmentPointer
+			);
+		}
+		
+		/**
+		 * Sets the innermost environment pointer to the parent of the current environment.
+		 */
+		void popEnvironment(){
+			innermostEnvironmentPointer
+				= innermostEnvironmentPointer->getEnclosingEnvironmentPointer();
 		}
 		
 		static void throwIfNotType(
