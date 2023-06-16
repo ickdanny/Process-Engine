@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <functional>
 #include <any>
+#include <utility>
 
 namespace darkness{
 	
@@ -100,6 +101,8 @@ namespace darkness{
 			static constexpr int binLeft{ -31 };
 			static constexpr int binRight{ -32 };
 			static constexpr int callFuncExpr{ -40 };
+			static constexpr int callNative{ -41 };
+			static constexpr int callUser{ -42 };
 		};
 		struct StallingNativeFunctionCall{
 			NativeFunction stallingNativeFunction{};
@@ -660,7 +663,7 @@ namespace darkness{
 				popEnvironment();
 			}
 			catch(const StallFlag&){
-				/**
+				/*
 				 * stalled on a native function! vomit onto the stack and rethrow, but
 				 * DO NOT RESET THE ENVIRONMENT POINTER since we must resume in the inner-most
 				 * environment.
@@ -999,16 +1002,124 @@ namespace darkness{
 			return nativeFunction({ argValue });
 		}
 		
-		//todo: continue refactoring and implementing stalling
-		
+		/**
+		 * Runs a binary plus node. This node will add integers, floats, and concatenate
+		 * strings. It will throw if the args are of any other built in type. Delegates to the
+		 * native binary plus function if the arg is of a user-defined type. Because users must
+		 * guarantee that the native binary plus function will not stall, this method will only
+		 * stall on its left or right argument. If this method stalls on the left argument, it
+		 * will vomit the left index onto the stack. However, if the method stalls on the right
+		 * argument, it will also first vomit the left value onto the stack, so as to eliminate
+		 * the need to reevaluate the left node upon resuming execution.
+		 */
 		DataType runBinaryPlus(const AstNode& binary){
 			throwIfNotType(binary, AstType::binPlus, "not binary plus!");
-			DataType leftValue{ runExpression(
-				*std::get<AstBinData>(binary.dataVariant).left
-			) };
-			DataType rightValue{ runExpression(
-				*std::get<AstBinData>(binary.dataVariant).right
-			) };
+			const auto& [leftValue, rightValue] = evaluateBinaryArgs(binary);
+			return evaluateBinaryPlus(leftValue, rightValue);
+		}
+		
+		/**
+		 * Evaluates the two sides of a binary expression. Does not check for ast type
+		 */
+		std::pair<DataType, DataType> evaluateBinaryArgs(const AstNode& binary){
+			DataType leftValue;//uninitialized
+			try {
+				leftValue = runExpression(*std::get<AstBinData>(binary.dataVariant).left);
+			}
+			catch(const StallFlag&){
+				pushStallNodeInfo({ binary.type, StallNodeInfo::binLeft });
+				throw;
+			}
+			DataType rightValue;//uninitialized
+			try {
+				rightValue = runExpression(*std::get<AstBinData>(binary.dataVariant).right);
+			}
+			catch(const StallFlag&){
+				pushStallNodeData(leftValue);
+				pushStallNodeInfo({ binary.type, StallNodeInfo::binRight });
+				throw;
+			}
+			return { leftValue, rightValue };
+		}
+		
+		/**
+		 * Resumes a binary plus node. This node will add integers, floats, and concatenate
+		 * strings. It will throw if the args are of any other built in type. Delegates to the
+		 * native binary plus function if the args are of a user-defined type. If the stall
+		 * occurred on the left argument, execution will resume as normal. However, if the stall
+		 * occurred on the right argument, this method will extract the stored left argument
+		 * from the stack as well.
+		 */
+		DataType resumeBinaryPlus(const AstNode& binary){
+			throwIfNotType(binary, AstType::binPlus, "not binary plus!");
+			//get the stall info
+			const StallNodeInfo& stallNodeInfo{ popLastStallNodeInfo() };
+			throwIfNotType(stallNodeInfo, AstType::binPlus, "bad stall type: not bin plus!");
+			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(binary);
+			return evaluateBinaryPlus(leftValue, rightValue);
+		}
+		
+		/**
+		 * Resumes evaluating the two sides of a binary expression. Handles the case of
+		 * resuming the right argument needing to extract the stored left argument. Does not
+		 * check for ast type.
+		 */
+		std::pair<DataType, DataType> resumeEvaluatingBinaryArgs(
+			const AstNode& binary,
+			const StallNodeInfo& stallNodeInfo
+		){
+			DataType leftValue;//uninitialized
+			DataType rightValue;//uninitialized
+			switch(stallNodeInfo.index){
+				case StallNodeInfo::binLeft: {
+					//the left expression may stall again
+					try{
+						leftValue = resumeExpression(
+							*std::get<AstBinData>(binary.dataVariant).left
+						);
+					}
+					catch(const StallFlag&){
+						pushStallNodeInfo({ binary.type, StallNodeInfo::binLeft });
+						throw;
+					}
+					//the left expression did not stall again, evaluate to right side
+					try {
+						rightValue = runExpression(
+							*std::get<AstBinData>(binary.dataVariant).right
+						);
+					}
+					catch(const StallFlag&){
+						pushStallNodeData(leftValue);
+						pushStallNodeInfo({ binary.type, StallNodeInfo::binRight });
+						throw;
+					}
+					break;
+				}
+				case StallNodeInfo::binRight: {
+					//must pop stack in case lower expressions also need stack
+					leftValue = popLastStallData();
+					//the right expression may stall again
+					try{
+						rightValue = resumeExpression(
+							*std::get<AstBinData>(binary.dataVariant).right
+						);
+					}
+					catch(const StallFlag&){
+						pushStallNodeData(leftValue);
+						pushStallNodeInfo({ binary.type, StallNodeInfo::binRight });
+						throw;
+					}
+				}
+				default:
+					throwError("bad stall index for binary expression: " + stallNodeInfo.index);
+			}
+		}
+		
+		/**
+		 * Given two input arguments, runs either the built in binary plus or the native binary
+		 * plus on those arguments, and returns the result.
+		 */
+		DataType evaluateBinaryPlus(const DataType& leftValue, const DataType& rightValue){
 			auto leftIndex{ leftValue.index() };
 			auto rightIndex{ rightValue.index() };
 			if(leftIndex < numBuiltInTypes && rightIndex < numBuiltInTypes){
@@ -1083,14 +1194,44 @@ namespace darkness{
 			return nativeFunction({ leftValue, rightValue });
 		}
 		
+		/**
+		 * Runs a binary minus node. This node will subtract integers and floats. It will throw
+		 * if the args are of any other built in type. Delegates to the native binary minus
+		 * function if the args are of a user-defined type. Because users must guarantee that
+		 * the native binary minus function will not stall, this method will only stall on its
+		 * left or right argument. If this method stalls on the left argument, it will vomit the
+		 * left index onto the stack. However, if the method stalls on the right argument, it
+		 * will also first vomit the left value onto the stack, so as to eliminate the need to
+		 * reevaluate the left node upon resuming execution.
+		 */
 		DataType runBinaryMinus(const AstNode& binary){
 			throwIfNotType(binary, AstType::binMinus, "not binary minus!");
-			DataType leftValue{ runExpression(
-				*std::get<AstBinData>(binary.dataVariant).left
-			) };
-			DataType rightValue{ runExpression(
-				*std::get<AstBinData>(binary.dataVariant).right
-			) };
+			const auto& [leftValue, rightValue] = evaluateBinaryArgs(binary);
+			return evaluateBinaryMinus(leftValue, rightValue);
+		}
+		
+		/**
+		 * Resumes a binary minus node. This node will subtract integers and floats. It will
+		 * throw if the args are of any other built in type. Delegates to the native binary
+		 * minus function if the arg is of a user-defined type. If the stall occurred on the
+		 * left argument, execution will resume as normal. However, if the stall occurred on
+		 * the right argument, this method will extract the stored left argument from the stack
+		 * as well.
+		 */
+		DataType resumeBinaryMinus(const AstNode& binary){
+			throwIfNotType(binary, AstType::binMinus, "not binary minus!");
+			//get the stall info
+			const StallNodeInfo& stallNodeInfo{ popLastStallNodeInfo() };
+			throwIfNotType(stallNodeInfo, AstType::binMinus, "bad stall type: not bin minus!");
+			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(binary);
+			return evaluateBinaryMinus(leftValue, rightValue);
+		}
+		
+		/**
+		 * Given two input arguments, runs either the built in binary minus or the native
+		 * binary minus on those arguments, and returns the result.
+		 */
+		DataType evaluateBinaryMinus(const DataType& leftValue, const DataType& rightValue){
 			auto leftIndex{ leftValue.index() };
 			auto rightIndex{ rightValue.index() };
 			if(leftIndex < numBuiltInTypes && rightIndex < numBuiltInTypes){
@@ -1143,14 +1284,44 @@ namespace darkness{
 			return nativeFunction({ leftValue, rightValue });
 		}
 		
+		/**
+		 * Runs a binary star node. This node will multiply integers and floats. It will throw
+		 * if the args are of any other built in type. Delegates to the native binary star
+		 * function if the arg is of a user-defined type. Because users must guarantee that the
+		 * native binary star function will not stall, this method will only stall on its left
+		 * or right argument. If this method stalls on the left argument, it will vomit the
+		 * left index onto the stack. However, if the method stalls on the right argument, it
+		 * will also first vomit the left value onto the stack, so as to eliminate the need to
+		 * reevaluate the left node upon resuming execution.
+		 */
 		DataType runBinaryStar(const AstNode& binary){
 			throwIfNotType(binary, AstType::binStar, "not binary star!");
-			DataType leftValue{ runExpression(
-				*std::get<AstBinData>(binary.dataVariant).left
-			) };
-			DataType rightValue{ runExpression(
-				*std::get<AstBinData>(binary.dataVariant).right
-			) };
+			const auto& [leftValue, rightValue] = evaluateBinaryArgs(binary);
+			return evaluateBinaryStar(leftValue, rightValue);
+		}
+		
+		/**
+		 * Resumes a binary star node. This node will multiply integers and floats. It will
+		 * throw if the args are of any other built in type. Delegates to the native binary
+		 * star function if the arg is of a user-defined type. If the stall occurred on the
+		 * left argument, execution will resume as normal. However, if the stall occurred on
+		 * the right argument, this method will extract the stored left argument from the stack
+		 * as well.
+		 */
+		DataType resumeBinaryStar(const AstNode& binary){
+			throwIfNotType(binary, AstType::binStar, "not binary star!");
+			//get the stall info
+			const StallNodeInfo& stallNodeInfo{ popLastStallNodeInfo() };
+			throwIfNotType(stallNodeInfo, AstType::binStar, "bad stall type: not bin star!");
+			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(binary);
+			return evaluateBinaryStar(leftValue, rightValue);
+		}
+		
+		/**
+		 * Given two input arguments, runs either the built in binary star or the native binary
+		 * star on those arguments, and returns the result.
+		 */
+		DataType evaluateBinaryStar(const DataType& leftValue, const DataType& rightValue){
 			auto leftIndex{ leftValue.index() };
 			auto rightIndex{ rightValue.index() };
 			if(leftIndex < numBuiltInTypes && rightIndex < numBuiltInTypes){
@@ -1203,14 +1374,51 @@ namespace darkness{
 			return nativeFunction({ leftValue, rightValue });
 		}
 		
+		/**
+		 * Runs a binary forward slash node. This node will divide integers and floats. It will
+		 * throw if the args are of any other built in type. Delegates to the native binary
+		 * forward slash function if the arg is of a user-defined type. Because users must
+		 * guarantee that the native binary forward slash function will not stall, this method
+		 * will only stall on its left or right argument. If this method stalls on the left
+		 * argument, it will vomit the left index onto the stack. However, if the method stall
+		 * on the right argument, it will also first vomit the left value onto the stack, so
+		 * as to eliminate the need to reevaluate the left node upon resuming execution.
+		 */
 		DataType runBinaryForwardSlash(const AstNode& binary){
 			throwIfNotType(binary, AstType::binForwardSlash, "not binary forward slash!");
-			DataType leftValue{ runExpression(
-				*std::get<AstBinData>(binary.dataVariant).left
-			) };
-			DataType rightValue{ runExpression(
-				*std::get<AstBinData>(binary.dataVariant).right
-			) };
+			const auto& [leftValue, rightValue] = evaluateBinaryArgs(binary);
+			return evaluateBinaryForwardSlash(leftValue, rightValue);
+		}
+		
+		/**
+		 * Resumes a binary forward slash node. This node will divide integers and floats. It
+		 * will throw if the args are of any other built in type. Delegates to the native
+		 * binary forward slash function if the arg is of a user-defined type. If the stall
+		 * occurred on the left argument, execution will resume as normal. However, if the
+		 * stall occurred on the right argument, this method will extract the stored left
+		 * argument from the stack as well.
+		 */
+		DataType resumeBinaryForwardSlash(const AstNode& binary){
+			throwIfNotType(binary, AstType::binForwardSlash, "not binary forward slash!");
+			//get the stall info
+			const StallNodeInfo& stallNodeInfo{ popLastStallNodeInfo() };
+			throwIfNotType(
+				stallNodeInfo,
+				AstType::binForwardSlash,
+				"bad stall type: not bin forward slash!"
+			);
+			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(binary);
+			return evaluateBinaryForwardSlash(leftValue, rightValue);
+		}
+		
+		/**
+		 * Given two input arguments, runs either the built in binary forward slash or the
+		 * native binary forward slash on those arguments, and returns the result.
+		 */
+		DataType evaluateBinaryForwardSlash(
+			const DataType& leftValue,
+			const DataType& rightValue
+		){
 			auto leftIndex{ leftValue.index() };
 			auto rightIndex{ rightValue.index() };
 			if(leftIndex < numBuiltInTypes && rightIndex < numBuiltInTypes){
@@ -1263,24 +1471,83 @@ namespace darkness{
 			return nativeFunction({ leftValue, rightValue });
 		}
 		
+		/**
+		 * Runs a binary dual equal node, which checks for equality. This method will throw if
+		 * given a function argument. Delegates to the native dual equal function if the args
+		 * are of a user-defined type. Because users must guarantee that the native dual equal
+		 * function will not stall, this method will only stall on its left or right argument.
+		 * If this method stalls on the left argument, it will vomit the left index onto the
+		 * stack. However, if the method stalls on the right argument, it  will also first
+		 * vomit the left value onto the stack, so as to eliminate the need to reevaluate the
+		 * left node upon resuming execution.
+		 */
 		DataType runBinaryDualEqual(const AstNode& binary){
 			throwIfNotType(binary, AstType::binDualEqual, "not binary dual equal!");
-			return evaluateBinaryDualEqual(binary);
+			const auto& [leftValue, rightValue] = evaluateBinaryArgs(binary);
+			return evaluateBinaryDualEqual(leftValue, rightValue);
 		}
 		
+		/**
+		 * Resumes a binary dual equal node, which checks for equality. This method will throw
+		 * if given a function argument. Delegates to the native dual equal function if the
+		 * args are of a user-defined type. If the stall occurred on the left argument,
+		 * execution will resume as normal. However, if the stall occurred on the right
+		 * argument, this method will extract the stored left argument from the stack as well.
+		 */
+		DataType resumeBinaryDualEqual(const AstNode& binary){
+			throwIfNotType(binary, AstType::binDualEqual, "not binary dual equal!");
+			//get the stall info
+			const StallNodeInfo& stallNodeInfo{ popLastStallNodeInfo() };
+			throwIfNotType(
+				stallNodeInfo,
+				AstType::binDualEqual,
+				"bad stall type: not bin dual equal!"
+			);
+			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(binary);
+			return evaluateBinaryDualEqual(leftValue, rightValue);
+		}
+		
+		/**
+		 * Runs a binary bang equal node, which checks for inequality. This method will throw
+		 * if given a function argument. Uses the native dual equal function if the args are
+		 * of a user-defined type. Because users must guarantee that the native dual equal
+		 * function will not stall, this method will only stall on its left or right argument.
+		 * If this method stalls on the left argument, it will vomit the left index onto the
+		 * stack. However, if the method stalls on the right argument, it  will also first
+		 * vomit the left value onto the stack, so as to eliminate the need to reevaluate the
+		 * left node upon resuming execution.
+		 */
 		DataType runBinaryBangEqual(const AstNode& binary){
 			throwIfNotType(binary, AstType::binBangEqual, "not binary bang equal!");
-			return !evaluateBinaryDualEqual(binary);
+			const auto& [leftValue, rightValue] = evaluateBinaryArgs(binary);
+			return !evaluateBinaryDualEqual(leftValue, rightValue);
 		}
 		
-		//runs a dual equal operation on two sides of a binary expression without ast checking
-		bool evaluateBinaryDualEqual(const AstNode& binary){
-			DataType leftValue{ runExpression(
-				*std::get<AstBinData>(binary.dataVariant).left
-			) };
-			DataType rightValue{ runExpression(
-				*std::get<AstBinData>(binary.dataVariant).right
-			) };
+		/**
+		 * Resumes a binary bang equal node, which checks for inequality. This method will
+		 * throw  if given a function argument. Uses the native dual equal function if the
+		 * args are of a user-defined type. If the stall occurred on the left argument,
+		 * execution will resume as normal. However, if the stall occurred on the right
+		 * argument, this method will extract the stored left argument from the stack as well.
+		 */
+		DataType resumeBinaryBangEqual(const AstNode& binary){
+			throwIfNotType(binary, AstType::binBangEqual, "not binary bang equal!");
+			//get the stall info
+			const StallNodeInfo& stallNodeInfo{ popLastStallNodeInfo() };
+			throwIfNotType(
+				stallNodeInfo,
+				AstType::binBangEqual,
+				"bad stall type: not bin bang equal!"
+			);
+			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(binary);
+			return !evaluateBinaryDualEqual(leftValue, rightValue);
+		}
+		
+		/**
+		 * Given two input arguments, runs either the built in binary dual equal or the native
+		 * binary dual equal on those arguments, and returns the result.
+		 */
+		bool evaluateBinaryDualEqual(const DataType& leftValue, const DataType& rightValue){
 			auto leftIndex{ leftValue.index() };
 			auto rightIndex{ rightValue.index() };
 			if(leftIndex < numBuiltInTypes && rightIndex < numBuiltInTypes){
@@ -1376,54 +1643,159 @@ namespace darkness{
 			}
 		}
 		
+		/**
+		 * Runs a binary greater node, which compares ints, floats, and strings. This method
+		 * will throw if given any other built in type. Delegates to the native binary greater
+		 * function if the args are of a user-defined type. Because users must guarantee that
+		 * the native binary greater function will not stall, this method will only stall on
+		 * its left or right argument. If this method stalls on the left argument, it will
+		 * vomit the left index onto the stack. However, if the method stalls on the right
+		 * argument, it will also first vomit the left value onto the stack, so as to
+		 * eliminate the need to reevaluate the left node upon resuming execution.
+		 */
 		DataType runBinaryGreater(const AstNode& binary){
 			throwIfNotType(binary, AstType::binGreater, "not binary greater!");
-			DataType leftValue{ runExpression(
-				*std::get<AstBinData>(binary.dataVariant).left
-			) };
-			DataType rightValue{ runExpression(
-				*std::get<AstBinData>(binary.dataVariant).right
-			) };
+			const auto& [leftValue, rightValue] = evaluateBinaryArgs(binary);
 			return evaluateBinaryGreater(leftValue, rightValue);
 		}
 		
+		/**
+		 * Resumes a binary greater node, which compares ints, floats, and strings. This method
+		 * will throw if given any other built in type. Delegates to the native binary greater
+		 * function if the args are of a user-defined type. If the stall occurred on the left
+		 * argument, execution will resume as normal. However, if the stall occurred on the
+		 * right argument, this method will extract the stored left argument from the stack
+		 * as well.
+		 */
+		DataType resumeBinaryGreater(const AstNode& binary){
+			throwIfNotType(binary, AstType::binGreater, "not binary greater!");
+			//get the stall info
+			const StallNodeInfo& stallNodeInfo{ popLastStallNodeInfo() };
+			throwIfNotType(
+				stallNodeInfo,
+				AstType::binGreater,
+				"bad stall type: not bin greater!"
+			);
+			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(binary);
+			return evaluateBinaryGreater(leftValue, rightValue);
+		}
+		
+		/**
+		 * Runs a binary greater equal node, which compares ints, floats, and strings. This
+		 * method will throw if given any other built in type. Uses the native binary greater
+		 * function if the args are of a user-defined type. Because users must guarantee that
+		 * the native binary greater function will not stall, this method will only stall on
+		 * its left or right argument. If this method stalls on the left argument, it will
+		 * vomit the left index onto the stack. However, if the method stalls on the right
+		 * argument, it will also first vomit the left value onto the stack, so as to
+		 * eliminate the need to reevaluate the left node upon resuming execution.
+		 */
 		DataType runBinaryGreaterEqual(const AstNode& binary){
 			throwIfNotType(binary, AstType::binGreaterEqual, "not binary greater equal!");
-			DataType leftValue{ runExpression(
-				*std::get<AstBinData>(binary.dataVariant).left
-			) };
-			DataType rightValue{ runExpression(
-				*std::get<AstBinData>(binary.dataVariant).right
-			) };
+			const auto& [leftValue, rightValue] = evaluateBinaryArgs(binary);
 			//switch left and right and also negate
 			return !evaluateBinaryGreater(rightValue, leftValue);
 		}
 		
+		/**
+		 * Resumes a binary greater equal node, which compares ints, floats, and strings. This
+		 * method will throw if given any other built in type. Uses the native binary greater
+		 * function if the args are of a user-defined type. If the stall occurred on the left
+		 * argument, execution will resume as normal. However, if the stall occurred on the
+		 * right argument, this method will extract the stored left argument from the stack
+		 * as well.
+		 */
+		DataType resumeBinaryGreaterEqual(const AstNode& binary){
+			throwIfNotType(binary, AstType::binGreaterEqual, "not binary greater equal!");
+			//get the stall info
+			const StallNodeInfo& stallNodeInfo{ popLastStallNodeInfo() };
+			throwIfNotType(
+				stallNodeInfo,
+				AstType::binGreaterEqual,
+				"bad stall type: not bin greater equal!"
+			);
+			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(binary);
+			//switch left and right and also negate
+			return !evaluateBinaryGreater(rightValue, leftValue);
+		}
+		
+		/**
+		 * Runs a binary less node, which compares ints, floats, and strings. This method will
+		 * throw if given any other built in type. Uses the native binary greater function if
+		 * the args are of a user-defined type. Because users must guarantee that the native
+		 * binary greater function will not stall, this method will only stall on its left or
+		 * right argument. If this method stalls on the left argument, it will vomit the left
+		 * index onto the stack. However, if the method stalls on the right argument, it will
+		 * also first vomit the left value onto the stack, so as to eliminate the need to
+		 * reevaluate the left node upon resuming execution.
+		 */
 		DataType runBinaryLess(const AstNode& binary){
 			throwIfNotType(binary, AstType::binLess, "not binary less!");
-			DataType leftValue{ runExpression(
-				*std::get<AstBinData>(binary.dataVariant).left
-			) };
-			DataType rightValue{ runExpression(
-				*std::get<AstBinData>(binary.dataVariant).right
-			) };
+			const auto& [leftValue, rightValue] = evaluateBinaryArgs(binary);
 			//switch left and right
 			return evaluateBinaryGreater(rightValue, leftValue);
 		}
 		
+		/**
+		 * Resumes a binary less node, which compares ints, floats, and strings. This method
+		 * will throw if given any other built in type. Uses the native binary greater function
+		 * if the args are of a user-defined type. If the stall occurred on the left argument,
+		 * execution will resume as normal. However, if the stall occurred on the right
+		 * argument, this method will extract the stored left argument from the stack as well.
+		 */
+		DataType resumeBinaryLess(const AstNode& binary){
+			throwIfNotType(binary, AstType::binLess, "not binary less!");
+			//get the stall info
+			const StallNodeInfo& stallNodeInfo{ popLastStallNodeInfo() };
+			throwIfNotType(stallNodeInfo, AstType::binLess, "bad stall type: not bin less!");
+			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(binary);
+			//switch left and right
+			return evaluateBinaryGreater(rightValue, leftValue);
+		}
+		
+		/**
+		 * Runs a binary less equal node, which compares ints, floats, and strings. This
+		 * method will throw if given any other built in type. Uses the native binary greater
+		 * function if the args are of a user-defined type. Because users must guarantee that
+		 * the native binary greater function will not stall, this method will only stall on
+		 * its left or right argument. If this method stalls on the left argument, it will
+		 * vomit the left index onto the stack. However, if the method stalls on the right
+		 * argument, it will also first vomit the left value onto the stack, so as to
+		 * eliminate the need to reevaluate the left node upon resuming execution.
+		 */
 		DataType runBinaryLessEqual(const AstNode& binary){
 			throwIfNotType(binary, AstType::binLessEqual, "not binary less equal!");
-			DataType leftValue{ runExpression(
-				*std::get<AstBinData>(binary.dataVariant).left
-			) };
-			DataType rightValue{ runExpression(
-				*std::get<AstBinData>(binary.dataVariant).right
-			) };
+			const auto& [leftValue, rightValue] = evaluateBinaryArgs(binary);
 			//negate
 			return !evaluateBinaryGreater(leftValue, rightValue);
 		}
 		
-		//runs a greater operation on two sides of a binary expression without ast checking
+		/**
+		 * Resumes a binary less equal node, which compares ints, floats, and strings. This
+		 * method will throw if given any other built in type. Uses the native binary greater
+		 * function if the args are of a user-defined type. If the stall occurred on the left
+		 * argument, execution will resume as normal. However, if the stall occurred on the
+		 * right argument, this method will extract the stored left argument from the stack
+		 * as well.
+		 */
+		DataType resumeBinaryLessEqual(const AstNode& binary){
+			throwIfNotType(binary, AstType::binLessEqual, "not binary less equal!");
+			//get the stall info
+			const StallNodeInfo& stallNodeInfo{ popLastStallNodeInfo() };
+			throwIfNotType(
+				stallNodeInfo,
+				AstType::binLessEqual,
+				"bad stall type: not bin less equal!"
+			);
+			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(binary);
+			//negate
+			return !evaluateBinaryGreater(leftValue, rightValue);
+		}
+		
+		/**
+		 * Given two input arguments, runs either the built in binary greater or the native
+		 * binary greater on those arguments, and returns the result.
+		 */
 		bool evaluateBinaryGreater(const DataType& leftValue, const DataType& rightValue){
 			auto leftIndex{ leftValue.index() };
 			auto rightIndex{ rightValue.index() };
@@ -1505,11 +1877,22 @@ namespace darkness{
 			}
 		}
 		
+		/**
+		 * Runs a binary ampersand node, which runs a short-circuiting AND operation. This
+		 * method will throw if given anything but booleans. A stall may occur on either the
+		 * left or right side. However, because of the short circuiting behavior, there is
+		 * no need to store the result of the left side if the right side stalls.
+		 */
 		DataType runBinaryAmpersand(const AstNode& binary){
 			throwIfNotType(binary, AstType::binAmpersand, "not binary ampersand!");
-			DataType leftValue{ runExpression(
-				*std::get<AstBinData>(binary.dataVariant).left
-			) };
+			DataType leftValue;//uninitialized
+			try {
+				leftValue = runExpression(*std::get<AstBinData>(binary.dataVariant).left);
+			}
+			catch(const StallFlag&){
+				pushStallNodeInfo({ binary.type, StallNodeInfo::binLeft });
+				throw;
+			}
 			if(leftValue.index() != boolIndex){
 				throwError("left side of '&' not bool!");
 			}
@@ -1517,21 +1900,112 @@ namespace darkness{
 				//if the left side was false, short circuit and return false
 				return false;
 			}
-			DataType rightValue{ runExpression(
-				*std::get<AstBinData>(binary.dataVariant).right
-			) };
+			DataType rightValue;//uninitialized
+			try {
+				rightValue = runExpression(*std::get<AstBinData>(binary.dataVariant).right);
+			}
+			catch(const StallFlag&){
+				pushStallNodeInfo({ binary.type, StallNodeInfo::binRight });
+				throw;
+			}
 			if(rightValue.index() != boolIndex){
 				throwError("right side of '&' not bool!");
 			}
-			//if the left side is true, the entire expression evaluates to the right side
+			//when the left side is true, the entire expression evaluates to the right side
 			return std::get<bool>(rightValue);
 		}
 		
+		/**
+		 * Resumes a binary ampersand node, which runs a short-circuiting AND operation. This
+		 * method will throw if given anything but booleans. The stall may have occurred on
+		 * either the left or right side. However, because of the short circuiting behavior,
+		 * there is no need to retrieve the result of the left side if the right side stalled.
+		 */
+		DataType resumeBinaryAmpersand(const AstNode& binary){
+			throwIfNotType(binary, AstType::binAmpersand, "not binary ampersand!");
+			//get the stall info
+			const StallNodeInfo& stallNodeInfo{ popLastStallNodeInfo() };
+			throwIfNotType(
+				stallNodeInfo,
+				AstType::binAmpersand,
+				"bad stall type: not bin ampersand!"
+			);
+			switch(stallNodeInfo.index){
+				case StallNodeInfo::binLeft: {
+					//the left expression may stall again
+					DataType leftValue;//uninitialized
+					try{
+						leftValue = resumeExpression(
+							*std::get<AstBinData>(binary.dataVariant).left
+						);
+					}
+					catch(const StallFlag&){
+						pushStallNodeInfo({ binary.type, StallNodeInfo::binLeft });
+						throw;
+					}
+					//left side did not stall again -> execute remainder as normal
+					if(leftValue.index() != boolIndex){
+						throwError("left side of '&' not bool!");
+					}
+					if(!std::get<bool>(leftValue)){
+						//if the left side was false, short circuit and return false
+						return false;
+					}
+					DataType rightValue;//uninitialized
+					try {
+						rightValue = runExpression(
+							*std::get<AstBinData>(binary.dataVariant).right
+						);
+					}
+					catch(const StallFlag&){
+						pushStallNodeInfo({ binary.type, StallNodeInfo::binRight });
+						throw;
+					}
+					if(rightValue.index() != boolIndex){
+						throwError("right side of '&' not bool!");
+					}
+					//the entire expression evaluates to the right side
+					return std::get<bool>(rightValue);
+				}
+				case StallNodeInfo::binRight:{
+					//if we stalled on the right side, left must be false
+					DataType rightValue;//uninitialized
+					try {
+						rightValue = resumeExpression(
+							*std::get<AstBinData>(binary.dataVariant).right
+						);
+					}
+					catch(const StallFlag&){
+						pushStallNodeInfo({ binary.type, StallNodeInfo::binRight });
+						throw;
+					}
+					if(rightValue.index() != boolIndex){
+						throwError("right side of '&' not bool!");
+					}
+					//the entire expression evaluates to the right side
+					return std::get<bool>(rightValue);
+				}
+				default:
+					throwError("bad stall index for binary '&' : " + stallNodeInfo.index);
+			}
+		}
+		
+		/**
+		 * Runs a binary vertical bar node, which runs a short-circuiting OR operation. This
+		 * method will throw if given anything but booleans. A stall may occur on either the
+		 * left or right side. However, because of the short circuiting behavior, there is
+		 * no need to store the result of the left side if the right side stalls.
+		 */
 		DataType runBinaryVerticalBar(const AstNode& binary){
 			throwIfNotType(binary, AstType::binVerticalBar, "not binary vertical bar!");
-			DataType leftValue{ runExpression(
-				*std::get<AstBinData>(binary.dataVariant).left
-			) };
+			DataType leftValue;//uninitialized
+			try {
+				leftValue = runExpression(*std::get<AstBinData>(binary.dataVariant).left);
+			}
+			catch(const StallFlag&){
+				pushStallNodeInfo({ binary.type, StallNodeInfo::binLeft });
+				throw;
+			}
 			if(leftValue.index() != boolIndex){
 				throwError("left side of '|' not bool!");
 			}
@@ -1539,26 +2013,127 @@ namespace darkness{
 				//if the left side was true, short circuit and return true
 				return true;
 			}
-			DataType rightValue{ runExpression(
-				*std::get<AstBinData>(binary.dataVariant).right
-			) };
+			DataType rightValue;//uninitialized
+			try {
+				rightValue = runExpression(*std::get<AstBinData>(binary.dataVariant).right);
+			}
+			catch(const StallFlag&){
+				pushStallNodeInfo({ binary.type, StallNodeInfo::binRight });
+				throw;
+			}
 			if(rightValue.index() != boolIndex){
 				throwError("right side of '|' not bool!");
 			}
-			//if the left side is false, the entire expression evaluates to the right side
+			//when the left side is false, the entire expression evaluates to the right side
 			return std::get<bool>(rightValue);
 		}
 		
-		DataType runBinaryAssignment(const AstNode& binary){
-			throwIfNotType(binary, AstType::binAssign, "not an assignment!");
+		/**
+		 * Resumes a binary vertical bar node, which runs a short-circuiting OR operation. This
+		 * method will throw if given anything but booleans. The stall may have occurred on
+		 * either the left or right side. However, because of the short circuiting behavior,
+		 * there is no need to retrieve the result of the left side if the right side stalled.
+		 */
+		DataType resumeBinaryVerticalBar(const AstNode& binary){
+			throwIfNotType(binary, AstType::binVerticalBar, "not binary vertical bar!");
+			//get the stall info
+			const StallNodeInfo& stallNodeInfo{ popLastStallNodeInfo() };
+			throwIfNotType(
+				stallNodeInfo,
+				AstType::binVerticalBar,
+				"bad stall type: not bin vertical bar!"
+			);
+			switch(stallNodeInfo.index){
+				case StallNodeInfo::binLeft: {
+					DataType leftValue;//uninitialized
+					try{
+						leftValue = resumeExpression(
+							*std::get<AstBinData>(binary.dataVariant).left
+						);
+					}
+					catch(const StallFlag&){
+						pushStallNodeInfo({ binary.type, StallNodeInfo::binLeft });
+						throw;
+					}
+					//left side did not stall again -> execute remainder as normal
+					if(leftValue.index() != boolIndex){
+						throwError("left side of '|' not bool!");
+					}
+					if(std::get<bool>(leftValue)){
+						//if the left side was true, short circuit and return true
+						return true;
+					}
+					DataType rightValue;//uninitialized
+					try {
+						rightValue = runExpression(
+							*std::get<AstBinData>(binary.dataVariant).right
+						);
+					}
+					catch(const StallFlag&){
+						pushStallNodeInfo({ binary.type, StallNodeInfo::binRight });
+						throw;
+					}
+					if(rightValue.index() != boolIndex){
+						throwError("right side of '|' not bool!");
+					}
+					//the entire expression evaluates to the right side
+					return std::get<bool>(rightValue);
+				}
+				case StallNodeInfo::binRight:{
+					//if we stalled on the right side, left must be false
+					DataType rightValue;//uninitialized
+					try {
+						rightValue = resumeExpression(
+							*std::get<AstBinData>(binary.dataVariant).right
+						);
+					}
+					catch(const StallFlag&){
+						pushStallNodeInfo({ binary.type, StallNodeInfo::binRight });
+						throw;
+					}
+					if(rightValue.index() != boolIndex){
+						throwError("right side of '|' not bool!");
+					}
+					//the entire expression evaluates to the right side
+					return std::get<bool>(rightValue);
+				}
+				default:
+					throwError("bad stall index for binary '|' : " + stallNodeInfo.index);
+			}
+		}
+		
+		/**
+		 * Runs an assignment node, which binds the right side to the variable on the left.
+		 * Since this method can only stall on evaluating the right side, it will not vomit
+		 * onto the stack.
+		 */
+		DataType runBinaryAssignment(const AstNode& assign){
+			throwIfNotType(assign, AstType::binAssign, "not an assignment!");
 			const auto& data{
-				std::get<AstAssignData>(binary.dataVariant)
+				std::get<AstAssignData>(assign.dataVariant)
 			};
 			DataType value{ runExpression(*data.right) };
 			innermostEnvironmentPointer->assign(data.varName, value);
 			return value;
 		}
 		
+		/**
+		 * Resumes an assignment node. Since assigns can only stall on evaluating their right
+		 * side, this type of node will not pop the stack.
+		 */
+		DataType resumeBinaryAssignment(const AstNode& assign){
+			throwIfNotType(assign, AstType::binAssign, "not an assignment!");
+			const auto& data{
+				std::get<AstAssignData>(assign.dataVariant)
+			};
+			DataType value{ resumeExpression(*data.right) };
+			innermostEnvironmentPointer->assign(data.varName, value);
+			return value;
+		}
+		
+		/**
+		 * Runs a variable node. This type of node should never stall.
+		 */
 		DataType runVariable(const AstNode& variable){
 			throwIfNotType(variable, AstType::variable, "not a variable node!");
 			const auto& varName{
@@ -1567,12 +2142,25 @@ namespace darkness{
 			return innermostEnvironmentPointer->get(varName);
 		}
 		
+		/**
+		 * Runs a function call node. This type of node may stall on its function expression,
+		 * any one of its argument expressions, or the call to the function itself. This method
+		 * will vomit its function expression and all the previously evaluated arguments in
+		 * case of a stall.
+		 */
 		DataType runCall(const AstNode& call){
 			throwIfNotType(call, AstType::call, "not a call node!");
 			const auto& data{ std::get<AstCallData>(call.dataVariant) };
 			
-			//get the function wrapper
-			const auto& functionWrapperData{ runExpression(*data.funcExpr) };
+			//get the function wrapper, which may stall
+			DataType functionWrapperData;
+			try {
+				functionWrapperData = runExpression(*data.funcExpr);
+			}
+			catch(const StallFlag&){
+				pushStallNodeInfo({ AstType::call, StallNodeInfo::callFuncExpr });
+				throw;
+			}
 			if(!std::holds_alternative<FunctionWrapper>(functionWrapperData)){
 				throwError("tried to call non-function!");
 			}
@@ -1583,12 +2171,27 @@ namespace darkness{
 				const auto& nativeFunction{ unwrapNativeFunctionFromData(functionWrapper) };
 				//evaluate all args and store in a vector
 				std::vector<DataType> args{};
-				for(const auto& argNode : data.args){
-					args.push_back(runExpression(argNode));
+				int currentIndex{ 0 };
+				try {
+					for(; currentIndex < data.args.size(); ++currentIndex ) {
+						args.push_back(runExpression(data.args[currentIndex]));
+					}
+				}
+				catch(const StallFlag&){
+					//if stall on an arg, push the funcExpr AND all current args to the stack
+					//currentIndex points to the stalled arg (which wasn't complete)
+					for(; currentIndex >= 0; --currentIndex){
+						//by pushing the back element, the top will be the first arg
+						pushStallNodeData(args.pop_back());
+					}
+					pushStallNodeData(functionWrapperData);
+					pushStallNodeInfo({ AstType::call, currentIndex });
+					throw;
 				}
 				//pass to native function
 				return nativeFunction(args);
 			}
+			//todo: handle stalling on user function calls etc
 			//case 2: user function
 			else{
 				const UserFunctionWrapper& userFunctionWrapper{
@@ -1631,6 +2234,9 @@ namespace darkness{
 			}
 		}
 		
+		/**
+		 * Returns true if the given data is of one of the types specified as type parameters.
+		 */
 		template <typename T, typename... Ts>
 		bool holdsAlternatives(const DataType& dataType){
 			//recursive case
@@ -1644,6 +2250,9 @@ namespace darkness{
 			}
 		}
 		
+		/**
+		 * Does a type-checked conversion of a given data to a native function.
+		 */
 		NativeFunction unwrapNativeFunctionFromData(const DataType& data){
 			if(std::holds_alternative<FunctionWrapper>(data)){
 				return unwrapNativeFunction(std::get<FunctionWrapper>(data));
@@ -1653,6 +2262,9 @@ namespace darkness{
 			}
 		}
 		
+		/**
+		 * Does a type-checked conversion of a function wrapper to a native function.
+		 */
 		NativeFunction unwrapNativeFunction(const FunctionWrapper& functionWrapper){
 			if(std::holds_alternative<NativeFunctionWrapper>(functionWrapper)){
 				return std::any_cast<NativeFunction>(
@@ -1664,18 +2276,30 @@ namespace darkness{
 			}
 		}
 		
+		/**
+		 * Pushes the given info element onto the stall stack
+		 */
 		void pushStallNodeInfo(const StallNodeInfo& stallNodeInfo){
 			stallStack.push_back(stallNodeInfo);
 		}
 		
+		/**
+		 * Pushes the given data element onto the stall stack
+		 */
 		void pushStallNodeData(const DataType& data){
 			stallStack.push_back(data);
 		}
 		
+		/**
+		 * Pops and returns the top element of the stall stack as an info element
+		 */
 		StallNodeInfo popLastStallNodeInfo(){
 			 return std::get<StallNodeInfo>(stallStack.pop_back());
 		}
 		
+		/**
+		 * Pops and returns the top element of the stall stack as a data element
+		 */
 		DataType popLastStallData(){
 			 return std::get<DataType>(stallStack.pop_back());
 		}
@@ -1698,6 +2322,9 @@ namespace darkness{
 				= innermostEnvironmentPointer->getEnclosingEnvironmentPointer();
 		}
 		
+		/**
+		 * Throws an error if the given ast node is not of the specified ast type.
+		 */
 		static void throwIfNotType(
 			const AstNode& node,
 			AstType type,
@@ -1708,6 +2335,9 @@ namespace darkness{
 			}
 		}
 		
+		/**
+		 * Throws an error if the given stall node info is not of the specified ast type
+		 */
 		static void throwIfNotType(
 			const StallNodeInfo& stallNodeInfo,
 			AstType type,
