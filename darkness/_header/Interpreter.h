@@ -109,7 +109,7 @@ namespace darkness{
 			std::vector<DataType> args{};
 			
 			DataType run(){
-				stallingNativeFunction(args);
+				return stallingNativeFunction(args);
 			}
 		};
 		
@@ -131,6 +131,7 @@ namespace darkness{
 		std::vector<std::variant<StallNodeInfo, DataType>> stallStack{};
 		StallingNativeFunctionCall stallingNativeFunctionCall{};
 		DataType stallReturn{ false };
+		//todo: could possibly refactor the stall fields (and innermost environment ptr) out
 		
 	public:
 		/**
@@ -178,12 +179,13 @@ namespace darkness{
 		}
 		
 	public:
+		//todo: maybe let scripts return stuff? Can define functions in different scripts
 		/**
 		 * Runs a darkness script. If the given AstNode is of any other type, throws an error.
-		 * A script may stall on any of its statements.
+		 * A script may stall on any of its statements. Returns true if the script completed,
+		 * false if the script stalled.
 		 */
-		void runScript(const AstNode& script){
-			//todo: maybe let scripts return stuff? Can define functions in different scripts
+		bool runScript(const AstNode& script){
 			throwIfNotType(script, AstType::script, "trying to run not script!");
 			int currentIndex{ 0 };
 			const auto& statements{ std::get<AstScriptData>(script.dataVariant).statements };
@@ -195,16 +197,17 @@ namespace darkness{
 			catch(const StallFlag&){
 				//stalled on a native function! vomit onto the stack and exit
 				pushStallNodeInfo({ AstType::script, currentIndex });
-				return;
+				return false;
 			}
+			return true;
 		}
 		
 		/**
 		 * Resumes a stalled darkness script. If the given AstNode is of any other type, throws
 		 * an error. The script may stall on the same statement, or it may stall on a new
-		 * statement.
+		 * statement. Returns true if the script completed, false if the script stalled again.
 		 */
-		 void resumeScript(const AstNode& script){
+		 bool resumeScript(const AstNode& script){
 			throwIfNotType(script, AstType::script, "trying to resume not script!");
 			//make sure interpreter was stalled
 			if(stallingNativeFunctionCall.stallingNativeFunction == nullptr){
@@ -216,7 +219,7 @@ namespace darkness{
 			}
 			catch(const StallFlag&){
 				//stalled again on the same native function! exit prematurely
-				return;
+				return false;
 			}
 			//successfully ran - reset stalling native function call to nothing
 			stallingNativeFunctionCall = {};
@@ -238,8 +241,9 @@ namespace darkness{
 			catch(const StallFlag&){
 				//stalled on a different native function! vomit onto the stack and exit
 				pushStallNodeInfo({ AstType::script, currentIndex });
-				return;
+				return false;
 			}
+			return true;
 		 }
 		 
 	private:
@@ -665,7 +669,7 @@ namespace darkness{
 			catch(const StallFlag&){
 				/*
 				 * stalled on a native function! vomit onto the stack and rethrow, but
-				 * DO NOT RESET THE ENVIRONMENT POINTER since we must resume in the inner-most
+				 * DO NOT RESET THE ENVIRONMENT POINTER since we must resume in the innermost
 				 * environment.
 				 */
 				pushStallNodeInfo({ AstType::stmtBlock, currentIndex });
@@ -782,6 +786,7 @@ namespace darkness{
 					
 				default:
 					throwError("trying to run not an expression!");
+					return false;//dummy return
 			}
 		}
 		
@@ -842,6 +847,7 @@ namespace darkness{
 				
 				default:
 					throwError("trying to resume not an expression!");
+					return false;//dummy return
 			}
 		}
 		
@@ -878,7 +884,7 @@ namespace darkness{
 		 * Given an input argument, runs either the built in unary bang or the native unary
 		 * bang on that argument, and returns the result.
 		 */
-		bool evaluateUnaryBang(const DataType& argValue){
+		DataType evaluateUnaryBang(const DataType& argValue){
 			if(holdsAlternatives<bool>(argValue)){
 				return !std::get<bool>(argValue);
 			}
@@ -1055,7 +1061,10 @@ namespace darkness{
 			//get the stall info
 			const StallNodeInfo& stallNodeInfo{ popLastStallNodeInfo() };
 			throwIfNotType(stallNodeInfo, AstType::binPlus, "bad stall type: not bin plus!");
-			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(binary);
+			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(
+				binary,
+				stallNodeInfo
+			);
 			return evaluateBinaryPlus(leftValue, rightValue);
 		}
 		
@@ -1111,8 +1120,9 @@ namespace darkness{
 					}
 				}
 				default:
-					throwError("bad stall index for binary expression: " + stallNodeInfo.index);
+					throwError("bad stall index for binary expr: " + stallNodeInfo.index);
 			}
+			return { false, false };//dummy return
 		}
 		
 		/**
@@ -1223,7 +1233,10 @@ namespace darkness{
 			//get the stall info
 			const StallNodeInfo& stallNodeInfo{ popLastStallNodeInfo() };
 			throwIfNotType(stallNodeInfo, AstType::binMinus, "bad stall type: not bin minus!");
-			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(binary);
+			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(
+				binary,
+				stallNodeInfo
+			);
 			return evaluateBinaryMinus(leftValue, rightValue);
 		}
 		
@@ -1313,7 +1326,10 @@ namespace darkness{
 			//get the stall info
 			const StallNodeInfo& stallNodeInfo{ popLastStallNodeInfo() };
 			throwIfNotType(stallNodeInfo, AstType::binStar, "bad stall type: not bin star!");
-			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(binary);
+			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(
+				binary,
+				stallNodeInfo
+			);
 			return evaluateBinaryStar(leftValue, rightValue);
 		}
 		
@@ -1407,7 +1423,10 @@ namespace darkness{
 				AstType::binForwardSlash,
 				"bad stall type: not bin forward slash!"
 			);
-			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(binary);
+			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(
+				binary,
+				stallNodeInfo
+			);
 			return evaluateBinaryForwardSlash(leftValue, rightValue);
 		}
 		
@@ -1503,7 +1522,10 @@ namespace darkness{
 				AstType::binDualEqual,
 				"bad stall type: not bin dual equal!"
 			);
-			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(binary);
+			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(
+				binary,
+				stallNodeInfo
+			);
 			return evaluateBinaryDualEqual(leftValue, rightValue);
 		}
 		
@@ -1539,7 +1561,10 @@ namespace darkness{
 				AstType::binBangEqual,
 				"bad stall type: not bin bang equal!"
 			);
-			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(binary);
+			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(
+				binary,
+				stallNodeInfo
+			);
 			return !evaluateBinaryDualEqual(leftValue, rightValue);
 		}
 		
@@ -1640,6 +1665,7 @@ namespace darkness{
 			}
 			else{
 				throwError("bad type from native dual equal function!");
+				return false;//dummy return
 			}
 		}
 		
@@ -1676,7 +1702,10 @@ namespace darkness{
 				AstType::binGreater,
 				"bad stall type: not bin greater!"
 			);
-			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(binary);
+			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(
+				binary,
+				stallNodeInfo
+			);
 			return evaluateBinaryGreater(leftValue, rightValue);
 		}
 		
@@ -1714,7 +1743,10 @@ namespace darkness{
 				AstType::binGreaterEqual,
 				"bad stall type: not bin greater equal!"
 			);
-			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(binary);
+			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(
+				binary,
+				stallNodeInfo
+			);
 			//switch left and right and also negate
 			return !evaluateBinaryGreater(rightValue, leftValue);
 		}
@@ -1748,7 +1780,10 @@ namespace darkness{
 			//get the stall info
 			const StallNodeInfo& stallNodeInfo{ popLastStallNodeInfo() };
 			throwIfNotType(stallNodeInfo, AstType::binLess, "bad stall type: not bin less!");
-			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(binary);
+			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(
+				binary,
+				stallNodeInfo
+			);
 			//switch left and right
 			return evaluateBinaryGreater(rightValue, leftValue);
 		}
@@ -1787,7 +1822,10 @@ namespace darkness{
 				AstType::binLessEqual,
 				"bad stall type: not bin less equal!"
 			);
-			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(binary);
+			const auto& [leftValue, rightValue] = resumeEvaluatingBinaryArgs(
+				binary,
+				stallNodeInfo
+			);
 			//negate
 			return !evaluateBinaryGreater(leftValue, rightValue);
 		}
@@ -1874,6 +1912,7 @@ namespace darkness{
 			}
 			else{
 				throwError("bad type from native greater function!");
+				return false;//dummy return
 			}
 		}
 		
@@ -1987,6 +2026,7 @@ namespace darkness{
 				}
 				default:
 					throwError("bad stall index for binary '&' : " + stallNodeInfo.index);
+					return false;//dummy return
 			}
 		}
 		
@@ -2099,6 +2139,7 @@ namespace darkness{
 				}
 				default:
 					throwError("bad stall index for binary '|' : " + stallNodeInfo.index);
+					return false;//dummy return
 			}
 		}
 		
@@ -2157,6 +2198,7 @@ namespace darkness{
 			try {
 				functionWrapperData = runExpression(*data.funcExpr);
 			}
+			//stalled on evaluating the funcExpr!
 			catch(const StallFlag&){
 				pushStallNodeInfo({ AstType::call, StallNodeInfo::callFuncExpr });
 				throw;
@@ -2165,72 +2207,380 @@ namespace darkness{
 				throwError("tried to call non-function!");
 			}
 			const auto& functionWrapper{ std::get<FunctionWrapper>(functionWrapperData) };
-			
+			return evaluateFunctionWrapperCall(data, functionWrapperData, functionWrapper);
+		}
+		
+		/**
+		 * Given a function wrapper, calls the function as either a native or a user function.
+		 * This method may stall on evaluating arguments or executing the function itself.
+		 */
+		DataType evaluateFunctionWrapperCall(
+			const AstCallData& data,
+			const DataType& functionWrapperData,
+			const FunctionWrapper& functionWrapper
+		){
 			//case 1: native function
 			if(std::holds_alternative<NativeFunctionWrapper>(functionWrapper)){
 				const auto& nativeFunction{ unwrapNativeFunctionFromData(functionWrapper) };
-				//evaluate all args and store in a vector
-				std::vector<DataType> args{};
-				int currentIndex{ 0 };
-				try {
-					for(; currentIndex < data.args.size(); ++currentIndex ) {
-						args.push_back(runExpression(data.args[currentIndex]));
-					}
-				}
-				catch(const StallFlag&){
-					//if stall on an arg, push the funcExpr AND all current args to the stack
-					//currentIndex points to the stalled arg (which wasn't complete)
-					for(; currentIndex >= 0; --currentIndex){
-						//by pushing the back element, the top will be the first arg
-						pushStallNodeData(args.pop_back());
-					}
-					pushStallNodeData(functionWrapperData);
-					pushStallNodeInfo({ AstType::call, currentIndex });
-					throw;
-				}
-				//pass to native function
-				return nativeFunction(args);
+				return evaluateNativeFunctionCall(data, functionWrapperData, nativeFunction);
 			}
-			//todo: handle stalling on user function calls etc
 			//case 2: user function
 			else{
 				const UserFunctionWrapper& userFunctionWrapper{
 					std::get<UserFunctionWrapper>(functionWrapper)
 				};
-				//create a new environment for the function
-				std::shared_ptr<Environment> previousEnvironment{
-					innermostEnvironmentPointer
-				};
-				innermostEnvironmentPointer = std::make_shared<Environment>(
-					previousEnvironment
+				return evaluateUserFunctionCall(data, functionWrapper, userFunctionWrapper);
+			}
+		}
+		
+		/**
+		 * Given a native function, evaluates the arguments and runs the function. This method
+		 * may stall on evaluating arguments or executing the native function itself.
+		 */
+		DataType evaluateNativeFunctionCall(
+			const AstCallData& data,
+			const DataType& functionWrapperData,
+			const NativeFunction& nativeFunction
+		){
+			//evaluate all args and store in a vector; each arg may stall
+			std::vector<DataType> args{};
+			int currentIndex{ 0 };
+			try {
+				for(; currentIndex < data.args.size(); ++currentIndex ) {
+					args.push_back(runExpression(data.args[currentIndex]));
+				}
+			}
+			//stalled on evaluating an arg!
+			catch(const StallFlag&){
+				int stalledIndex{ currentIndex };
+				//first, push all the args
+				//currentIndex points to the stalled arg (which wasn't complete)
+				for(--currentIndex; currentIndex >= 0; --currentIndex){
+					//by pushing the back element, the top will be the first arg
+					pushStallNodeData(args.back());
+					args.pop_back();
+				}
+				//second, push the function wrapper
+				pushStallNodeData(functionWrapperData);
+				//last, push a stall info pointing to the stalled arg
+				pushStallNodeInfo({ AstType::call, stalledIndex });
+				throw;
+			}
+			//pass to native function, which may stall (in fact this is where stalls start)
+			return evaluateNativeFunctionWithArgs(nativeFunction, args, functionWrapperData);
+		}
+		
+		/**
+		 * Runs and returns the result of a native function. Begins a stall cycle if it stalls.
+		 */
+		DataType evaluateNativeFunctionWithArgs(
+			const NativeFunction& nativeFunction,
+			const std::vector<DataType>& args,
+			const DataType& functionWrapperData
+		){
+			//try to run the native function
+			try {
+				return nativeFunction(args);
+			}
+			//stalled on native function!
+			catch(const StallFlag&){
+				//don't push the args - instead set the stalling native function call
+				stallingNativeFunctionCall = { nativeFunction, args };
+				//next, push the function wrapper
+				pushStallNodeData(functionWrapperData);
+				//last, push a stall info for a native call stall
+				pushStallNodeInfo({ AstType::call, StallNodeInfo::callNative });
+				throw;
+			}
+		}
+		
+		/**
+		 * Given a user function wrapper, evaluates the arguments and passes execution to that
+		 * function. This method may stall on evaluating arguments or executing the function
+		 * body itself.
+		 */
+		DataType evaluateUserFunctionCall(
+			const AstCallData& data,
+			const DataType& functionWrapperData,
+			const UserFunctionWrapper& userFunctionWrapper
+		){
+			//create a new environment for the function
+			pushEmptyEnvironment();
+			//evaluate args and store in the function environment; each arg may stall
+			int currentIndex{ 0 };
+			try {
+				for(; currentIndex < data.args.size(); ++currentIndex ) {
+					innermostEnvironmentPointer->define(
+						userFunctionWrapper.paramNames[currentIndex],
+						runExpression(data.args[currentIndex])
+					);
+				}
+			}
+			//stalled on an arg
+			catch(const StallFlag&){
+				//in this case, there is no need to push all the args since we aren't
+				//resetting the environment. Do push the function and info though.
+				pushStallNodeData(functionWrapperData);
+				pushStallNodeInfo({ AstType::call, currentIndex });
+				throw;
+			}
+			//all args evaluated, pass to function body
+			return evaluateUserFunctionWithArgs(functionWrapperData, userFunctionWrapper);
+		}
+		
+		/**
+		 * Runs and returns the result of a user function. Execution of the function body may
+		 * stall.
+		 */
+		DataType evaluateUserFunctionWithArgs(
+			const DataType& functionWrapperData,
+			const UserFunctionWrapper& userFunctionWrapper
+		){
+			try{
+				//pass to the function body
+				runStatement(*userFunctionWrapper.body);
+				popEnvironment();
+				//if no throw/return occurred, return false
+				return DataType{ false };
+			}
+			//if we caught a DataType, that's our return value
+			catch(const DataType& returnValue){
+				popEnvironment();
+				return returnValue;
+			}
+			//stalled on the function body; DO NOT RESET ENVIRONMENT
+			catch(const StallFlag&){
+				/*
+				 * stalled on a native function! vomit onto the stack and rethrow, but
+				 * DO NOT RESET THE ENVIRONMENT POINTER since we must resume in the
+				 * innermost environment.
+				 */
+				pushStallNodeData(functionWrapperData);
+				pushStallNodeInfo({ AstType::call, StallNodeInfo::callUser });
+				throw;
+			}
+			//error! reset environment
+			catch(...){
+				//if anything else was thrown, that's an error, and we reset the environment
+				popEnvironment();
+				throw;
+			}
+		}
+		
+		/**
+		 * Resumes a function call node. A native function is the root of all stalls, but a user
+		 * function may be treated as a block of sorts.
+		 */
+		DataType resumeCall(const AstNode& call){
+			throwIfNotType(call, AstType::call, "not a call node!");
+			const auto& data{ std::get<AstCallData>(call.dataVariant) };
+			//get the stall info
+			const StallNodeInfo& stallNodeInfo{ popLastStallNodeInfo() };
+			throwIfNotType(stallNodeInfo, AstType::call, "bad stall type: not call!");
+			
+			//case 1: we stalled on a native call, which means we finally return
+			if(stallNodeInfo.index == StallNodeInfo::callNative){
+				DataType returnValue = stallReturn;
+				stallReturn = { false };
+				return returnValue;
+			}
+			
+			//case 2: we stalled on the getting the function wrapper
+			if(stallNodeInfo.index == StallNodeInfo::callFuncExpr){
+				//try to get the function wrapper again
+				DataType functionWrapperData;
+				try {
+					functionWrapperData = resumeExpression(*data.funcExpr);
+				}
+				//stalled again on the funcExpr!
+				catch(const StallFlag&){
+					pushStallNodeInfo({ AstType::call, StallNodeInfo::callFuncExpr });
+					throw;
+				}
+				if(!std::holds_alternative<FunctionWrapper>(functionWrapperData)){
+					throwError("tried to call non-function!");
+				}
+				const auto& functionWrapper{ std::get<FunctionWrapper>(functionWrapperData) };
+				return evaluateFunctionWrapperCall(data, functionWrapperData, functionWrapper);
+			}
+			
+			//case 3: we stalled on either a native function or a user function. Get the stored
+			//function wrapper off the stack
+			const DataType& functionWrapperData{ popLastStallData() };
+			const auto& functionWrapper{ std::get<FunctionWrapper>(functionWrapperData) };
+			return resumeEvaluatingFunctionWrapperCall(
+				data,
+				stallNodeInfo,
+				functionWrapperData,
+				functionWrapper
+			);
+		}
+		
+		/**
+		 * Resumes evaluating a function wrapper call. The call may have been a native function
+		 * call, in which case it is the root of the stall, or it may have been a user function
+		 * call, in which case it is not. Furthermore, the stall may have occurred when trying
+		 * to evaluate an argument.
+		 */
+		DataType resumeEvaluatingFunctionWrapperCall(
+			const AstCallData& data,
+			const StallNodeInfo& stallNodeInfo,
+			const DataType& functionWrapperData,
+			const FunctionWrapper& functionWrapper
+		){
+			//case 1: native function
+			if(std::holds_alternative<NativeFunctionWrapper>(functionWrapper)){
+				const auto& nativeFunction{ unwrapNativeFunctionFromData(functionWrapper) };
+				return resumeEvaluatingNativeFunctionCall(
+					data,
+					stallNodeInfo,
+					functionWrapperData,
+					nativeFunction
 				);
+			}
+			//case 2: user function
+			else{
+				const UserFunctionWrapper& userFunctionWrapper{
+					std::get<UserFunctionWrapper>(functionWrapper)
+				};
+				return resumeEvaluatingUserFunctionCall(
+					data,
+					stallNodeInfo,
+					functionWrapper,
+					userFunctionWrapper
+				);
+			}
+		}
+		
+		/**
+		 * Resumes a native function call. This method should only be called if the stall
+		 * occurred during evaluation of an argument expression for a native function.
+		 */
+		DataType resumeEvaluatingNativeFunctionCall(
+			const AstCallData& data,
+			const StallNodeInfo& stallNodeInfo,
+			const DataType& functionWrapperData,
+			const NativeFunction& nativeFunction
+		){
+			if(stallNodeInfo.index < 0){
+				throwError("trying to resume a native function call arg but stall index < 0!");
+			}
+			std::vector<DataType> args{};
+			//retrieve stored args
+			int currentIndex{ 0 };
+			for(; currentIndex < stallNodeInfo.index; ++currentIndex){
+				args.push_back(popLastStallData());
+			}
+			//try to get the rest of the args - may stall again!
+			try {
+				//resume evaluating the stalled arg
+				args.push_back(resumeExpression(data.args[currentIndex]));
+				++currentIndex;
+				//evaluate remainder of args as normal
+				for(; currentIndex < data.args.size(); ++currentIndex ) {
+					args.push_back(runExpression(data.args[currentIndex]));
+				}
+			}
+			//stalled on an arg again!
+			catch(const StallFlag&){
+				int stalledIndex{ currentIndex };
+				//first, push all the args
+				//currentIndex points to the stalled arg (which wasn't complete)
+				for(--currentIndex; currentIndex >= 0; --currentIndex){
+					//by pushing the back element, the top will be the first arg
+					pushStallNodeData(args.back());
+					args.pop_back();
+				}
+				//second, push the function wrapper
+				pushStallNodeData(functionWrapperData);
+				//last, push a stall info pointing to the stalled arg
+				pushStallNodeInfo({ AstType::call, stalledIndex });
+				throw;
+			}
+			//pass to native function, which may stall (in fact this is where stalls start)
+			return evaluateNativeFunctionWithArgs(nativeFunction, args, functionWrapperData);
+		}
+		
+		DataType resumeEvaluatingUserFunctionCall(
+			const AstCallData& data,
+			const StallNodeInfo& stallNodeInfo,
+			const DataType& functionWrapperData,
+			const UserFunctionWrapper& userFunctionWrapper
+		){
+			//case 1: we stalled on an arg
+			if(stallNodeInfo.index >= 0){
+				int currentIndex{ stallNodeInfo.index };
 				try{
-					//evaluate all args and store in the function environment
-					for(int i = 0; i < data.args.size(); ++i){
+					//try to evaluate the stalled arg
+					/*
+					 * The statements below are split up because when we resume from a stall,
+					 * we are currently in the environment containing the native function call.
+					 * resumeExpression() will reset the environment to the correct one
+					 * containing the parameter environment, but we should not access
+					 * innermostEnvironmentPointer prior to calling resumeExpression on the
+					 * stalled arg.
+					 */
+					const DataType& stalledArg{ resumeExpression(data.args[currentIndex]) };
+					innermostEnvironmentPointer->define(
+						userFunctionWrapper.paramNames[currentIndex],
+						stalledArg
+					);
+					++currentIndex;
+					//try to evaluate the remaining args
+					for(; currentIndex < data.args.size(); ++currentIndex ) {
 						innermostEnvironmentPointer->define(
-							userFunctionWrapper.paramNames[i],
-							runExpression(data.args[i])
+							userFunctionWrapper.paramNames[currentIndex],
+							runExpression(data.args[currentIndex])
 						);
 					}
-					//pass to the function body which may throw a DataType as its return
-					runStatement(*userFunctionWrapper.body);
-					innermostEnvironmentPointer
-						= innermostEnvironmentPointer->getEnclosingEnvironmentPointer();
+				}
+				//stalled on an arg again!
+				catch(const StallFlag&){
+					//in this case, there is no need to push all the args since we aren't
+					//resetting the environment. Do push the function and info though.
+					pushStallNodeData(functionWrapperData);
+					pushStallNodeInfo({ AstType::call, currentIndex });
+					throw;
+				}
+				//all args evaluated and put into the environment, now pass to function body
+				return evaluateUserFunctionWithArgs(functionWrapperData, userFunctionWrapper);
+			}
+			//case 2: we stalled in the function body
+			else if(stallNodeInfo.index == StallNodeInfo::callUser){
+				//attempt to resume executing the body statement
+				try{
+					//pass to the function body
+					resumeStatement(*userFunctionWrapper.body);
+					popEnvironment();
 					//if no throw/return occurred, return false
 					return DataType{ false };
 				}
+				//if we caught a DataType, that's our return value
 				catch(const DataType& returnValue){
-					//if we caught a DataType, that's our return value
-					innermostEnvironmentPointer
-						= innermostEnvironmentPointer->getEnclosingEnvironmentPointer();
+					popEnvironment();
 					return returnValue;
 				}
-				catch(...){
-					//if anything else was thrown, that's an error
-					innermostEnvironmentPointer
-						= innermostEnvironmentPointer->getEnclosingEnvironmentPointer();
+				//stalled on the function body again; DO NOT RESET ENVIRONMENT
+				catch(const StallFlag&){
+					/*
+					 * stalled on a native function! vomit onto the stack and rethrow, but
+					 * DO NOT RESET THE ENVIRONMENT POINTER since we must resume in the
+					 * innermost environment.
+					 */
+					pushStallNodeData(functionWrapperData);
+					pushStallNodeInfo({ AstType::call, StallNodeInfo::callUser });
 					throw;
 				}
+				//error! reset environment
+				catch(...){
+					//if anything else was thrown, that's an error, and we reset the environment
+					popEnvironment();
+					throw;
+				}
+			}
+			else{
+				throwError("bad stall index in resume user func call!");
+				return false;//dummy return
 			}
 		}
 		
@@ -2259,6 +2609,7 @@ namespace darkness{
 			}
 			else{
 				throwError("tried to unwrapNativeFunctionFromData a non-function!");
+				return false;//dummy return
 			}
 		}
 		
@@ -2273,6 +2624,7 @@ namespace darkness{
 			}
 			else{
 				throwError("tried to unwrapNativeFunctionFromData a user function!");
+				return false;//dummy return
 			}
 		}
 		
@@ -2294,14 +2646,18 @@ namespace darkness{
 		 * Pops and returns the top element of the stall stack as an info element
 		 */
 		StallNodeInfo popLastStallNodeInfo(){
-			 return std::get<StallNodeInfo>(stallStack.pop_back());
+			StallNodeInfo toRet{ std::get<StallNodeInfo>(stallStack.back()) };
+			stallStack.pop_back();
+			return toRet;
 		}
 		
 		/**
 		 * Pops and returns the top element of the stall stack as a data element
 		 */
 		DataType popLastStallData(){
-			 return std::get<DataType>(stallStack.pop_back());
+			DataType toRet{ std::get<DataType>(stallStack.back()) };
+			stallStack.pop_back();
+			return toRet;
 		}
 		
 		/**
@@ -2389,7 +2745,7 @@ namespace darkness{
 			}
 			
 			DataType get(const std::string& name){
-				auto& found{ identifierMap.find(name) };
+				const auto& found{ identifierMap.find(name) };
 				if(found != identifierMap.end()){
 					return found->second;
 				}
@@ -2398,11 +2754,12 @@ namespace darkness{
 				}
 				else{
 					throwError("bad get var name: " + name);
+					return false;//dummy return
 				}
 			}
 			
 			DataType get(const std::string& name, const std::string& errorMsg){
-				auto& found{ identifierMap.find(name) };
+				const auto& found{ identifierMap.find(name) };
 				if(found != identifierMap.end()){
 					return found->second;
 				}
@@ -2411,11 +2768,12 @@ namespace darkness{
 				}
 				else{
 					throwError(errorMsg);
+					return false;//dummy return
 				}
 			}
 			
 			bool contains(const std::string& name){
-				auto& found{ identifierMap.find(name) };
+				const auto& found{ identifierMap.find(name) };
 				return found != identifierMap.end();
 			}
 			

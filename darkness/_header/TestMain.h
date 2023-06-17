@@ -13,6 +13,7 @@ namespace darkness{
 	public:
 		TestInterpreter(){
 			addNativeFunction("print", print);
+			addNativeFunction("staller", staller);
 		}
 		
 	private:
@@ -44,6 +45,19 @@ namespace darkness{
 			}
 			return false;
 		}
+		
+		static DataType staller(const std::vector<DataType>& parameters){
+			static int i{ 0 };
+			wasp::debug::log(std::to_string(i));
+			if(i < 100){
+				++i;
+				throw StallFlag{};
+			}
+			else{
+				i = 0;
+				return 12345;
+			}
+		}
 	};
 	
 	//todo: temp for testing, from
@@ -68,7 +82,9 @@ namespace darkness{
 		Parser parser{};
 		auto script{ parser.parse(tokens) };
 		TestInterpreter interpreter{};
-		interpreter.runScript(script);
+		if( !interpreter.runScript(script) ) {
+			while( !interpreter.resumeScript(script) );
+		}
 		wasp::debug::log("\nend of script");
 	}
 }

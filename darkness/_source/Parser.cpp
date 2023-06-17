@@ -543,7 +543,7 @@ namespace darkness{
 			//needed to distinguish l and r values
 			return {
 				AstType::parenthesis,
-				AstParenthsData{
+				AstParenthesisData{
 					std::make_unique<AstNode>(std::move(expression))
 				}
 			};
