@@ -115,14 +115,16 @@ namespace darkness{
 		
 		class Environment;	//definition at bottom of file
 		
+	public:
 		struct ScriptExecutionState{
-			bool stalled{};
+			bool stalled{ false };
 			std::shared_ptr<Environment> innermostEnvironmentPointer{};
 			std::vector<StallNodeInfo> stallInfoStack{};
 			std::vector<DataType> stallDataStack{};
 			StallingNativeFunctionCall stallingNativeFunctionCall{};
 		};
 		
+	protected:
 		//constants
 		static constexpr auto numTypes{ std::variant_size_v<DataType> };
 		static constexpr auto numCustomTypes{ sizeof...(CustomTypes) };

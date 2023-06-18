@@ -129,7 +129,7 @@ namespace process::game::systems {
 			);
 		}
 
-		void apply(wasp::ecs::DataStorage& dataStorage) {
+		void applyAndClear(wasp::ecs::DataStorage& dataStorage) {
 			for (auto& order : queuedOrders) {
 				order->apply(dataStorage);
 			}

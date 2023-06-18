@@ -26,9 +26,6 @@
 #include "ConsoleOutput.h"
 #include "Logging.h"
 
-//todo: testing darkness
-#include "TestMain.h"
-
 using namespace process;
 using namespace process::game;
 
@@ -44,11 +41,6 @@ void pumpMessages();
 int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode) {
 	try {
 		wasp::debug::initConsoleOutput();
-		
-		//todo: testing darkness
-		darkness::test();
-		while(true){}
-		std::exit(0);
 		
 		//read settings
 		wasp::game::Settings settings {
@@ -66,12 +58,13 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 		resources::ResourceMasterStorage resourceMasterStorage {};
 		
 		resource::ResourceLoader resourceLoader {
-			std::array<wasp::resource::Loadable*, 5> {
+			std::array<wasp::resource::Loadable*, 6> {
 				&resourceMasterStorage.directoryStorage,
 				&resourceMasterStorage.manifestStorage,
 				&resourceMasterStorage.spriteStorage,
 				&resourceMasterStorage.midiSequenceStorage,
-				&resourceMasterStorage.dialogueStorage
+				&resourceMasterStorage.dialogueStorage,
+				&resourceMasterStorage.scriptStorage
 			}
 		};
 		resourceLoader.loadFile({ config::mainManifestPath });
@@ -174,18 +167,18 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 	#ifdef _DEBUG
 	catch( std::exception& exception ) {
 		wasp::debug::log(exception.what());
-		#pragma warning(suppress : 4297)  //if debug, we throw exceptions in main
-		throw;
+		#pragma warning(suppress : 4297)  //if debug, we spin forever after an error
+		while(true);
 	}
 	catch( std::string& str ) {
 		wasp::debug::log(str);
-		#pragma warning(suppress : 4297)  //if debug, we throw exceptions in main
-		throw;
+		#pragma warning(suppress : 4297)  //if debug, we spin forever after an error
+		while(true);
 	}
 	catch( ... ) {
 		wasp::debug::log("Exception caught in main of unknown type\n");
-		#pragma warning(suppress : 4297)  //if debug, we throw exceptions in main
-		throw;
+		#pragma warning(suppress : 4297)  //if debug, we spin forever after an error
+		while(true);
 	}
 	#else
 	catch (...) {

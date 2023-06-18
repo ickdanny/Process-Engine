@@ -8,8 +8,7 @@
 #include "Components/PlayerData.h"
 #include "Components/CollisionType.h"
 #include "Components/DeathCommand.h"
-#include "Components/SpawnProgramList.h"
-#include "Components/ScriptProgramList.h"
+#include "Components/ScriptList.h"
 #include "Components/PickupType.h"
 #include "Components/TwoFramePosition.h"
 #include "PolarVector.h"
@@ -73,10 +72,10 @@ namespace process::game {
         using wasp::game::components::TwoFramePosition::TwoFramePosition;
 
         //Explicitly define copy and move constructors taking Point2
-        Position(const wasp::math::Point2& toCopy)
+        explicit Position(const wasp::math::Point2& toCopy)
             : wasp::game::components::TwoFramePosition(toCopy) {
         }
-        Position(wasp::math::Point2&& toMove)
+        explicit Position(wasp::math::Point2&& toMove)
             : wasp::game::components::TwoFramePosition(toMove) {
         }
     };
@@ -89,18 +88,18 @@ namespace process::game {
         using PolarVector::PolarVector;
 
         //Explicitly define copy and move constructors taking PolarVector
-        Velocity(const PolarVector& toCopy)
+        explicit Velocity(const PolarVector& toCopy)
             : PolarVector(toCopy) {
         }
-        Velocity(PolarVector&& toMove)
+        explicit Velocity(PolarVector&& toMove)
             : PolarVector(toMove) {
         }
 
         //Explicitly define copy and move constructors taking Vector2
-        Velocity(const Vector2& toCopy)
+        explicit Velocity(const Vector2& toCopy)
             : PolarVector(toCopy) {
         }
-        Velocity(Vector2&& toMove)
+        explicit Velocity(Vector2&& toMove)
             : PolarVector(toMove) {
         }
 
@@ -124,10 +123,10 @@ namespace process::game {
         using wasp::math::AABB::AABB;
 
         //Explicitly define copy and move constructors taking AABB
-        Hitbox(const AABB& toCopy)
+        explicit Hitbox(const AABB& toCopy)
             : wasp::math::AABB(toCopy) {
         }
-        Hitbox(AABB&& toMove)
+        explicit Hitbox(AABB&& toMove)
             : wasp::math::AABB(toMove) {
         }
     };
@@ -147,20 +146,16 @@ namespace process::game {
         using wasp::game::components::DeathCommand::DeathCommand;
 
         //Explicitly defined constructor taking the command
-        DeathCommand(wasp::game::components::DeathCommand::Commands command)
+        explicit DeathCommand(wasp::game::components::DeathCommand::Commands command)
             : wasp::game::components::DeathCommand{ command } {
         }
     };
-    struct ScriptProgramList : wasp::game::components::ScriptProgramList {
-        using wasp::game::components::ScriptProgramList::ScriptProgramList;
-    };
-
-    struct SpawnProgramList : wasp::game::components::SpawnProgramList {
-        using wasp::game::components::SpawnProgramList::SpawnProgramList;
+    struct ScriptList : components::ScriptList {
+        using components::ScriptList::ScriptList;
     };
 
     struct DeathSpawn {
-        SpawnProgramList spawnProgramList{};
+		ScriptList scriptList{};
     };
 
     struct Inbound {

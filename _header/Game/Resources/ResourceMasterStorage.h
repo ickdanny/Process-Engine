@@ -5,6 +5,7 @@
 #include "Game/Resources/MidiSequenceStorage.h"
 #include "Game/Resources/DialogueStorage.h"
 #include "Game/Resources/SpriteStorage.h"
+#include "Game/Resources/ScriptStorage.h"
 
 namespace process::game::resources {
 	struct ResourceMasterStorage {
@@ -13,5 +14,6 @@ namespace process::game::resources {
 		SpriteStorage spriteStorage{};
 		MidiSequenceStorage midiSequenceStorage {};
 		DialogueStorage dialogueStorage {};
+		ScriptStorage scriptStorage {};
 	};
 }
