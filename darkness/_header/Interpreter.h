@@ -115,6 +115,14 @@ namespace darkness{
 		
 		class Environment;	//definition at bottom of file
 		
+		struct ScriptExecutionState{
+			bool stalled{};
+			std::shared_ptr<Environment> innermostEnvironmentPointer{};
+			std::vector<StallNodeInfo> stallInfoStack{};
+			std::vector<DataType> stallDataStack{};
+			StallingNativeFunctionCall stallingNativeFunctionCall{};
+		};
+		
 		//constants
 		static constexpr auto numTypes{ std::variant_size_v<DataType> };
 		static constexpr auto numCustomTypes{ sizeof...(CustomTypes) };
@@ -128,10 +136,10 @@ namespace darkness{
 		//fields
 		std::shared_ptr<Environment> nativeEnvironmentPointer{};
 		std::shared_ptr<Environment> innermostEnvironmentPointer{};
-		std::vector<std::variant<StallNodeInfo, DataType>> stallStack{};
+		std::vector<StallNodeInfo> stallInfoStack{};
+		std::vector<DataType> stallDataStack{};
 		StallingNativeFunctionCall stallingNativeFunctionCall{};
 		DataType stallReturn{ false };
-		//todo: could possibly refactor the stall fields (and innermost environment ptr) out
 		
 	public:
 		/**
@@ -185,8 +193,9 @@ namespace darkness{
 		 * A script may stall on any of its statements. Returns true if the script completed,
 		 * false if the script stalled.
 		 */
-		bool runScript(const AstNode& script){
+		ScriptExecutionState runScript(const AstNode& script){
 			throwIfNotType(script, AstType::script, "trying to run not script!");
+			resetState();
 			int currentIndex{ 0 };
 			const auto& statements{ std::get<AstScriptData>(script.dataVariant).statements };
 			try{
@@ -197,9 +206,9 @@ namespace darkness{
 			catch(const StallFlag&){
 				//stalled on a native function! vomit onto the stack and exit
 				pushStallNodeInfo({ AstType::script, currentIndex });
-				return false;
+				return packageState();
 			}
-			return true;
+			return ScriptExecutionState{};
 		}
 		
 		/**
@@ -207,8 +216,12 @@ namespace darkness{
 		 * an error. The script may stall on the same statement, or it may stall on a new
 		 * statement. Returns true if the script completed, false if the script stalled again.
 		 */
-		 bool resumeScript(const AstNode& script){
+		ScriptExecutionState resumeScript(
+			const AstNode& script,
+			const ScriptExecutionState& state
+		){
 			throwIfNotType(script, AstType::script, "trying to resume not script!");
+			loadState(state);
 			//make sure interpreter was stalled
 			if(stallingNativeFunctionCall.stallingNativeFunction == nullptr){
 				throwError("trying to resume a script but was not stalled!");
@@ -219,7 +232,7 @@ namespace darkness{
 			}
 			catch(const StallFlag&){
 				//stalled again on the same native function! exit prematurely
-				return false;
+				return packageState();
 			}
 			//successfully ran - reset stalling native function call to nothing
 			stallingNativeFunctionCall = {};
@@ -241,9 +254,9 @@ namespace darkness{
 			catch(const StallFlag&){
 				//stalled on a different native function! vomit onto the stack and exit
 				pushStallNodeInfo({ AstType::script, currentIndex });
-				return false;
+				return packageState();
 			}
-			return true;
+			return ScriptExecutionState{};
 		 }
 		 
 	private:
@@ -2632,22 +2645,22 @@ namespace darkness{
 		 * Pushes the given info element onto the stall stack
 		 */
 		void pushStallNodeInfo(const StallNodeInfo& stallNodeInfo){
-			stallStack.push_back(stallNodeInfo);
+			stallInfoStack.push_back(stallNodeInfo);
 		}
 		
 		/**
 		 * Pushes the given data element onto the stall stack
 		 */
 		void pushStallNodeData(const DataType& data){
-			stallStack.push_back(data);
+			stallDataStack.push_back(data);
 		}
 		
 		/**
 		 * Pops and returns the top element of the stall stack as an info element
 		 */
 		StallNodeInfo popLastStallNodeInfo(){
-			StallNodeInfo toRet{ std::get<StallNodeInfo>(stallStack.back()) };
-			stallStack.pop_back();
+			StallNodeInfo toRet{ stallInfoStack.back() };
+			stallInfoStack.pop_back();
 			return toRet;
 		}
 		
@@ -2655,8 +2668,8 @@ namespace darkness{
 		 * Pops and returns the top element of the stall stack as a data element
 		 */
 		DataType popLastStallData(){
-			DataType toRet{ std::get<DataType>(stallStack.back()) };
-			stallStack.pop_back();
+			DataType toRet{ stallDataStack.back() };
+			stallDataStack.pop_back();
 			return toRet;
 		}
 		
@@ -2676,6 +2689,44 @@ namespace darkness{
 		void popEnvironment(){
 			innermostEnvironmentPointer
 				= innermostEnvironmentPointer->getEnclosingEnvironmentPointer();
+		}
+		
+		/**
+		 * Packages up the interpreter state. Invalidates the following fields:
+		 * innermostEnvironmentPointer, stallInfoStack, stallDataStack,
+		 * and stallingNativeFunctionCall.
+		 */
+		ScriptExecutionState packageState(){
+			return {
+				true,
+				std::move(innermostEnvironmentPointer),
+				std::move(stallInfoStack),
+				std::move(stallDataStack),
+				std::move(stallingNativeFunctionCall)
+			};
+		}
+		
+		/**
+		 * Resets the state of the interpreter, specifically the innermostEnvironmentPointer,
+		 * stallInfoStack, and stallDataStack.
+		 */
+		void resetState(){
+			innermostEnvironmentPointer = std::make_shared<Environment>(
+				nativeEnvironmentPointer
+			);
+			stallInfoStack.clear();
+			stallDataStack.clear();
+		}
+		
+		/**
+		 * Loads the interpreter with the given script execution state. Invalidates the given
+		 * state.
+		 */
+		void loadState(const ScriptExecutionState& state){
+			innermostEnvironmentPointer = std::move(state.innermostEnvironmentPointer);
+			stallInfoStack = std::move(state.stallInfoStack);
+			stallDataStack = std::move(state.stallDataStack);
+			stallingNativeFunctionCall = std::move(state.stallingNativeFunctionCall);
 		}
 		
 		/**
@@ -2714,6 +2765,9 @@ namespace darkness{
 			//fields
 			std::shared_ptr<Environment> enclosingEnvironmentPointer{};
 			std::unordered_map<std::string, DataType> identifierMap{};
+			#ifdef _DEBUG
+			bool locked{ false };
+			#endif
 		
 		public:
 			Environment()
@@ -2727,11 +2781,27 @@ namespace darkness{
 				, identifierMap{} {
 			}
 			
+			#ifdef _DEBUG
+			void setLock(bool lockState){
+				locked = lockState;
+			}
+			#endif
+			
 			void define(const std::string& name, const DataType& value){
+				#ifdef _DEBUG
+				if(locked){
+					throwError("trying to define in a locked environment!");
+				}
+				#endif
 				identifierMap[name] = value;
 			}
 			
 			void assign(const std::string& name, const DataType& value){
+				#ifdef _DEBUG
+				if(locked){
+					throwError("trying to assign in a locked environment!");
+				}
+				#endif
 				const auto& found{ identifierMap.find(name) };
 				if(found != identifierMap.end()){
 					define(name, value);

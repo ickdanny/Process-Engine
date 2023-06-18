@@ -9,11 +9,39 @@
 
 namespace darkness{
 	
+	//todo: temp for testing, from
+	//todo: https://stackoverflow.com/questions/20902945/reading-a-string-from-file-c
+	std::string read_string_from_file(const std::string &file_path) {
+		const std::ifstream input_stream(file_path, std::ios_base::binary);
+		
+		if (input_stream.fail()) {
+			throw std::runtime_error("Failed to open file");
+		}
+		
+		std::stringstream buffer;
+		buffer << input_stream.rdbuf();
+		
+		return buffer.str();
+	}
+	
 	class TestInterpreter : public Interpreter<>{
 	public:
 		TestInterpreter(){
 			addNativeFunction("print", print);
 			addNativeFunction("staller", staller);
+		}
+		
+		static void test(){
+			auto input{ read_string_from_file("res\\test.dk") };
+			Lexer lexer{};
+			auto tokens{ lexer.lex(input) };
+			Parser parser{};
+			auto script{ parser.parse(tokens) };
+			TestInterpreter interpreter{};
+			auto scriptState{ interpreter.runScript(script) };
+			if( scriptState.stalled ) {
+				while( (scriptState = interpreter.resumeScript(script, scriptState)).stalled );
+			}
 		}
 		
 	private:
@@ -60,31 +88,8 @@ namespace darkness{
 		}
 	};
 	
-	//todo: temp for testing, from
-	//todo: https://stackoverflow.com/questions/20902945/reading-a-string-from-file-c
-	std::string read_string_from_file(const std::string &file_path) {
-		const std::ifstream input_stream(file_path, std::ios_base::binary);
-		
-		if (input_stream.fail()) {
-			throw std::runtime_error("Failed to open file");
-		}
-		
-		std::stringstream buffer;
-		buffer << input_stream.rdbuf();
-		
-		return buffer.str();
-	}
-	
 	void test() {
-		auto input{ read_string_from_file("res\\test.dk") };
-		Lexer lexer{};
-		auto tokens{ lexer.lex(input) };
-		Parser parser{};
-		auto script{ parser.parse(tokens) };
-		TestInterpreter interpreter{};
-		if( !interpreter.runScript(script) ) {
-			while( !interpreter.resumeScript(script) );
-		}
+		TestInterpreter::test();
 		wasp::debug::log("\nend of script");
 	}
 }
