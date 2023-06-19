@@ -1,11 +1,12 @@
 #include "Game/Systems/PlayerShotSystem.h"
 
-//#include "Game/Systems/Programs/PlayerPrograms.h"
-
 namespace process::game::systems {
+	
+	PlayerShotSystem::PlayerShotSystem(resources::ScriptStorage* scriptStoragePointer)
+		: scriptStoragePointer{ scriptStoragePointer } {
+	}
 
 	void PlayerShotSystem::operator()(Scene& scene) {
-
 		//this system only works if there are game commands
 		if (scene.hasChannel(SceneTopics::gameCommands)) {
 			auto& gameCommandChannel{ scene.getChannel(SceneTopics::gameCommands) };

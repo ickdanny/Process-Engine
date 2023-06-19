@@ -115,7 +115,7 @@ namespace process::game::systems {
 						MenuCommandSelect::Commands::enter, 
 						std::tuple{ SceneNames::difficulty, GameBuilderCommands::start }
 					},
-					{ },	//draw depth
+					{ },	//depth, since we need to pass true below
 					true
 				).package(),
 				makeButton(
@@ -189,7 +189,7 @@ namespace process::game::systems {
 						MenuCommandSelect::Commands::enter,
 						std::tuple{ SceneNames::shot, GameBuilderCommands::easy }
 					},
-					{ },	//draw depth
+					{ },	//depth, since we need to pass true below
 					true
 				).package(),
 				makeButton(
@@ -276,7 +276,7 @@ namespace process::game::systems {
 				},
 				ScriptList{
 					components::ScriptContainer{
-						scriptStoragePointer->get(L"hello_world")
+						scriptStoragePointer->get(L"call_hello_world")	//todo: script test
 					}
 				},
 				AnimationList{ 
@@ -339,7 +339,7 @@ namespace process::game::systems {
 						MenuCommandSelect::Commands::enter,
 						std::tuple{ nextScene, GameBuilderCommands::shotA }
 					},
-					{ },	//draw depth
+					{ },	//depth, since we need to pass true below
 					true
 				).package(),
 				makeButton(
@@ -385,7 +385,7 @@ namespace process::game::systems {
 						MenuCommandSelect::Commands::enter,
 						std::tuple{ SceneNames::game, GameBuilderCommands::stage1 }
 					},
-					{ },	//draw depth
+					{ },	//depth, since we need to pass true below
 					true
 				).package(),
 				makeButton(
@@ -463,7 +463,7 @@ namespace process::game::systems {
 					0,
 					L"button_01",
 					{ MenuCommandSelect::Commands::startTrack, L"01" },
-					{ },	//draw depth
+					{ },	//depth, since we need to pass true below
 					true
 				).package(),
 				makeButton(
@@ -590,7 +590,7 @@ namespace process::game::systems {
 					0,
 					L"button_sound",
 					{ MenuCommandSelect::Commands::toggleSound },
-					{ },	//draw depth
+					{ },	//depth, since we need to pass true below
 					true
 				).package(),
 				makeButton(
@@ -643,9 +643,11 @@ namespace process::game::systems {
 		);
 
 		auto& dataStorage{ scene.getDataStorage() };
+		
+		//add the overlay GUI
 		addForeground(dataStorage, L"overlay_frame");
 
-		//adding the player
+		//add the player
 		auto& playerDataChannel{ 
 			globalChannelSetPointer->getChannel(GlobalTopics::playerData)
 		};
@@ -669,7 +671,7 @@ namespace process::game::systems {
 				SpriteInstruction{
 					spriteStoragePointer->get(L"p_idle_1")->sprite,
 					config::playerDrawOrder,
-					wasp::math::Vector2{ 0.0f, 4.0f }			//offset
+					wasp::math::Vector2{ 0.0f, 4.0f }	//sprite offset
 				},
 				playerData,
 				Inbound{ config::playerInbound },
@@ -717,6 +719,7 @@ namespace process::game::systems {
 		//adding the spawner
 		components::ScriptContainer scriptContainer;//uninitialized
 		
+		//todo: add spawner script
 		/*
 		switch (gameState.stage) {
 			case 1:
@@ -741,11 +744,11 @@ namespace process::game::systems {
 
 		dataStorage.addEntity(
 			EntityBuilder::makeEntity(
-				ScriptList{ scriptContainer }
+				ScriptList{ /*scriptContainer*/ }
 			).package()
 		);
 
-		//adding the background
+		//add the background
 		constexpr int screenHeight{ 220 };
 		constexpr int screenWidth{ 170 };
 		std::wstring backgroundID{};
@@ -774,19 +777,19 @@ namespace process::game::systems {
 			default:
 				throw std::runtime_error{ "unexpected default case " };
 		}
-		SpriteInstruction backgroundSprite{
+		SpriteInstruction backgroundSpriteInstruction{
 			spriteStoragePointer->get(backgroundID)->sprite,
 			config::backgroundDrawOrder
 		};
-		std::size_t totalHeight{ backgroundSprite.getSprite().height };
+		std::size_t totalHeight{ backgroundSpriteInstruction.getSprite().height };
 		int startingY{ static_cast<int>(totalHeight) - screenHeight };
 		float yVelocity{ static_cast<float>(-startingY) / static_cast<float>(ticks) };
 
 		dataStorage.addEntity(
 			EntityBuilder::makeVisible(
 				wasp::math::Point2{ middleX, center.y },
-				backgroundSprite,
-				SubImage{ 
+				backgroundSpriteInstruction,
+				SubImage{ //todo: subimage not drawing in right place; whole view is moving
 					0.0f, 
 					static_cast<float>(startingY), 
 					static_cast<float>(screenWidth), 
@@ -859,7 +862,7 @@ namespace process::game::systems {
 					L"button_resume",
 					//the game cannot be paused during dialogue so this is safe
 					{ MenuCommandSelect::Commands::backTo, SceneNames::game },
-					{ },	//draw depth
+					{ },	//depth, since we need to pass true below
 					true
 				).package(),
 				makeButton(
@@ -911,7 +914,7 @@ namespace process::game::systems {
 					0,
 					L"button_accept",
 					{ MenuCommandSelect::Commands::backTo, SceneNames::game },
-					{ },	//draw depth
+					{ },	//depth, since we need to pass true below
 					true
 				).package(),
 				makeButton(

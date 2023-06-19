@@ -6,12 +6,18 @@ namespace process::game::systems {
 	
 	using namespace wasp::ecs;
 	using namespace wasp::ecs::entity;
+	using ResourceSharedPointer = std::shared_ptr<resources::ScriptStorage::ResourceType>;
 	
-	ScriptSystem::ScriptSystem(wasp::channel::ChannelSet* globalChannelSetPointer)
-		: globalChannelSetPointer { globalChannelSetPointer } {
+	ScriptSystem::ScriptSystem(
+		wasp::channel::ChannelSet* globalChannelSetPointer,
+		resources::ScriptStorage* scriptStoragePointer
+	)
+		: globalChannelSetPointer { globalChannelSetPointer }
+		, scriptStoragePointer{ scriptStoragePointer } {
 		//add native functions
 		addNativeFunction("print", print);
-		//todo: should load scripts as callable functions
+		//load function scripts manually
+		addFunctionScript("helloWorld", scriptStoragePointer->get(L"hello_world"));
 	}
 	
 	void ScriptSystem::operator()(Scene& scene) {

@@ -2,6 +2,8 @@
 
 #include "systemInclude.h"
 
+#include "Resources/ScriptStorage.h"
+
 namespace process::game::systems {
 
 	class PlayerBombSystem {
@@ -10,15 +12,10 @@ namespace process::game::systems {
 		using EntityHandle = wasp::ecs::entity::EntityHandle;
 
 		//fields
-		//todo: need way to access scripts Programs* programsPointer{};
+		resources::ScriptStorage* scriptStoragePointer{};
 
 	public:
-		
-		/*
-		PlayerBombSystem(Programs* programsPointer)
-			: programsPointer{ programsPointer } {
-		}
-		 */
+		explicit PlayerBombSystem(resources::ScriptStorage* scriptStoragePointer);
 
 		void operator()(Scene& scene);
 

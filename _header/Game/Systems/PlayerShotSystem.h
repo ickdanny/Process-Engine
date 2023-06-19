@@ -1,22 +1,20 @@
 #pragma once
 
 #include "systemInclude.h"
+#include "ScriptStorage.h"
 
 namespace process::game::systems {
 
 	class PlayerShotSystem {
 	private:
 		//fields
-		//todo: need way to access scripts
-		//Programs* programsPointer{};
+		resources::ScriptStorage* scriptStoragePointer{};
 
 	public:
 		
-		/*
-		PlayerShotSystem(Programs* programsPointer)
-			: programsPointer{ programsPointer } {
-		}
-		 */
+		
+		PlayerShotSystem(resources::ScriptStorage* scriptStoragePointer);
+		
 
 		void operator()(Scene& scene);
 

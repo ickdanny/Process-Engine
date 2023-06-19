@@ -1,6 +1,7 @@
 #pragma once
 
 #include "systemInclude.h"
+#include "ScriptStorage.h"
 
 namespace process::game::systems {
 
@@ -10,17 +11,15 @@ namespace process::game::systems {
 		using EntityHandle = wasp::ecs::entity::EntityHandle;
 		using CollisionCommands = components::CollisionCommands;
 
-		//todo: need way to access scripts
 		//fields
-		//Programs* programsPointer{};
+		resources::ScriptStorage* scriptStoragePointer{};
 
 	public:
-		CollisionHandlerSystem(/*Programs* programsPointer*/){};
+		CollisionHandlerSystem(resources::ScriptStorage* scriptStoragePointer);
 		void operator()(Scene& scene);
 
 	private:
 		//helper functions
-
 		template <typename CollisionType>
 		void handleCollisions(Scene& scene) {
 			const auto& collisionChannel{

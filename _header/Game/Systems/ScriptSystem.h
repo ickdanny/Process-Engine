@@ -4,6 +4,7 @@
 
 #include "Game/Systems/ComponentOrderQueue.h"
 #include "Interpreter.h"
+#include "ScriptStorage.h"
 
 namespace process::game::systems {
 
@@ -14,12 +15,16 @@ namespace process::game::systems {
 
 		//fields
 		wasp::channel::ChannelSet* globalChannelSetPointer{};
+		resources::ScriptStorage* scriptStoragePointer{};
 		Scene* currentScenePointer{};
 		EntityID currentEntityID{};
 		ComponentOrderQueue componentOrderQueue{};//cleared at end of every call
 
 	public:
-		explicit ScriptSystem(wasp::channel::ChannelSet* globalChannelSetPointer);
+		ScriptSystem(
+			wasp::channel::ChannelSet* globalChannelSetPointer,
+			resources::ScriptStorage* scriptStoragePointer
+		);
 		void operator()(Scene& scene);
 
 	private:

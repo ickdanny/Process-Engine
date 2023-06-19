@@ -188,8 +188,24 @@ namespace darkness{
 			nativeEnvironmentPointer->define(name, data);
 		}
 		
+		/**
+		 * Binds a function script to the native environment under the specified name.
+		 */
+		void addFunctionScript(
+			const std::string& name,
+			const std::shared_ptr<AstNode>& bodyPointer,
+			const std::vector<std::string>& paramNames = {}
+		){
+			UserFunctionWrapper userFunctionWrapper{
+				paramNames,
+				bodyPointer
+			};
+			FunctionWrapper functionWrapper{ userFunctionWrapper };
+			DataType environmentData{ functionWrapper };
+			nativeEnvironmentPointer->define(name, environmentData);
+		}
+		
 	public:
-		//todo: maybe let scripts return stuff? Can define functions in different scripts
 		/**
 		 * Runs a darkness script. If the given AstNode is of any other type, throws an error.
 		 * A script may stall on any of its statements. Returns true if the script completed,

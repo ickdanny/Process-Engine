@@ -37,8 +37,6 @@ namespace process::graphics {
 		Angle rotation{ defaultRotation };
 		float scale{ defaultScale };
 
-		bool updated{};         //useful for implementation
-
 	public:
 		//constructor
 		explicit SpriteDrawInstruction(
@@ -62,7 +60,7 @@ namespace process::graphics {
 		const Sprite& getSprite() const {
 			return sprite;
 		}
-		const int getDepth() const {
+		int getDepth() const {
 			return depth;
 		}
 		const Vector2& getOffset() const {
@@ -79,36 +77,19 @@ namespace process::graphics {
 		//setters
 		void setSprite(const Sprite& sprite) {
 			this->sprite = sprite;
-			flagForUpdate();
 		}
 		void setDepth(int depth){
 			this->depth = depth;
-			flagForUpdate();
 		}
 		void setOffset(const Vector2& offset) {
 			this->offset = offset;
-			flagForUpdate();
 		}
 		void setRotation(Angle rotation) {
 			this->rotation = rotation;
-			flagForUpdate();
 		}
 		void setScale(float scale) {
 			this->scale = scale;
 			throwIfScaleOutOfRange();
-			flagForUpdate();
-		}
-
-		//todo: check if we need SpriteDrawInstruction update
-		//updating
-		bool isUpdated() const {
-			return updated;
-		}
-		void flagForUpdate() {
-			updated = false;
-		}
-		void update() {
-			updated = true;
 		}
 
 	private:

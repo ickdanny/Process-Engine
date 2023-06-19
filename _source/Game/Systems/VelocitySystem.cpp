@@ -11,7 +11,7 @@ namespace process::game::systems {
 			)
 		};
 
-		//add each entity's velocity to it's position and step the position
+		//add each entity's velocity to its position and step the position
 		auto groupIterator{ groupPointer->groupIterator<Position, Velocity>() };
 		while (groupIterator.isValid()) {
 			const auto [position, velocity] = *groupIterator;

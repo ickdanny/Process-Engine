@@ -56,11 +56,12 @@ namespace process::game {
 		systems::GameBuilderSystem gameBuilderSystem;			//not initialized!
 		systems::LoadSystem loadSystem;							//not initialized!
 		systems::DialogueSystem dialogueSystem;					//not initialized!
+		systems::ScriptSystem scriptSystem;						//not initialized!
+		systems::PlayerMovementSystem playerMovementSystem{};
 		systems::VelocitySystem velocitySystem{};
 		systems::CollisionDetectorSystem collisionDetectorSystem{};
-		systems::PlayerMovementSystem playerMovementSystem{};
-		systems::PlayerShotSystem playerShotSystem;				//not initialized!
 		systems::CollisionHandlerSystem collisionHandlerSystem;	//not initialized!
+		systems::PlayerShotSystem playerShotSystem;				//not initialized!
 		systems::PlayerStateSystem playerStateSystem{};
 		systems::PlayerBombSystem playerBombSystem;				//not initialized!
 		systems::PlayerDeathDetectorSystem playerDeathDetectorSystem{};
@@ -68,7 +69,6 @@ namespace process::game {
 		systems::PlayerRespawnSystem playerRespawnSystem{};
 		systems::PlayerReactivateSystem playerReactivateSystem{};
 		systems::DeathHandlerSystem deathHandlerSystem{};
-		systems::ScriptSystem scriptSystem;						//not initialized!
 		systems::OverlaySystem overlaySystem;					//not initialized!
 		systems::PauseSystem pauseSystem;						//not initialized!
 		systems::AnimationSystem animationSystem;				//not initialized!

@@ -159,7 +159,7 @@ namespace process::game {
 			recursiveRenderHelper(itr + 1);
 		}
 		sceneRenderer(scene);
-		//for each scene, we need to clear the depth since painters algorithm
+		//for each scene, we need to clear the depth since painter's algorithm
 		graphicsWrapperPointer->clearDepth();
 	}
 }

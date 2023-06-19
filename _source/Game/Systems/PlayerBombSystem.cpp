@@ -1,9 +1,12 @@
 #include "Game/Systems/PlayerBombSystem.h"
 
-//#include "Game/Systems/Programs/PlayerPrograms.h"
 #include "Logging.h"
 
 namespace process::game::systems {
+	
+	PlayerBombSystem::PlayerBombSystem(resources::ScriptStorage* scriptStoragePointer)
+		: scriptStoragePointer{ scriptStoragePointer } {
+	}
 
 	void PlayerBombSystem::operator()(Scene& scene) {
 		if (scene.hasChannel(SceneTopics::playerStateEntry)) {

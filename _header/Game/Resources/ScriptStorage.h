@@ -12,12 +12,13 @@ namespace process::game::resources {
 		: public resource::ResourceStorage<darkness::AstNode>,
 			public resource::FileLoadable,
 			public resource::ManifestLoadable {
-	private:
+	public:
 		//typedefs
 		using Script = darkness::AstNode;
 		using ResourceType = resource::Resource<Script>;
 		using ResourceBase = wasp::resource::ResourceBase;
 		
+	private:
 		//fields
 		darkness::Lexer lexer{};
 		darkness::Parser parser{};

@@ -1,5 +1,7 @@
 #include "Game/Systems/RenderSystem.h"
 
+#include "Logging.h"
+
 namespace process::game::systems {
 	
 	void RenderSystem::operator()(Scene& scene) {

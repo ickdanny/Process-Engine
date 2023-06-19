@@ -25,11 +25,14 @@ namespace process::game {
 			&(resourceMasterStoragePointer->spriteStorage),
 			&(resourceMasterStoragePointer->dialogueStorage)
 		}
-		, playerShotSystem{ /*&programs*/ }
-		, collisionHandlerSystem{ /*&programs*/ }
-		, playerBombSystem{ /*&programs*/ }
+		, scriptSystem{
+			globalChannelSetPointer,
+			&(resourceMasterStoragePointer->scriptStorage)
+		}
+		, collisionHandlerSystem{ &(resourceMasterStoragePointer->scriptStorage) }
+		, playerShotSystem{ &(resourceMasterStoragePointer->scriptStorage) }
+		, playerBombSystem{ &(resourceMasterStoragePointer->scriptStorage) }
 		, continueSystem{ globalChannelSetPointer }
-		, scriptSystem{ globalChannelSetPointer }
 		, overlaySystem{ &(resourceMasterStoragePointer->spriteStorage) }
 		, pauseSystem{ globalChannelSetPointer }
 		, animationSystem{ &(resourceMasterStoragePointer->spriteStorage) }
@@ -46,11 +49,12 @@ namespace process::game {
 		gameBuilderSystem(scene);
 		loadSystem(scene);
 		dialogueSystem(scene);
+		scriptSystem(scene);
+		playerMovementSystem(scene);
 		velocitySystem(scene);
 		collisionDetectorSystem(scene);
-		playerMovementSystem(scene);
-		playerShotSystem(scene);
 		collisionHandlerSystem(scene);
+		playerShotSystem(scene);
 		playerStateSystem(scene);
 		playerBombSystem(scene);
 		playerDeathDetectorSystem(scene);
@@ -58,7 +62,6 @@ namespace process::game {
 		playerRespawnSystem(scene);
 		playerReactivateSystem(scene);
 		deathHandlerSystem(scene);
-		scriptSystem(scene);
 		overlaySystem(scene);
 		pauseSystem(scene);
 		animationSystem(scene);

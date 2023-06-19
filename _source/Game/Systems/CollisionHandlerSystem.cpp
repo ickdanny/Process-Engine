@@ -4,11 +4,13 @@
 
 namespace process::game::systems {
 
-	/*
-	CollisionHandlerSystem::CollisionHandlerSystem(Programs* programsPointer)
-		: programsPointer{ programsPointer } {
+	
+	CollisionHandlerSystem::CollisionHandlerSystem(
+		resources::ScriptStorage* scriptStoragePointer
+	)
+		: scriptStoragePointer{ scriptStoragePointer } {
 	}
-	 */
+	
 
 	void CollisionHandlerSystem::operator()(Scene& scene) {
 		//this system is responsible for clearing the playerHits channel
