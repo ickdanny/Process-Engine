@@ -199,7 +199,7 @@ namespace darkness{
 			throwIfNotType(script, AstType::script, "trying to run not script!");
 			resetState();
 			int currentIndex{ 0 };
-			const auto& statements{ std::get<AstScriptData>(script.dataVariant).statements };
+			const auto& statements{ std::get<AstStmtBlockData>(script.dataVariant).statements };
 			try{
 				for(; currentIndex < statements.size(); ++currentIndex){
 					runStatement(statements[currentIndex]);
@@ -243,7 +243,7 @@ namespace darkness{
 			throwIfNotType(stallNodeInfo, AstType::script, "bad stall type: not script!");
 			//resume running the script
 			int currentIndex{ stallNodeInfo.index };
-			const auto& statements{ std::get<AstScriptData>(script.dataVariant).statements };
+			const auto& statements{ std::get<AstStmtBlockData>(script.dataVariant).statements };
 			try{
 				//resume the stalled statement
 				resumeStatement(statements[currentIndex]);
@@ -285,7 +285,10 @@ namespace darkness{
 					runReturn(statement);
 					break;
 				case AstType::stmtBlock:
-					runBlock(statement);
+					runBlock(statement, false);
+					break;
+				case AstType::script:
+					runBlock(statement, true);
 					break;
 				case AstType::stmtExpression:
 					runExpression(
@@ -321,7 +324,10 @@ namespace darkness{
 					resumeReturn(statement);
 					break;
 				case AstType::stmtBlock:
-					resumeBlock(statement);
+					resumeBlock(statement, false);
+					break;
+				case AstType::script:
+					resumeBlock(statement, true);
 					break;
 				case AstType::stmtExpression:
 					resumeExpression(
@@ -666,8 +672,13 @@ namespace darkness{
 		/**
 		 * Runs a block node. A block may stall on any of its statements.
 		 */
-		void runBlock(const AstNode& block){
-			throwIfNotType(block, AstType::stmtBlock, "not a block!");
+		void runBlock(const AstNode& block, bool isScriptBlock){
+			if(!isScriptBlock) {
+				throwIfNotType(block, AstType::stmtBlock, "not a block!");
+			}
+			else{
+				throwIfNotType(block, AstType::script, "not a script block!");
+			}
 			int currentIndex{ 0 };
 			const auto& statements{
 				std::get<AstStmtBlockData>(block.dataVariant).statements
@@ -701,12 +712,17 @@ namespace darkness{
 		 * Resumes a stalled block. The block may stall on the same statement, or it may stall
 		 * on a new statement.
 		 */
-		void resumeBlock(const AstNode& block){
+		void resumeBlock(const AstNode& block, bool isScriptBlock){
 			/**
 			 * This method DOES NOT CREATE A NEW ENVIRONMENT since we resume execution in the
 			 * inner-most environment.
 			 */
-			throwIfNotType(block, AstType::stmtBlock, "not a block!");
+			if(!isScriptBlock) {
+				throwIfNotType(block, AstType::stmtBlock, "not a block!");
+			}
+			else{
+				throwIfNotType(block, AstType::script, "not a script block!");
+			}
 			//get the stall info
 			const StallNodeInfo& stallNodeInfo{ popLastStallNodeInfo() };
 			throwIfNotType(stallNodeInfo, AstType::stmtBlock, "bad stall type: not block!");

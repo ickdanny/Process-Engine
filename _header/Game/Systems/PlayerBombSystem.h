@@ -2,8 +2,6 @@
 
 #include "systemInclude.h"
 
-#include "Game/Systems/Programs/Programs.h"
-
 namespace process::game::systems {
 
 	class PlayerBombSystem {
@@ -12,12 +10,15 @@ namespace process::game::systems {
 		using EntityHandle = wasp::ecs::entity::EntityHandle;
 
 		//fields
-		Programs* programsPointer{};
+		//todo: need way to access scripts Programs* programsPointer{};
 
 	public:
+		
+		/*
 		PlayerBombSystem(Programs* programsPointer)
 			: programsPointer{ programsPointer } {
 		}
+		 */
 
 		void operator()(Scene& scene);
 

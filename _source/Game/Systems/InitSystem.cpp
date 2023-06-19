@@ -255,14 +255,14 @@ namespace process::game::systems {
 		addBackground(
 			dataStorage, 
 			L"background_menu_shot_back",
-			-1000,
-			wasp::math::Point2{ center.x + xOffset - 1, backY }
+			-100,
+			wasp::math::Point2{ center.x + xOffset, backY }
 		);
 		addBackground(
 			dataStorage,
 			L"background_menu_shot_back",
-			-1000,
-			wasp::math::Point2{ center.x - xOffset, backY }
+			-100,
+			wasp::math::Point2{ center.x - xOffset + 1, backY }
 		);
 
 		//adding the player previews
@@ -274,12 +274,10 @@ namespace process::game::systems {
 					config::playerDrawOrder,
 					wasp::math::Vector2{ 0.0f, 4.0f }			//offset
 				},
-				SpawnProgramList{
-					/*
-					components::SpawnProgram{ 
-						programsPointer->playerPrograms.shotAPreviewProgram
+				ScriptList{
+					components::ScriptContainer{
+						scriptStoragePointer->get(L"hello_world")
 					}
-					 */
 				},
 				AnimationList{ 
 					components::Animation{ {
@@ -298,7 +296,7 @@ namespace process::game::systems {
 					config::playerDrawOrder,
 					wasp::math::Vector2{ 0.0f, 4.0f }			//offset
 				},
-				SpawnProgramList{
+				ScriptList{
 					/*
 					components::SpawnProgram{ 
 						programsPointer->playerPrograms.shotBPreviewProgram
@@ -678,7 +676,7 @@ namespace process::game::systems {
 				PlayerCollisions::Target{ components::CollisionCommands::player },
 				PickupCollisions::Target{},
 				DeathCommand{ DeathCommand::Commands::playerDeath },
-				SpawnProgramList{},
+				ScriptList{},
 				DeathSpawn{ /*{ programsPointer->playerPrograms.deathSpawnProgram }*/ },
 				AnimationList{ 
 					{
@@ -717,7 +715,7 @@ namespace process::game::systems {
 		);
 
 		//adding the spawner
-		wasp::game::components::ScriptProgram const* scriptProgramPointer{};
+		components::ScriptContainer scriptContainer;//uninitialized
 		
 		/*
 		switch (gameState.stage) {
@@ -743,10 +741,7 @@ namespace process::game::systems {
 
 		dataStorage.addEntity(
 			EntityBuilder::makeEntity(
-				ScriptProgramList{ 
-					{ *scriptProgramPointer }
-				},
-				SpawnProgramList{ }
+				ScriptList{ scriptContainer }
 			).package()
 		);
 
@@ -785,7 +780,7 @@ namespace process::game::systems {
 		};
 		std::size_t totalHeight{ backgroundSprite.getSprite().height };
 		int startingY{ static_cast<int>(totalHeight) - screenHeight };
-		float yVelocity{ -startingY / static_cast<float>(ticks) };
+		float yVelocity{ static_cast<float>(-startingY) / static_cast<float>(ticks) };
 
 		dataStorage.addEntity(
 			EntityBuilder::makeVisible(

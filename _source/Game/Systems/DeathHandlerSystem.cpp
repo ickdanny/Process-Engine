@@ -31,9 +31,8 @@ namespace process::game::systems {
 	}
 
 	DeathHandlerSystem::DeathHandlerSystem()
-		: ghostProgram{
+		: ghostScriptContainer{
 			//todo: death handler system ghost program
-			std::make_shared<ScriptNode>(ScriptInstructions::error)
 			/*
 			ScriptProgramUtil::makeStallingIfNode(
 				std::make_shared<ScriptNode>(ScriptInstructions::isNotSpawning),
@@ -95,7 +94,8 @@ namespace process::game::systems {
 		auto& dataStorage{ scene.getDataStorage() };
 
 		//remove spawn component and pickup collision
-		dataStorage.removeComponent<SpawnProgramList>(playerHandle);
+		//todo: need to remove player's specific spawn program
+		//dataStorage.removeComponent<SpawnProgramList>(playerHandle);
 		dataStorage.removeComponent<PickupCollisions::Target>(playerHandle);
 
 		//spawn blocker + pickups
@@ -125,6 +125,8 @@ namespace process::game::systems {
 			DeathSpawn& deathSpawn{
 				dataStorage.getComponent<DeathSpawn>(entityHandle)
 			};
+			auto scriptList{ std::move(deathSpawn.scriptList) };
+			scriptList.push_back(ghostScriptContainer);
 			//add a ghost with the death spawn program list and possibly position
 			if (dataStorage.containsComponent<Position>(entityHandle)) {
 				Position& position{
@@ -133,18 +135,14 @@ namespace process::game::systems {
 				auto ghostTuple{
 					EntityBuilder::makeEntity(
 						position, 
-						deathSpawn.spawnProgramList,
-						ScriptProgramList{ ghostProgram }
+						scriptList
 					)
 				};
 				dataStorage.addEntity(ghostTuple.package());
 			}
 			else {
 				auto ghostTuple{ 
-					EntityBuilder::makeEntity(
-						deathSpawn.spawnProgramList,
-						ScriptProgramList{ ghostProgram }
-					)
+					EntityBuilder::makeEntity(scriptList)
 				};
 				dataStorage.addEntity(ghostTuple.package());
 			}

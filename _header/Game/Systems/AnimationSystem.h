@@ -17,7 +17,6 @@ namespace process::game::systems {
 		template <typename T>
 		using Topic = wasp::channel::Topic<T>;
 		using Animation = components::Animation;
-		using AnimationList = components::AnimationList;
 		//fields
         resources::SpriteStorage* spriteStoragePointer{};
 

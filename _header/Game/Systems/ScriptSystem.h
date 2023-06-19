@@ -24,5 +24,8 @@ namespace process::game::systems {
 
 	private:
 		void runScriptList(ScriptList& scriptList);
+		
+		//native functions
+		static DataType print(const std::vector<DataType>& parameters);
 	};
 }

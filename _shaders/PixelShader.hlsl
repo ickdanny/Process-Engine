@@ -8,5 +8,9 @@ struct VSOut{
 };
 
 float4 main( VSOut vsOut ) : SV_Target{
-    return tex.Sample(samplerState, vsOut.texCoord);
+    float4 output = tex.Sample(samplerState, vsOut.texCoord);
+    if(output.a < 0.1){
+        discard;
+    }
+    return output;
 }

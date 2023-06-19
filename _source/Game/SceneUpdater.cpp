@@ -13,7 +13,7 @@ namespace process::game {
 		: initSystem{
 			globalChannelSetPointer, 
 			&(resourceMasterStoragePointer->spriteStorage),
-			&programs
+			&(resourceMasterStoragePointer->scriptStorage)
 		}
 		, inputParserSystem{ keyInputTablePointer }
 		, menuNavigationSystem{ globalChannelSetPointer }
@@ -25,12 +25,11 @@ namespace process::game {
 			&(resourceMasterStoragePointer->spriteStorage),
 			&(resourceMasterStoragePointer->dialogueStorage)
 		}
-		, scriptSystem{ globalChannelSetPointer }
-		, playerShotSystem{ &programs }
-		, collisionHandlerSystem{ &programs }
-		, playerBombSystem{ &programs }
+		, playerShotSystem{ /*&programs*/ }
+		, collisionHandlerSystem{ /*&programs*/ }
+		, playerBombSystem{ /*&programs*/ }
 		, continueSystem{ globalChannelSetPointer }
-		, spawnSystem{ globalChannelSetPointer }
+		, scriptSystem{ globalChannelSetPointer }
 		, overlaySystem{ &(resourceMasterStoragePointer->spriteStorage) }
 		, pauseSystem{ globalChannelSetPointer }
 		, animationSystem{ &(resourceMasterStoragePointer->spriteStorage) }
@@ -48,7 +47,6 @@ namespace process::game {
 		loadSystem(scene);
 		dialogueSystem(scene);
 		velocitySystem(scene);
-		scriptSystem(scene);
 		collisionDetectorSystem(scene);
 		playerMovementSystem(scene);
 		playerShotSystem(scene);
@@ -60,7 +58,7 @@ namespace process::game {
 		playerRespawnSystem(scene);
 		playerReactivateSystem(scene);
 		deathHandlerSystem(scene);
-		spawnSystem(scene);
+		scriptSystem(scene);
 		overlaySystem(scene);
 		pauseSystem(scene);
 		animationSystem(scene);

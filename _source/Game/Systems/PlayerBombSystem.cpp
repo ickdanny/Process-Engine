@@ -26,13 +26,13 @@ namespace process::game::systems {
 		if (!dataStorage.containsComponent<PlayerData>(playerHandle)) {
 			throw std::runtime_error{ "cannot find player data for bomb!" };
 		}
-		if (!dataStorage.containsComponent<SpawnProgramList>(playerHandle)) {
+		if (!dataStorage.containsComponent<ScriptList>(playerHandle)) {
 			throw std::runtime_error{ "player has no spawn data at bomb!" };
 		}
 
 		auto& playerData{ dataStorage.getComponent<PlayerData>(playerHandle) };
-		auto& spawnProgramList{ 
-			dataStorage.getComponent<SpawnProgramList>(playerHandle) 
+		auto& scriptList{
+			dataStorage.getComponent<ScriptList>(playerHandle)
 		};
 		//todo:: player bomb programs
 		/*

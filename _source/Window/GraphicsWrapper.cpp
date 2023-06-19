@@ -347,7 +347,6 @@ namespace process::window {
 	}
 	
 	void GraphicsWrapper::setBlendState(){
-		
 		D3D11_BLEND_DESC blendStateDesc{};
 		blendStateDesc.AlphaToCoverageEnable = false;
 		blendStateDesc.IndependentBlendEnable = false;

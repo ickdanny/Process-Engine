@@ -2,8 +2,8 @@
 
 #include "systemInclude.h"
 #include "Game/Resources/SpriteStorage.h"
+#include "Game/Resources/ScriptStorage.h"
 #include "Game/Systems/EntityBuilder.h"
-#include "Game/Systems/Programs/Programs.h"
 
 namespace process::game::systems {
 
@@ -22,17 +22,17 @@ namespace process::game::systems {
 		//fields
 		wasp::channel::ChannelSet* globalChannelSetPointer{};
 		resources::SpriteStorage* spriteStoragePointer{};
-		Programs* programsPointer{};
+		resources::ScriptStorage* scriptStoragePointer{};
 
 	public:
 		InitSystem(
 			wasp::channel::ChannelSet* globalChannelSetPointer,
 			resources::SpriteStorage* spriteStoragePointer,
-			Programs* programsPointer
+			resources::ScriptStorage* scriptStoragePointer
 		)
 			: globalChannelSetPointer{ globalChannelSetPointer }
 			, spriteStoragePointer { spriteStoragePointer }
-			, programsPointer{ programsPointer } {
+			, scriptStoragePointer { scriptStoragePointer } {
 		}
 
 		void operator()(Scene& scene) const;
@@ -69,6 +69,7 @@ namespace process::game::systems {
 				{ config::graphicsWidth / 2.0f, config::graphicsHeight / 2.0f }
 		) const;
 		
+		[[nodiscard]]
 		BasicButtonComponentTuple makeButton(
 			const wasp::math::Point2& initPos,
 			const wasp::math::Vector2& offset,
@@ -80,6 +81,7 @@ namespace process::game::systems {
 			bool selected = false
 		) const;
 		
+		[[nodiscard]]
 		BasicButtonComponentTuple makeButton(
 			const wasp::math::Point2& unselPos,
 			const wasp::math::Vector2& selOffset,

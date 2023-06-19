@@ -141,13 +141,11 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 			[&] {
 				game.update();
 				pumpMessages();
-				wasp::debug::log("update");
 			},
 			//draw function
 			[&]() {
 				game.render();
 				window.getGraphicsWrapper().present();
-				wasp::debug::log("render");
 			}
 		};
 		
@@ -167,18 +165,21 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 	#ifdef _DEBUG
 	catch( std::exception& exception ) {
 		wasp::debug::log(exception.what());
-		#pragma warning(suppress : 4297)  //if debug, we spin forever after an error
-		while(true);
+		Sleep(100);
+		#pragma warning(suppress : 4297)  //if debug, we throw
+		throw;
 	}
 	catch( std::string& str ) {
 		wasp::debug::log(str);
-		#pragma warning(suppress : 4297)  //if debug, we spin forever after an error
-		while(true);
+		Sleep(100);
+		#pragma warning(suppress : 4297)  //if debug, we throw
+		throw;
 	}
 	catch( ... ) {
 		wasp::debug::log("Exception caught in main of unknown type\n");
-		#pragma warning(suppress : 4297)  //if debug, we spin forever after an error
-		while(true);
+		Sleep(100);
+		#pragma warning(suppress : 4297)  //if debug, we throw
+		throw;
 	}
 	#else
 	catch (...) {

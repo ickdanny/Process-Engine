@@ -26,25 +26,28 @@ namespace process::game::systems {
 		//get the iterator for players
 		static const Topic<wasp::ecs::component::Group*> groupPointerStorageTopic{};
 		auto groupPointer{
-			getGroupPointer<PlayerData, Position, SpawnProgramList>(
+			getGroupPointer<PlayerData, Position, ScriptList>(
 				scene,
 				groupPointerStorageTopic
 			)
 		};
 		auto groupIterator{ 
-			groupPointer->groupIterator<PlayerData, SpawnProgramList>() 
+			groupPointer->groupIterator<PlayerData, ScriptList>()
 		};
 		while (groupIterator.isValid()) {
-			auto [playerData, spawnProgramList] = *groupIterator;
+			auto [playerData, scriptList] = *groupIterator;
 
 			//check to see if the player already has a shot spawn program by
 			//checking each active spawn program's max tick
 			bool isPlayerAlreadyShooting{ false };
-			for (const auto& spawnProgram : spawnProgramList) {
+			for (const auto& scriptContainer : scriptList) {
+				//todo: check for player shot program
+				/*
 				if (spawnProgram.getMaxTick() == config::playerShotMaxTick) {
 					isPlayerAlreadyShooting = true;
 					break;
 				}
+				 */
 			}
 
 			//if there is no pre-existing shot program, add one

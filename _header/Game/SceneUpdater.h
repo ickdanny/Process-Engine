@@ -4,10 +4,6 @@
 #include "Input/IKeyInputTable.h"
 #include "Game/Scenes.h"
 
-
-
-#include "Game/Systems/Programs/Programs.h"
-
 #include "Game/Systems/InitSystem.h"
 #include "Game/Systems/MiscellaneousSystem.h"
 #include "Game/Systems/InputParserSystem.h"
@@ -29,7 +25,6 @@
 #include "Game/Systems/PlayerRespawnSystem.h"
 #include "Game/Systems/PlayerReactivateSystem.h"
 #include "Game/Systems/DeathHandlerSystem.h"
-#include "Game/Systems/SpawnSystem.h"
 #include "Game/Systems/OverlaySystem.h"
 #include "Game/Systems/PauseSystem.h"
 #include "Game/Systems/AnimationSystem.h"
@@ -49,7 +44,8 @@ namespace process::game {
 	private:
 		
 		//fields
-		systems::Programs programs;								//not initialized!
+		//todo: do we need a prototypes struct?
+		//systems::Programs programs;								//not initialized!
 
 		//systems
 		systems::InitSystem initSystem;							//not initialized!
@@ -61,7 +57,6 @@ namespace process::game {
 		systems::LoadSystem loadSystem;							//not initialized!
 		systems::DialogueSystem dialogueSystem;					//not initialized!
 		systems::VelocitySystem velocitySystem{};
-		systems::ScriptSystem scriptSystem;						//not initialized!
 		systems::CollisionDetectorSystem collisionDetectorSystem{};
 		systems::PlayerMovementSystem playerMovementSystem{};
 		systems::PlayerShotSystem playerShotSystem;				//not initialized!
@@ -73,7 +68,7 @@ namespace process::game {
 		systems::PlayerRespawnSystem playerRespawnSystem{};
 		systems::PlayerReactivateSystem playerReactivateSystem{};
 		systems::DeathHandlerSystem deathHandlerSystem{};
-		systems::SpawnSystem spawnSystem;						//not initialized!
+		systems::ScriptSystem scriptSystem;						//not initialized!
 		systems::OverlaySystem overlaySystem;					//not initialized!
 		systems::PauseSystem pauseSystem;						//not initialized!
 		systems::AnimationSystem animationSystem;				//not initialized!

@@ -94,12 +94,12 @@ namespace process::game::config {
 	constexpr float bossHitbox{ 13.0f };
 	
 	//graphics
-	constexpr int backgroundDrawOrder{ -10000 };
+	constexpr int backgroundDrawOrder{ -9000 };
 	constexpr int effectDrawOrder{ -6000 };
 	constexpr int playerBulletDrawOrder{ -5000 };
 	constexpr int enemyDrawOrder{ -4000 };
 	constexpr int pickupDrawOrder{ -3000 };
 	constexpr int playerDrawOrder{ 0 };
 	constexpr int enemyBulletDrawOrder{ 1000 };
-	constexpr int foregroundDrawOrder{ 10000 };
+	constexpr int foregroundDrawOrder{ 9000 };
 }

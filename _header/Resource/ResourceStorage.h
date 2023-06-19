@@ -15,8 +15,7 @@ namespace process::resource {
 	
 	template <typename T>
 	class ResourceStorage : public wasp::resource::IResourceStorage {
-		using ResourceMap =
-			std::unordered_map<std::wstring, std::shared_ptr<Resource<T>>>;
+		using ResourceMap = std::unordered_map<std::wstring, std::shared_ptr<Resource<T>>>;
 	
 	protected:
 		ResourceMap resourceMap {};

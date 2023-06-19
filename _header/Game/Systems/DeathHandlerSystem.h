@@ -8,11 +8,10 @@ namespace process::game::systems {
 	private:
 		//typedefs
 		using EntityHandle = wasp::ecs::entity::EntityHandle;
-		using ScriptNode = wasp::game::components::ScriptNode;
-		using ScriptInstructions = wasp::game::components::ScriptInstructions;
+		using ScriptContainer = components::ScriptContainer;
 
 		//fields
-		wasp::game::components::ScriptProgram ghostProgram;		//uninitialized!
+		ScriptContainer ghostScriptContainer;//uninitialized
 
 	public:
 		DeathHandlerSystem();

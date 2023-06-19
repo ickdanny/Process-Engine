@@ -33,7 +33,10 @@ namespace process::game::systems {
 
 		//reset the player's position to spawn
 		dataStorage.setComponent<Position>(
-			wasp::ecs::SetComponentOrder<Position>{ playerHandle, config::playerSpawn }
+			wasp::ecs::SetComponentOrder<Position>{
+				playerHandle,
+				Position{ config::playerSpawn }
+			}
 		);
 
 		PlayerData& playerData{ dataStorage.getComponent<PlayerData>(playerHandle) };

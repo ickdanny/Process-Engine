@@ -5,10 +5,15 @@
 namespace process::game::components {
 	
 	struct ScriptContainer{
-		darkness::AstNode script{};
-		bool runForever{};
+		//constants
+		static constexpr int noTimer{ -1 };
+		
+		//fields
+		std::shared_ptr<darkness::AstNode> scriptPointer{};
+		std::string name{};
+		bool runForever{ false };
 		darkness::Interpreter<>::ScriptExecutionState state{};
-		int timer{};
+		int timer{ noTimer };
 	};
 	
 	using ScriptList = std::vector<ScriptContainer>;

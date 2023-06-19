@@ -19,7 +19,7 @@ namespace darkness{
 		
 		return{
 			AstType::script,
-			AstScriptData{ std::move(statements)	}
+			AstStmtBlockData{ std::move(statements)	}
 		};
 	}
 	#pragma warning(suppress : 4068) //suppress unknown pragma

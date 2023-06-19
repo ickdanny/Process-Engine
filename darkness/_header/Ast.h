@@ -9,7 +9,7 @@ namespace darkness{
 	enum class AstType{
 		error,
 		
-		script,				// the base of every darkness script
+		script,				// the base of every darkness script; data is of type AstBlockData
 		
 		//statement types
 		stmtVarDeclare,		// a variable declaration
@@ -58,10 +58,6 @@ namespace darkness{
 	};
 	
 	struct AstNode; //forward declare
-	
-	struct AstScriptData{
-		std::vector<AstNode> statements{};
-	};
 	
 	struct AstStmtVarDeclareData{
 		std::string varName{};
@@ -144,7 +140,6 @@ namespace darkness{
 	struct AstNode{
 		AstType type{};
 		std::variant<
-			AstScriptData,
 			AstStmtVarDeclareData,
 			AstStmtFuncDeclareData,
 			AstStmtIfData,
