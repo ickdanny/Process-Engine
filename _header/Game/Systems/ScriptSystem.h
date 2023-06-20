@@ -12,12 +12,14 @@ namespace process::game::systems {
 	private:
 		//typedefs
 		using EntityID = wasp::ecs::entity::EntityID;
+		using ScriptContainer = components::ScriptContainer;
 
 		//fields
 		wasp::channel::ChannelSet* globalChannelSetPointer{};
 		resources::ScriptStorage* scriptStoragePointer{};
 		Scene* currentScenePointer{};
 		EntityID currentEntityID{};
+		ScriptContainer* currentScriptContainerPointer{};
 		ComponentOrderQueue componentOrderQueue{};//cleared at end of every call
 
 	public:
@@ -32,5 +34,8 @@ namespace process::game::systems {
 		
 		//native functions
 		static DataType print(const std::vector<DataType>& parameters);
+		DataType timer(const std::vector<DataType>& parameters);
+		DataType stall(const std::vector<DataType>& parameters);
+		static DataType stallUntil(const std::vector<DataType>& parameters);
 	};
 }

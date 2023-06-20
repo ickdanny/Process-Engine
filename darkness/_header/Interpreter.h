@@ -2635,7 +2635,7 @@ namespace darkness{
 		 * Returns true if the given data is of one of the types specified as type parameters.
 		 */
 		template <typename T, typename... Ts>
-		bool holdsAlternatives(const DataType& dataType){
+		static bool holdsAlternatives(const DataType& dataType){
 			//recursive case
 			if constexpr(static_cast<bool>(sizeof...(Ts))){
 				return std::holds_alternative<T>(dataType)
@@ -2647,10 +2647,11 @@ namespace darkness{
 			}
 		}
 		
+	protected:
 		/**
 		 * Does a type-checked conversion of a given data to a native function.
 		 */
-		NativeFunction unwrapNativeFunctionFromData(const DataType& data){
+		static NativeFunction unwrapNativeFunctionFromData(const DataType& data){
 			if(std::holds_alternative<FunctionWrapper>(data)){
 				return unwrapNativeFunction(std::get<FunctionWrapper>(data));
 			}
@@ -2663,7 +2664,7 @@ namespace darkness{
 		/**
 		 * Does a type-checked conversion of a function wrapper to a native function.
 		 */
-		NativeFunction unwrapNativeFunction(const FunctionWrapper& functionWrapper){
+		static NativeFunction unwrapNativeFunction(const FunctionWrapper& functionWrapper){
 			if(std::holds_alternative<NativeFunctionWrapper>(functionWrapper)){
 				return std::any_cast<NativeFunction>(
 					std::get<NativeFunctionWrapper>(functionWrapper)
@@ -2675,6 +2676,7 @@ namespace darkness{
 			}
 		}
 		
+	private:
 		/**
 		 * Pushes the given info element onto the stall stack
 		 */
