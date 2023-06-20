@@ -60,6 +60,12 @@ namespace process::window {
 			const Rectangle& sourceRectangle
 		) override;
 		
+		void drawTileSprite(
+			const Rectangle& drawRectangle,
+			const SpriteDrawInstruction& spriteDrawInstruction,
+			Point2 pixelOffset
+		) override;
+		
 		struct Vertex{
 			//the following ARE used by d3d
 			[[maybe_unused]]

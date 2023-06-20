@@ -473,7 +473,42 @@ namespace process::window {
 		
 		contextPointer->Draw(numVertices, 0u);
 		
-		//historically, sub-sprite calls have been rare, so change texture coords back
+		//expect sub-sprite calls to be rare, so change texture coords back
+		setVertexBuffer();
+	}
+	
+	void GraphicsWrapper::drawTileSprite(
+		const Rectangle& drawRectangle,
+		const SpriteDrawInstruction& spriteDrawInstruction,
+		Point2 pixelOffset
+	){
+		//change texture coordinates to tile the draw rectangle
+		float tileWidth{ static_cast<float>(spriteDrawInstruction.getSprite().width) };
+		float tileHeight{ static_cast<float>(spriteDrawInstruction.getSprite().height) };
+		float uLow{ pixelOffset.x / tileWidth };
+		float uHigh{ uLow + drawRectangle.width / tileWidth };
+		float vLow{ pixelOffset.y / tileHeight };
+		float vHigh{ vLow + drawRectangle.height / tileHeight };
+		setVertexBuffer(uLow, uHigh, vLow, vHigh);
+		
+		//draw sprite covering draw rectangle
+		Point2 preOffsetCenter{
+			drawRectangle.x + drawRectangle.width / 2.0f,
+			drawRectangle.y + drawRectangle.height / 2.0f
+		};
+		updatePSTexture(spriteDrawInstruction);
+		
+		VSConstantBuffer constantBuffer{makeTransform(
+			preOffsetCenter,
+			spriteDrawInstruction,
+			drawRectangle.width,
+			drawRectangle.height
+		) };
+		mapVSConstantBuffer(&constantBuffer);
+		
+		contextPointer->Draw(numVertices, 0u);
+		
+		//expect tile draws to be rare so change texture coords back
 		setVertexBuffer();
 	}
 	

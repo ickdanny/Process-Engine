@@ -15,15 +15,13 @@ namespace process::game::config {
 		gameWidth + collisionOutbound,
 		-collisionOutbound,
 		gameHeight + collisionOutbound
-	}
-		+ gameOffset;
+	} + gameOffset;
 	
 	//player
 	constexpr wasp::math::Point2 playerSpawn = wasp::math::Point2{
 		gameWidth / 2.0f,
 		gameHeight - 25.0f
-	}
-		+ gameOffset;
+	} + gameOffset;
 	
 	constexpr wasp::math::AABB playerHitbox{ 2.0f };
 	
@@ -94,12 +92,12 @@ namespace process::game::config {
 	constexpr float bossHitbox{ 13.0f };
 	
 	//graphics
-	constexpr int backgroundDrawOrder{ -9000 };
-	constexpr int effectDrawOrder{ -6000 };
-	constexpr int playerBulletDrawOrder{ -5000 };
-	constexpr int enemyDrawOrder{ -4000 };
-	constexpr int pickupDrawOrder{ -3000 };
-	constexpr int playerDrawOrder{ 0 };
-	constexpr int enemyBulletDrawOrder{ 1000 };
-	constexpr int foregroundDrawOrder{ 9000 };
+	constexpr int backgroundDepth{ -9000 };
+	constexpr int effectDepth{ -6000 };
+	constexpr int playerBulletDepth{ -5000 };
+	constexpr int enemyDepth{ -4000 };
+	constexpr int pickupDepth{ -3000 };
+	constexpr int playerDepth{ 0 };
+	constexpr int enemyBulletDepth{ 1000 };
+	constexpr int foregroundDepth{ 9000 };
 }

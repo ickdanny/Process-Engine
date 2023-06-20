@@ -12,14 +12,20 @@ namespace process::graphics {
 		using Rectangle = wasp::math::Rectangle;
 	public:
 		virtual void drawSprite(
-			const Point2 center,
+			Point2 preOffsetCenter,
 			const SpriteDrawInstruction& spriteDrawInstruction
 		) = 0;
 
 		virtual void drawSubSprite(
-			const Point2 center,
+			Point2 preOffsetCenter,
 			const SpriteDrawInstruction& spriteDrawInstruction,
 			const Rectangle& sourceRectangle
+		) = 0;
+		
+		virtual void drawTileSprite(
+			const Rectangle& drawRectangle,
+			const SpriteDrawInstruction& spriteDrawInstruction,
+			Point2 pixelOffset
 		) = 0;
 	};
 }

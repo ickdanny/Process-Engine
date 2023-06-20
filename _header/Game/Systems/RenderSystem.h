@@ -25,13 +25,18 @@ namespace process::game::systems {
 		//helper functions
 		void drawSprite(
 			const Position& position,
-			const SpriteInstruction& drawInstruction
+			const SpriteInstruction& spriteInstruction
 		);
 
 		void drawSprite(
 			const Position& position,
-			const SpriteInstruction& drawInstruction,
+			const SpriteInstruction& spriteInstruction,
 			const SubImage& subImage
+		);
+		
+		void drawSprite(
+			const TilingInstruction& tilingInstruction,
+			const SpriteInstruction& spriteInstruction
 		);
 	};
 }

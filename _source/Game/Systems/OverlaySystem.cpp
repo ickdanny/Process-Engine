@@ -121,7 +121,7 @@ namespace process::game::systems {
             position,
             SpriteInstruction{
                 spriteStoragePointer->get(imageName)->sprite,
-				config::foregroundDrawOrder + 1
+				config::foregroundDepth + 1
             }
         );
     }

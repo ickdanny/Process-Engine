@@ -4,7 +4,7 @@
 
 namespace process::game::systems {
 
-	class SubImageScrollSystem {
+	class TileScrollSystem {
 	public:
 		void operator()(Scene& scene);
 	};

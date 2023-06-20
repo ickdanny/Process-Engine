@@ -143,7 +143,7 @@ namespace process::game::systems {
             entityHandle,
             SpriteInstruction{ 
                 spriteStoragePointer->get(id)->sprite,
-				config::foregroundDrawOrder,
+				config::foregroundDepth,
                 {},		//offset
                 0.0f,	//rotation
                 imageOpacity

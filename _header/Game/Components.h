@@ -51,9 +51,13 @@ namespace process::game {
     struct SubImage : wasp::math::Rectangle {
         using wasp::math::Rectangle::Rectangle;
     };
-    struct SubImageScroll : wasp::math::Rectangle {
-        using wasp::math::Rectangle::Rectangle;
-    };
+	struct TilingInstruction{
+		wasp::math::Rectangle drawRectangle;
+		wasp::math::Point2 pixelOffset{};
+	};
+	struct TileScroll{
+		wasp::math::Vector2 pixelScroll{};
+	};
     struct TextInstruction {
         std::wstring text{};
         std::pair<float, float> bounds{};

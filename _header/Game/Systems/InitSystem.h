@@ -57,14 +57,14 @@ namespace process::game::systems {
 		void addBackground(
 			wasp::ecs::DataStorage& dataStorage,
 			const std::wstring& name,
-			int relativeDrawOrder = 0,
+			int relativeDepth = 0,
 			const wasp::math::Point2& position =
 				{ config::graphicsWidth / 2.0f, config::graphicsHeight / 2.0f }
 		) const;
 		void addForeground(
 			wasp::ecs::DataStorage& dataStorage,
 			const std::wstring& name,
-			int relativeDrawOrder = 0,
+			int relativeDepth = 0,
 			const wasp::math::Point2& position =
 				{ config::graphicsWidth / 2.0f, config::graphicsHeight / 2.0f }
 		) const;

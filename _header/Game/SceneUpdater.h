@@ -30,7 +30,7 @@
 #include "Game/Systems/AnimationSystem.h"
 #include "Game/Systems/RotateSpriteForwardSystem.h"
 #include "Game/Systems/SpriteSpinSystem.h"
-#include "Game/Systems/SubImageScrollSystem.h"
+#include "Game/Systems/TileScrollSystem.h"
 #include "Game/Systems/InboundSystem.h"
 #include "Game/Systems/OutboundSystem.h"
 #include "Game/Systems/GameOverSystem.h"
@@ -74,7 +74,7 @@ namespace process::game {
 		systems::AnimationSystem animationSystem;				//not initialized!
 		systems::RotateSpriteForwardSystem rotateSpriteForwardSystem{};
 		systems::SpriteSpinSystem spriteSpinSystem{};
-		systems::SubImageScrollSystem subImageScrollSystem{};
+		systems::TileScrollSystem subImageScrollSystem{};
 		systems::InboundSystem inboundSystem{};
 		systems::OutboundSystem outboundSystem{};
 		systems::GameOverSystem gameOverSystem;					//not initialized!

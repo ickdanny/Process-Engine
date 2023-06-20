@@ -29,6 +29,12 @@ namespace process::game::systems {
 				};
 				drawSprite(position, spriteInstruction, subImage);
 			}
+			else if(dataStorage.containsComponent<TilingInstruction>(entityID)){
+				const auto& tilingInstruction{
+					dataStorage.getComponent<TilingInstruction>(entityID)
+				};
+				drawSprite(tilingInstruction, spriteInstruction);
+			}
 			else {
 				drawSprite(position, spriteInstruction);
 			}
@@ -40,23 +46,34 @@ namespace process::game::systems {
 	
 	void RenderSystem::drawSprite(
 		const Position& position,
-		const SpriteInstruction& drawInstruction
+		const SpriteInstruction& spriteInstruction
 	) {
 		graphicsWrapperPointer->drawSprite(
 			position,
-			drawInstruction
+			spriteInstruction
 		);
 	}
 
 	void RenderSystem::drawSprite(
 		const Position& position,
-		const SpriteInstruction& drawInstruction,
+		const SpriteInstruction& spriteInstruction,
 		const SubImage& subImage
 	) {
 		graphicsWrapperPointer->drawSubSprite(
 			position,
-			drawInstruction,
+			spriteInstruction,
 			subImage
+		);
+	}
+	
+	void RenderSystem::drawSprite(
+		const TilingInstruction& tilingInstruction,
+		const SpriteInstruction& spriteInstruction
+	) {
+		graphicsWrapperPointer->drawTileSprite(
+			tilingInstruction.drawRectangle,
+			spriteInstruction,
+			tilingInstruction.pixelOffset
 		);
 	}
 }

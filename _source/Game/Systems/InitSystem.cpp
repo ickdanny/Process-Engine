@@ -244,7 +244,7 @@ namespace process::game::systems {
 		addBackground(
 			dataStorage, 
 			L"background_menu_shot",
-			config::playerBulletDrawOrder - config::backgroundDrawOrder + 10
+			config::playerBulletDepth - config::backgroundDepth + 10
 		);
 
 		constexpr float buttonY{ 202.0f };
@@ -271,7 +271,7 @@ namespace process::game::systems {
 				wasp::math::Point2{ center.x - xOffset, playerY },
 				SpriteInstruction{
 					spriteStoragePointer->get(L"p_idle_1")->sprite,
-					config::playerDrawOrder,
+					config::playerDepth,
 					wasp::math::Vector2{ 0.0f, 4.0f }			//offset
 				},
 				ScriptList{
@@ -293,7 +293,7 @@ namespace process::game::systems {
 				wasp::math::Point2{ center.x + xOffset, playerY },
 				SpriteInstruction{
 					spriteStoragePointer->get(L"p_idle_1")->sprite,
-					config::playerDrawOrder,
+					config::playerDepth,
 					wasp::math::Vector2{ 0.0f, 4.0f }			//offset
 				},
 				ScriptList{
@@ -670,7 +670,7 @@ namespace process::game::systems {
 				Velocity{},
 				SpriteInstruction{
 					spriteStoragePointer->get(L"p_idle_1")->sprite,
-					config::playerDrawOrder,
+					config::playerDepth,
 					wasp::math::Vector2{ 0.0f, 4.0f }	//sprite offset
 				},
 				playerData,
@@ -749,53 +749,53 @@ namespace process::game::systems {
 		);
 
 		//add the background
-		constexpr int screenHeight{ 220 };
-		constexpr int screenWidth{ 170 };
+		//these values are not precise, but good enough to draw the backgrounds
+		constexpr float backgroundHeight{ 250.0f };
+		constexpr float backgroundWidth{ 200.0f };
 		std::wstring backgroundID{};
-		int ticks{};
+		float pixelScrollPerTick;//will be negated to move in correct direction
 		switch (gameState.stage) {
 			case 1:
-				backgroundID = L"background_1";
-				ticks = 4060 + 120;
+				backgroundID = L"tile1";
+				pixelScrollPerTick = 1.0f;
 				break;
 			case 2:
-				backgroundID = L"background_2";
-				ticks = 5380 + 120;
+				backgroundID = L"tile2";
+				pixelScrollPerTick = 1.0f;
 				break;
 			case 3:
-				backgroundID = L"background_3";
-				ticks = 6660 + 120;
+				backgroundID = L"tile3";
+				pixelScrollPerTick = 1.0f;
 				break;
 			case 4:
-				backgroundID = L"background_4";
-				ticks = 6390 + 120;
+				backgroundID = L"tile4";
+				pixelScrollPerTick = 1.0f;
 				break;
 			case 5:
-				backgroundID = L"background_5";
-				ticks = 2670 + 120;
+				backgroundID = L"tile5";
+				pixelScrollPerTick = 1.0f;
 				break;
 			default:
 				throw std::runtime_error{ "unexpected default case " };
 		}
 		SpriteInstruction backgroundSpriteInstruction{
 			spriteStoragePointer->get(backgroundID)->sprite,
-			config::backgroundDrawOrder
+			config::backgroundDepth
 		};
-		std::size_t totalHeight{ backgroundSpriteInstruction.getSprite().height };
-		int startingY{ static_cast<int>(totalHeight) - screenHeight };
-		float yVelocity{ static_cast<float>(-startingY) / static_cast<float>(ticks) };
 
 		dataStorage.addEntity(
 			EntityBuilder::makeVisible(
 				wasp::math::Point2{ middleX, center.y },
 				backgroundSpriteInstruction,
-				SubImage{ //todo: subimage not drawing in right place; whole view is moving
-					0.0f, 
-					static_cast<float>(startingY), 
-					static_cast<float>(screenWidth), 
-					static_cast<float>(screenHeight)
+				TilingInstruction{
+					{
+						0.0f,
+						0.0f,
+						backgroundWidth,
+						backgroundHeight
+					}
 				},
-				SubImageScroll{ 0.0f, yVelocity, 0.0f, 0.0f }
+				TileScroll{ { 0.0f, -pixelScrollPerTick } }
 			).package()
 		);
 
@@ -830,7 +830,7 @@ namespace process::game::systems {
 				{ config::graphicsWidth / 2.0f, config::graphicsHeight - 40.0f },
 				SpriteInstruction{
 					spriteStoragePointer->get(L"background_dialogue")->sprite,
-					config::backgroundDrawOrder,
+					config::backgroundDepth,
 					{},		//offset
 					0.0f,	//rotation
 				}
@@ -969,7 +969,7 @@ namespace process::game::systems {
 	void InitSystem::addBackground(
 		wasp::ecs::DataStorage& dataStorage,
 		const std::wstring& name,
-		int relativeDrawOrder,
+		int relativeDepth,
 		const wasp::math::Point2& position
 	) const {
 		dataStorage.addEntity(
@@ -977,7 +977,7 @@ namespace process::game::systems {
 				position,
 				SpriteInstruction{
 					spriteStoragePointer->get(name)->sprite,
-					config::backgroundDrawOrder + relativeDrawOrder
+					config::backgroundDepth + relativeDepth
 				}
 			).package()
 		);
@@ -986,7 +986,7 @@ namespace process::game::systems {
 	void InitSystem::addForeground(
 		wasp::ecs::DataStorage& dataStorage,
 		const std::wstring& name,
-		int relativeDrawOrder,
+		int relativeDepth,
 		const wasp::math::Point2& position
 	) const {
 		dataStorage.addEntity(
@@ -994,7 +994,7 @@ namespace process::game::systems {
 				position,
 				SpriteInstruction{
 					spriteStoragePointer->get(name)->sprite,
-					config::foregroundDrawOrder + relativeDrawOrder
+					config::foregroundDepth + relativeDepth
 				}
 			).package()
 		);
