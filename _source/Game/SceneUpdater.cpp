@@ -27,7 +27,8 @@ namespace process::game {
 		}
 		, scriptSystem{
 			globalChannelSetPointer,
-			&(resourceMasterStoragePointer->scriptStorage)
+			&(resourceMasterStoragePointer->scriptStorage),
+			&(resourceMasterStoragePointer->spriteStorage)
 		}
 		, collisionHandlerSystem{ &(resourceMasterStoragePointer->scriptStorage) }
 		, playerShotSystem{ &(resourceMasterStoragePointer->scriptStorage) }

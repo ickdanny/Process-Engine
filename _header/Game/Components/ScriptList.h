@@ -4,6 +4,7 @@
 
 namespace process::game::components {
 	
+	template <typename... CustomTypes>
 	struct ScriptContainer{
 		//constants
 		static constexpr int noTimer{ -1 };
@@ -11,10 +12,10 @@ namespace process::game::components {
 		//fields
 		std::shared_ptr<darkness::AstNode> scriptPointer{};
 		std::string name{};
-		bool runForever{ false };
-		darkness::Interpreter<wasp::math::Vector2>::ScriptExecutionState state{};
+		typename darkness::Interpreter<CustomTypes...>::ScriptExecutionState state{};
 		int timer{ noTimer };
 	};
 	
-	using ScriptList = std::vector<ScriptContainer>;
+	template <typename... CustomTypes>
+	using ScriptList = std::vector<ScriptContainer<CustomTypes...>>;
 }

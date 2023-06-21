@@ -8,6 +8,8 @@
 namespace process::game::systems {
 	
 	namespace{
+		constexpr char spawnString[] { "spawn" };
+		
 		#define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
 		std::string convertFromWideString(const std::wstring& wideString){
 			//setup converter
@@ -24,6 +26,10 @@ namespace process::game::systems {
 			return converter.from_bytes(string);
 		}
 		#undef _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+		
+		bool containsSpawnString(const std::string& string){
+			return string.find(spawnString) != std::string::npos;
+		}
 	}
 	
 	using namespace wasp::ecs;
@@ -45,10 +51,50 @@ namespace process::game::systems {
 		addNativeFunction("stall", std::bind(&ScriptSystem::stall, this, _1));
 		addNativeFunction("stallUntil", stallUntil);
 		addNativeFunction("error", throwError);
-		addNativeFunction("removeVisible", std::bind(&ScriptSystem::removeVisible, this, _1));
+		addNativeFunction("removeVisible",
+			std::bind(&ScriptSystem::removeComponent<VisibleMarker>, this, "removeVisible", _1)
+		);
 		addNativeFunction("setSpriteInstruction",
-						  std::bind(&ScriptSystem::setSpriteInstruction, this, _1));
+			std::bind(&ScriptSystem::setSpriteInstruction, this, _1)
+		);
 		addNativeFunction("setDepth", std::bind(&ScriptSystem::setDepth, this, _1));
+		addNativeFunction("isSpawning", std::bind(&ScriptSystem::isSpawning, this, _1));
+		addNativeFunction("isBossDead", std::bind(&ScriptSystem::isBossDead, this, _1));
+		addNativeFunction("isDialogueOver", std::bind(&ScriptSystem::isDialogueOver, this, _1));
+		addNativeFunction("isWin", std::bind(&ScriptSystem::isWin, this, _1));
+		addNativeFunction("isXAbove",
+			std::bind(&ScriptSystem::checkCoordinate<true, true>, this, _1)
+		);
+		addNativeFunction("isXBelow",
+			std::bind(&ScriptSystem::checkCoordinate<true, false>, this, _1)
+		);
+		addNativeFunction("isYAbove",
+			std::bind(&ScriptSystem::checkCoordinate<false, true>, this, _1)
+		);
+		addNativeFunction("isYBelow",
+			std::bind(&ScriptSystem::checkCoordinate<false, false>, this, _1)
+		);
+		addNativeFunction("setCollidable", std::bind(&ScriptSystem::setCollidable, this, _1));
+		addNativeFunction("removeCollidable",
+			std::bind(
+				&ScriptSystem::removeComponent<CollidableMarker>,
+				this,
+				"removeCollidable",
+				_1
+			)
+		);
+		addNativeFunction("setHealth", std::bind(&ScriptSystem::setHealth, this, _1));
+		addNativeFunction("removeHealth",
+			std::bind(&ScriptSystem::removeComponent<Health>, this, "removeHealth", _1)
+		);
+		addNativeFunction("setDamage", std::bind(&ScriptSystem::setDamage, this, _1));
+		addNativeFunction("removeDamage",
+			std::bind(&ScriptSystem::removeComponent<Damage>, this, "removeDamage", _1)
+		);
+		addNativeFunction("addSpawn", std::bind(&ScriptSystem::addSpawn, this, _1));
+		addNativeFunction("clearSpawns", std::bind(&ScriptSystem::flagClearSpawns, this, _1));
+		addNativeFunction("addScript", std::bind(&ScriptSystem::addScript, this, _1));
+		addNativeFunction("setVelocity", std::bind(&ScriptSystem::setVelocity, this, _1));
 		
 		//load function scripts, which are files that start with keyword func
 		darkness::Lexer lexer{};
@@ -96,7 +142,26 @@ namespace process::game::systems {
 			auto [scriptList] = *groupIterator;
 			//load the current entity
 			currentEntityID = groupIterator.getEntityID();
+			scriptsToAddToCurrentEntity.clear();
+			
 			runScriptList(scriptList);
+			
+			//clear spawns
+			if(clearSpawnsFlag){
+				clearSpawns(scriptList);
+				clearSpawnsFlag = false;
+			}
+			
+			//add any new scripts
+			if(!scriptsToAddToCurrentEntity.empty()) {
+				scriptList.insert(
+					scriptList.end(),
+					std::make_move_iterator(scriptsToAddToCurrentEntity.begin()),
+					std::make_move_iterator(scriptsToAddToCurrentEntity.end())
+				);
+			}
+			
+			
 			++groupIterator;
 		}
 		
@@ -110,20 +175,48 @@ namespace process::game::systems {
 		return currentScenePointer->getDataStorage().makeHandle(currentEntityID);
 	}
 	
+	void ScriptSystem::throwIfNativeFunctionWrongArity(
+		std::size_t expectedArity,
+		const std::vector<DataType>& parameters,
+		const std::string& funcName
+	){
+		if(parameters.size() != expectedArity){
+			throw std::runtime_error{
+				"native func " + funcName + " wrong arity, expected "
+				+ std::to_string(expectedArity) + " but got "
+				+ std::to_string(parameters.size())
+			};
+		}
+	}
+	
+	void ScriptSystem::throwIfNativeFunctionArityOutOfRange(
+		std::size_t arityMinInclusive,
+		std::size_t arityMaxInclusive,
+		const std::vector<DataType>& parameters,
+		const std::string& funcName
+	){
+		std::size_t parametersSize{ parameters.size() };
+		if(parametersSize < arityMinInclusive || parametersSize > arityMaxInclusive){
+			throw std::runtime_error{
+				"native func " + funcName + " wrong arity, expected "
+				+ std::to_string(arityMinInclusive)	+ "-" + std::to_string(arityMaxInclusive)
+				+ " but got " + std::to_string(parametersSize)
+			};
+		}
+	}
+	
 	void ScriptSystem::runScriptList(ScriptList& scriptList) {
 		//for each script attached to the current entity
 		for( auto itr { scriptList.begin() }; itr != scriptList.end(); ) {
 			auto& scriptContainer { *itr };
 			//load the current script container
 			currentScriptContainerPointer = &scriptContainer;
-			
 			if(!scriptContainer.scriptPointer){
 				throw std::runtime_error{ "bad script pointer!" };
 			}
 			//if the script is not stalled, run the script
 			if(!scriptContainer.state.stalled){
 				scriptContainer.state = runScript(*scriptContainer.scriptPointer);
-				
 			}
 			//if the script IS stalled, resume the script
 			else{
@@ -132,18 +225,34 @@ namespace process::game::systems {
 					scriptContainer.state
 				);
 			}
-			//if the script is not tagged as runForever, check to see if its finished
-			if(!scriptContainer.runForever && !scriptContainer.state.stalled){
-				//if the script is finished, remove it
+			//if the script is stalled after being run, go to the next script
+			if(scriptContainer.state.stalled){
+				++itr;
+			}
+			//if the script is finished after being run, remove it
+			else{
 				itr = scriptList.erase(itr);
 			}
-			//if the script IS tagged as runForever, we don't care about its state right now
+		}
+	}
+	
+	void ScriptSystem::clearSpawns(ScriptList& scriptList){
+		//for each script attached to the current entity
+		for( auto itr { scriptList.begin() }; itr != scriptList.end(); ) {
+			auto& scriptContainer { *itr };
+			//if the script is a spawn, remove it
+			if(containsSpawnString(scriptContainer.name)){
+				itr = scriptList.erase(itr);
+			}
 			else{
 				++itr;
 			}
 		}
 	}
 	
+	/**
+	 * any... toPrint
+	 */
 	ScriptSystem::DataType ScriptSystem::print(const std::vector<DataType>& parameters){
 		for(const DataType& data : parameters){
 			switch(data.index()){
@@ -173,6 +282,9 @@ namespace process::game::systems {
 		return false;
 	}
 	
+	/**
+	 * int ticks
+	 */
 	ScriptSystem::DataType ScriptSystem::timer(const std::vector<DataType>& parameters) {
 		int& containerTimer = currentScriptContainerPointer->timer;
 		//if there is a positive timer, tick down the timer and continue stalling
@@ -182,16 +294,8 @@ namespace process::game::systems {
 		}
 		//if there is no timer, begin the timer and stall
 		else if(containerTimer == ScriptContainer::noTimer){
-			if(parameters.size() != 1){
-				throw std::runtime_error{
-					"native func timer wrong arg num: " + std::to_string(parameters.size())
-				};
-			}
-			const DataType& paramData{ parameters.front() };
-			if(paramData.index() != intIndex){
-				throw std::runtime_error{ "native func timer needs int arg!" };
-			}
-			containerTimer = std::get<int>(paramData);
+			throwIfNativeFunctionWrongArity(1, parameters, "timer");
+			containerTimer = std::get<int>(parameters[0]);
 			throw StallFlag{};
 		}
 		//if the timer is over, set to no timer and exit
@@ -211,6 +315,7 @@ namespace process::game::systems {
 		int& containerTimer = currentScriptContainerPointer->timer;
 		//if there is no timer, stall
 		if(containerTimer == ScriptContainer::noTimer){
+			throwIfNativeFunctionWrongArity(0, parameters, "stall");
 			++containerTimer;
 			throw StallFlag{};
 		}
@@ -221,6 +326,9 @@ namespace process::game::systems {
 		return false;
 	}
 	
+	/**
+	 * func condition, params... passToCondition
+	 */
 	ScriptSystem::DataType ScriptSystem::stallUntil(const std::vector<DataType>& parameters){
 		if(parameters.empty()){
 			throw std::runtime_error{ "native func stallUntil received no params!" };
@@ -250,6 +358,7 @@ namespace process::game::systems {
 	}
 	
 	ScriptSystem::DataType ScriptSystem::throwError(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionArityOutOfRange(0, 1, parameters, "error");
 		if(parameters.empty()){
 			throw std::runtime_error{ "Darkness runtime error" };
 		}
@@ -276,25 +385,22 @@ namespace process::game::systems {
 		}
 	}
 	
-	ScriptSystem::DataType ScriptSystem::removeVisible(
+	ScriptSystem::DataType ScriptSystem::setVisible(
 		const std::vector<DataType>& parameters
-	) {
+	){
+		throwIfNativeFunctionWrongArity(0, parameters, "setVisible");
 		EntityHandle entityHandle{ makeCurrentEntityHandle() };
-		componentOrderQueue.queueRemoveComponent<VisibleMarker>(
-			entityHandle
-		);
+		componentOrderQueue.queueSetComponent<VisibleMarker>(entityHandle, {});
 		return false;
 	}
 	
 	/**
-	 * String spriteID, int depth, Vector2 offset, float rotation, float scale
+	 * string spriteID, int depth, Vector2 offset, float rotation, float scale
 	 */
 	ScriptSystem::DataType ScriptSystem::setSpriteInstruction(
 		const std::vector<DataType>& parameters
 	) {
-		if(parameters.size() < 2){
-			throw std::runtime_error{ "native func setSpriteInstruction too few params" };
-		}
+		throwIfNativeFunctionArityOutOfRange(2, 5, parameters, "setSpriteInstruction");
 		const std::string& spriteID{ std::get<std::string>(parameters[0]) };
 		const auto& sprite{ spriteStoragePointer->get(convertToWideString(spriteID))->sprite };
 		const int& depth{ std::get<int>(parameters[1]) };
@@ -308,9 +414,6 @@ namespace process::game::systems {
 				//fall through
 			case 3:
 				spriteInstruction.setOffset(std::get<wasp::math::Vector2>(parameters[2]));
-				break;
-			default:
-				throw std::runtime_error{ "native func setSpriteInstruction too many params" };
 		}
 		EntityHandle entityHandle{ makeCurrentEntityHandle() };
 		componentOrderQueue.queueSetComponent<SpriteInstruction>(
@@ -320,11 +423,12 @@ namespace process::game::systems {
 		return false;
 	}
 	
+	/**
+	 * int depth
+	 */
 	ScriptSystem::DataType ScriptSystem::setDepth(const std::vector<DataType>& parameters){
-		if(parameters.empty()){
-			throw std::runtime_error{ "native func setDepth needs a param!" };
-		}
-		const int& depth{ std::get<int>(parameters[0]) };
+		throwIfNativeFunctionWrongArity(1, parameters, "setDepth");
+		int depth{ std::get<int>(parameters[0]) };
 		EntityHandle entityHandle{ makeCurrentEntityHandle() };
 		if(!containsComponent<SpriteInstruction>(entityHandle)){
 			throw std::runtime_error{ "native func setDepth no sprite instruction!" };
@@ -332,5 +436,141 @@ namespace process::game::systems {
 		auto& spriteInstruction{ getComponent<SpriteInstruction>(entityHandle) };
 		spriteInstruction.setDepth(depth);
 		return false;
+	}
+	
+	ScriptSystem::DataType ScriptSystem::isSpawning(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(0, parameters, "isSpawning");
+		EntityHandle entityHandle{ makeCurrentEntityHandle() };
+		//since this is the script system, the entity obviously has a script list
+		const auto& scriptList{ getComponent<ScriptList>(entityHandle) };
+		for(const auto& scriptContainer : scriptList){
+			if(containsSpawnString(scriptContainer.name)){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	ScriptSystem::DataType ScriptSystem::isBossDead(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(0, parameters, "isBossDead");
+		auto& bossDeathsChannel{
+			currentScenePointer->getChannel(SceneTopics::bossDeaths)
+		};
+		if (bossDeathsChannel.hasMessages()) {
+			bossDeathsChannel.clear();
+			return true;
+		}
+		return false;
+	}
+	
+	ScriptSystem::DataType ScriptSystem::isDialogueOver(
+		const std::vector<DataType>& parameters
+	) {
+		throwIfNativeFunctionWrongArity(0, parameters, "isDialogueOver");
+		auto& endDialogueFlagChannel{
+			globalChannelSetPointer->getChannel(GlobalTopics::endDialogueFlag)
+		};
+		if (endDialogueFlagChannel.hasMessages()) {
+			endDialogueFlagChannel.clear();
+			return true;
+		}
+		return false;
+	}
+	
+	ScriptSystem::DataType ScriptSystem::isWin(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(0, parameters, "isWin");
+		auto& winFlagChannel{
+			currentScenePointer->getChannel(SceneTopics::winFlag)
+		};
+		if (winFlagChannel.hasMessages()) {
+			winFlagChannel.clear();
+			return true;
+		}
+		return false;
+	}
+	
+	ScriptSystem::DataType ScriptSystem::setCollidable(
+		const std::vector<DataType>& parameters
+	) {
+		throwIfNativeFunctionWrongArity(0, parameters, "setCollidable");
+		EntityHandle entityHandle{ makeCurrentEntityHandle() };
+		componentOrderQueue.queueSetComponent<CollidableMarker>(entityHandle, {});
+		return false;
+	}
+	
+	/**
+	 * int health
+	 */
+	ScriptSystem::DataType ScriptSystem::setHealth(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(1, parameters, "setHealth");
+		int health{ std::get<int>(parameters[0]) };
+		EntityHandle entityHandle{ makeCurrentEntityHandle() };
+		componentOrderQueue.queueSetComponent<Health>(entityHandle, { health });
+		return false;
+	}
+	
+	/**
+	 * int damage
+	 */
+	ScriptSystem::DataType ScriptSystem::setDamage(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(1, parameters, "setDamage");
+		int damage{ std::get<int>(parameters[0]) };
+		EntityHandle entityHandle{ makeCurrentEntityHandle() };
+		componentOrderQueue.queueSetComponent<Damage>(entityHandle, { damage });
+		return false;
+	}
+	
+	/**
+	 * string spawnName
+	 */
+	ScriptSystem::DataType ScriptSystem::addSpawn(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(1, parameters, "addSpawn");
+		const std::string& spawnID{ std::get<std::string>(parameters[0]) };
+		const auto& scriptPointer{ scriptStoragePointer->get(convertToWideString(spawnID)) };
+		scriptsToAddToCurrentEntity.push_back({
+				scriptPointer,
+				std::string { spawnString } + "_" + spawnID
+		});
+		return false;
+	}
+	
+	ScriptSystem::DataType ScriptSystem::flagClearSpawns(
+		const std::vector<DataType>& parameters
+	) {
+		throwIfNativeFunctionWrongArity(0, parameters, "flagClearSpawns");
+		clearSpawnsFlag = true;
+		return false;
+	}
+	
+	/**
+	 * string scriptName
+	 */
+	ScriptSystem::DataType ScriptSystem::addScript(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(1, parameters, "addSpawn");
+		const std::string& scriptID{ std::get<std::string>(parameters[0]) };
+		const auto& scriptPointer{ scriptStoragePointer->get(convertToWideString(scriptID)) };
+		scriptsToAddToCurrentEntity.push_back({
+			scriptPointer,
+			scriptID
+		});
+		return false;
+	}
+	
+	/**
+	 * either Velocity velocity OR float magnitude, float angle
+	 */
+	ScriptSystem::DataType ScriptSystem::setVelocity(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionArityOutOfRange(1, 2, parameters, "setVelocity");
+		Velocity velocity;
+		if(parameters.size() == 1){
+			velocity = std::get<Velocity>(parameters[0]);
+		}
+		else{
+			velocity = Velocity{
+				std::get<float>(parameters[0]),
+				std::get<float>(parameters[1])
+			};
+		}
+		//todo: set velocity
 	}
 }

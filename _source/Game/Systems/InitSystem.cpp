@@ -275,7 +275,7 @@ namespace process::game::systems {
 					wasp::math::Vector2{ 0.0f, 4.0f }			//offset
 				},
 				ScriptList{
-					components::ScriptContainer{
+					ScriptContainer{
 						scriptStoragePointer->get(L"call_hello_world")	//todo: script test
 					}
 				},

@@ -5,12 +5,15 @@
 namespace wasp::math {
 	
 	PolarVector::PolarVector(float magnitude, Angle angle)
-		: magnitude { magnitude }, angle { angle } {
+		: magnitude { magnitude }
+		, angle { angle } {
 		updateVector2Representation();
 	}
 	
 	PolarVector::PolarVector(const Vector2& vector)
-		: magnitude { math::getMagnitude(vector) }, angle { math::getAngle(vector) }, vector2Representation { vector } {
+		: magnitude { math::getMagnitude(vector) }
+		, angle { math::getAngle(vector) }
+		, vector2Representation { vector } {
 	}
 	
 	void PolarVector::setMagnitude(float magnitude) {

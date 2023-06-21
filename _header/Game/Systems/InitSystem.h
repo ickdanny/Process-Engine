@@ -18,6 +18,7 @@ namespace process::game::systems {
 			MenuCommandSelect,
 			SpriteInstruction
 		>;
+		using ScriptContainer = ScriptList::value_type;
 
 		//fields
 		wasp::channel::ChannelSet* globalChannelSetPointer{};

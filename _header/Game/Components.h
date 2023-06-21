@@ -99,12 +99,9 @@ namespace process::game {
             : PolarVector(toMove) {
         }
 
-        //Explicitly define copy and move constructors taking Vector2
+        //Explicitly define copy constructor taking Vector2
         explicit Velocity(const Vector2& toCopy)
             : PolarVector(toCopy) {
-        }
-        explicit Velocity(Vector2&& toMove)
-            : PolarVector(toMove) {
         }
 
         //Explicitly define assignment operators
@@ -154,8 +151,8 @@ namespace process::game {
             : wasp::game::components::DeathCommand{ command } {
         }
     };
-    struct ScriptList : components::ScriptList {
-        using components::ScriptList::ScriptList;
+    struct ScriptList : components::ScriptList<wasp::math::Vector2, Velocity> {
+        using components::ScriptList<wasp::math::Vector2, Velocity>::ScriptList;
     };
 
     struct DeathSpawn {

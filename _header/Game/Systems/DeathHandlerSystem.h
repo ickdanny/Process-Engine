@@ -8,7 +8,7 @@ namespace process::game::systems {
 	private:
 		//typedefs
 		using EntityHandle = wasp::ecs::entity::EntityHandle;
-		using ScriptContainer = components::ScriptContainer;
+		using ScriptContainer = ScriptList::value_type;
 
 		//fields
 		ScriptContainer ghostScriptContainer;//uninitialized
