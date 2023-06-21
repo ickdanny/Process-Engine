@@ -1,8 +1,30 @@
 #include "Game/Systems/ScriptSystem.h"
 
+#include <locale>
+#include <codecvt>
+
 #include "Logging.h"
 
 namespace process::game::systems {
+	
+	namespace{
+		#define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+		std::string convertFromWideString(const std::wstring& wideString){
+			//setup converter
+			using convert_type = std::codecvt_utf8<wchar_t>;
+			std::wstring_convert<convert_type, wchar_t> converter{};
+
+			return converter.to_bytes( wideString );
+		}
+		
+		std::wstring convertToWideString(const std::string& string){
+			using convert_type = std::codecvt_utf8<wchar_t>;
+			std::wstring_convert<convert_type, wchar_t> converter{};
+			
+			return converter.from_bytes(string);
+		}
+		#undef _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+	}
 	
 	using namespace wasp::ecs;
 	using namespace wasp::ecs::entity;
@@ -11,17 +33,53 @@ namespace process::game::systems {
 	
 	ScriptSystem::ScriptSystem(
 		wasp::channel::ChannelSet* globalChannelSetPointer,
-		resources::ScriptStorage* scriptStoragePointer
+		resources::ScriptStorage* scriptStoragePointer,
+		resources::SpriteStorage* spriteStoragePointer
 	)
 		: globalChannelSetPointer { globalChannelSetPointer }
-		, scriptStoragePointer{ scriptStoragePointer } {
+		, scriptStoragePointer{ scriptStoragePointer }
+		, spriteStoragePointer{ spriteStoragePointer } {
 		//add native functions
 		addNativeFunction("print", print);
 		addNativeFunction("timer", std::bind(&ScriptSystem::timer, this, _1));
 		addNativeFunction("stall", std::bind(&ScriptSystem::stall, this, _1));
 		addNativeFunction("stallUntil", stallUntil);
-		//load function scripts manually
-		addFunctionScript("helloWorld", scriptStoragePointer->get(L"hello_world"));
+		addNativeFunction("error", throwError);
+		addNativeFunction("removeVisible", std::bind(&ScriptSystem::removeVisible, this, _1));
+		addNativeFunction("setSpriteInstruction",
+						  std::bind(&ScriptSystem::setSpriteInstruction, this, _1));
+		addNativeFunction("setDepth", std::bind(&ScriptSystem::setDepth, this, _1));
+		
+		//load function scripts, which are files that start with keyword func
+		darkness::Lexer lexer{};
+		std::vector<std::string> paramNames{};
+		scriptStoragePointer->forEach([&](const ResourceSharedPointer& resourceSharedPointer){
+			const std::wstring& wideID{ resourceSharedPointer->getID() };
+			const std::string shortID{ convertFromWideString(wideID) };
+			//test to see if the filename starts with keyword func
+			if(shortID.find("func") == 0){
+				paramNames.clear();
+				//split string into tokens with lexer
+				const auto& tokens{ lexer.lex(shortID) };
+				auto itr{ tokens.begin() };
+				++itr;
+				//grab the func name, which should always be the second token
+				const std::string& funcName{ std::get<std::string>(itr->value) };
+				++itr;
+				//all identifiers following the func name are param names
+				for(auto end{ tokens.end() }; itr != end; ++itr){
+					if(itr->type == darkness::TokenType::identifier){
+						paramNames.push_back(std::get<std::string>(itr->value));
+					}
+				}
+				//add the script with the param names from the file name
+				addFunctionScript(
+					funcName,
+					resourceSharedPointer->getDataPointerCopy(),
+					paramNames
+				);
+			}
+		});
 	}
 	
 	void ScriptSystem::operator()(Scene& scene) {
@@ -46,6 +104,10 @@ namespace process::game::systems {
 		componentOrderQueue.applyAndClear(scene.getDataStorage());
 		//unload current scene
 		currentScenePointer = nullptr;
+	}
+	
+	EntityHandle ScriptSystem::makeCurrentEntityHandle(){
+		return currentScenePointer->getDataStorage().makeHandle(currentEntityID);
 	}
 	
 	void ScriptSystem::runScriptList(ScriptList& scriptList) {
@@ -185,5 +247,90 @@ namespace process::game::systems {
 		else{
 			throw StallFlag{};
 		}
+	}
+	
+	ScriptSystem::DataType ScriptSystem::throwError(const std::vector<DataType>& parameters){
+		if(parameters.empty()){
+			throw std::runtime_error{ "Darkness runtime error" };
+		}
+		const DataType& paramData{ parameters.front() };
+		switch(paramData.index()){
+			case intIndex:
+				throw std::runtime_error{
+					"Darkness runtime error: " + std::to_string(std::get<int>(paramData))
+				};
+			case floatIndex:
+				throw std::runtime_error{
+					"Darkness runtime error: " + std::to_string(std::get<float>(paramData))
+				};
+			case boolIndex:
+				throw std::runtime_error{
+					"Darkness runtime error: " + std::to_string(std::get<bool>(paramData))
+				};
+			case stringIndex:
+				throw std::runtime_error{
+					"Darkness runtime error: " + std::get<std::string>(paramData)
+				};
+			default:
+				throw std::runtime_error{ "Darkness runtime error of unknown type" };
+		}
+	}
+	
+	ScriptSystem::DataType ScriptSystem::removeVisible(
+		const std::vector<DataType>& parameters
+	) {
+		EntityHandle entityHandle{ makeCurrentEntityHandle() };
+		componentOrderQueue.queueRemoveComponent<VisibleMarker>(
+			entityHandle
+		);
+		return false;
+	}
+	
+	/**
+	 * String spriteID, int depth, Vector2 offset, float rotation, float scale
+	 */
+	ScriptSystem::DataType ScriptSystem::setSpriteInstruction(
+		const std::vector<DataType>& parameters
+	) {
+		if(parameters.size() < 2){
+			throw std::runtime_error{ "native func setSpriteInstruction too few params" };
+		}
+		const std::string& spriteID{ std::get<std::string>(parameters[0]) };
+		const auto& sprite{ spriteStoragePointer->get(convertToWideString(spriteID))->sprite };
+		const int& depth{ std::get<int>(parameters[1]) };
+		SpriteInstruction spriteInstruction{sprite, depth};
+		switch(parameters.size()){
+			case 5:
+				spriteInstruction.setScale(std::get<float>(parameters[4]));
+				//fall through
+			case 4:
+				spriteInstruction.setRotation(std::get<float>(parameters[3]));
+				//fall through
+			case 3:
+				spriteInstruction.setOffset(std::get<wasp::math::Vector2>(parameters[2]));
+				break;
+			default:
+				throw std::runtime_error{ "native func setSpriteInstruction too many params" };
+		}
+		EntityHandle entityHandle{ makeCurrentEntityHandle() };
+		componentOrderQueue.queueSetComponent<SpriteInstruction>(
+			entityHandle,
+			spriteInstruction
+		);
+		return false;
+	}
+	
+	ScriptSystem::DataType ScriptSystem::setDepth(const std::vector<DataType>& parameters){
+		if(parameters.empty()){
+			throw std::runtime_error{ "native func setDepth needs a param!" };
+		}
+		const int& depth{ std::get<int>(parameters[0]) };
+		EntityHandle entityHandle{ makeCurrentEntityHandle() };
+		if(!containsComponent<SpriteInstruction>(entityHandle)){
+			throw std::runtime_error{ "native func setDepth no sprite instruction!" };
+		}
+		auto& spriteInstruction{ getComponent<SpriteInstruction>(entityHandle) };
+		spriteInstruction.setDepth(depth);
+		return false;
 	}
 }

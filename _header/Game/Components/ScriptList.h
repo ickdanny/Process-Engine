@@ -12,7 +12,7 @@ namespace process::game::components {
 		std::shared_ptr<darkness::AstNode> scriptPointer{};
 		std::string name{};
 		bool runForever{ false };
-		darkness::Interpreter<>::ScriptExecutionState state{};
+		darkness::Interpreter<wasp::math::Vector2>::ScriptExecutionState state{};
 		int timer{ noTimer };
 	};
 	

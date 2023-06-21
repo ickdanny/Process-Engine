@@ -15,7 +15,7 @@ namespace process::game::components {
 		bool looping{};
 		std::size_t currentIndex{};
 
-		explicit Animation(std::vector<std::wstring>  frames, bool looping = true)
+		explicit Animation(std::vector<std::wstring> frames, bool looping = true)
 			: frames{ std::move( frames ) }
 			, looping{ looping }
 			, currentIndex{ 0 } {
@@ -42,7 +42,7 @@ namespace process::game::components {
 		Ticker ticker;			//uninitialized!
 
 		AnimationList(
-			std::vector<Animation>  animations,
+			std::vector<Animation> animations,
 			std::size_t idleIndex, 
 			int ticks
 		)
