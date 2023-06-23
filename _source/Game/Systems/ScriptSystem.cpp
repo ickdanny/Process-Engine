@@ -95,6 +95,10 @@ namespace process::game::systems {
 		addNativeFunction("clearSpawns", std::bind(&ScriptSystem::flagClearSpawns, this, _1));
 		addNativeFunction("addScript", std::bind(&ScriptSystem::addScript, this, _1));
 		addNativeFunction("setVelocity", std::bind(&ScriptSystem::setVelocity, this, _1));
+		addNativeFunction("makeVector", makeVector);
+		addNativeFunction("makePolar", makePolar);
+		addNativeFunction("angleToPlayer", std::bind(&ScriptSystem::angleToPlayer, this, _1));
+		addNativeFunction("random", std::bind(&ScriptSystem::random, this, _1));
 		
 		//load function scripts, which are files that start with keyword func
 		darkness::Lexer lexer{};
@@ -247,6 +251,22 @@ namespace process::game::systems {
 			else{
 				++itr;
 			}
+		}
+	}
+	
+	ScriptSystem::DataType ScriptSystem::nativeUnaryMinus(
+		const std::vector<DataType>& parameters
+	) {
+		throwIfNativeFunctionWrongArity(1, parameters, "native unary minus");
+		const DataType& data{ parameters[0] };
+		if(std::holds_alternative<Vector2>(data)){
+			return -std::get<Vector2>(data);
+		}
+		else if(std::holds_alternative<PolarVector>(data)){
+			return -std::get<PolarVector>(data);
+		}
+		else{
+			throw std::runtime_error{ "Native unary minus bad type!" };
 		}
 	}
 	
@@ -563,7 +583,7 @@ namespace process::game::systems {
 		throwIfNativeFunctionArityOutOfRange(1, 2, parameters, "setVelocity");
 		Velocity velocity;
 		if(parameters.size() == 1){
-			velocity = std::get<Velocity>(parameters[0]);
+			velocity = std::get<PolarVector>(parameters[0]);
 		}
 		else{
 			velocity = Velocity{
@@ -571,6 +591,88 @@ namespace process::game::systems {
 				std::get<float>(parameters[1])
 			};
 		}
-		//todo: set velocity
+		EntityHandle entityHandle{ makeCurrentEntityHandle() };
+		componentOrderQueue.queueSetComponent<Velocity>(entityHandle, velocity);
+		return false;
+	}
+	
+	/**
+	 * float x, float y
+	 */
+	ScriptSystem::DataType ScriptSystem::makeVector(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(2, parameters, "makeVector");
+		return Vector2{ std::get<float>(parameters[0]), std::get<float>(parameters[1]) };
+	}
+	
+	/**
+	 * float magnitude, float angle
+	 */
+	ScriptSystem::DataType ScriptSystem::makePolar(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(2, parameters, "makePolar");
+		return PolarVector{ std::get<float>(parameters[0]), std::get<float>(parameters[1]) };
+	}
+	
+	ScriptSystem::DataType ScriptSystem::angleToPlayer(
+		const std::vector<DataType>& parameters
+	) {
+		Point2 pos{
+			currentScenePointer->getDataStorage().getComponent<Position>(currentEntityID)
+		};
+		
+		//get the iterator for players
+		static const Topic<wasp::ecs::component::Group*>
+			playerGroupPointerStorageTopic{};
+		
+		auto playerGroupPointer{
+			getGroupPointer<PlayerData, Position>(
+				*currentScenePointer,
+				playerGroupPointerStorageTopic
+			)
+		};
+		auto playerGroupIterator{
+			playerGroupPointer->groupIterator<Position>()
+		};
+		
+		if (playerGroupIterator.isValid()) {
+			//just grab the first player
+			const auto [playerPos] = *playerGroupIterator;
+			return static_cast<float>(wasp::math::getAngleFromAToB(pos, playerPos));
+		}
+		else {
+			return 0.0f;
+		}
+	}
+	
+	/**
+	 * float min, float max OR int min, int max
+	 */
+	ScriptSystem::DataType ScriptSystem::random(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(2, parameters, "random");
+		auto& prng{ currentScenePointer->getChannel(SceneTopics::random).getMessages()[0] };
+		const DataType& minData{ parameters[0] };
+		const DataType& maxData{ parameters[1] };
+		switch(minData.index()){
+			case floatIndex:{
+				float min{ std::get<float>(minData) };
+				float max;
+				switch(maxData.index()){
+					case floatIndex:
+						max = std::get<float>(maxData);
+						break;
+					case intIndex:
+						max = static_cast<float>(std::get<int>(maxData));
+						break;
+					default:
+						throw std::runtime_error{ "native func random bad type second arg!" };
+				}
+				std::uniform_real_distribution<float> distribution{ min, max };
+				return distribution(prng);
+			}
+			case intIndex{
+				switch(maxData.index()){
+					//todo: should we throw on type mismatch?
+				}
+			}
+		}
 	}
 }

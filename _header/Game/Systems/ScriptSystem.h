@@ -9,12 +9,18 @@
 
 namespace process::game::systems {
 
-	class ScriptSystem : private darkness::Interpreter<wasp::math::Vector2,	Velocity>{
+	class ScriptSystem : private darkness::Interpreter<
+		wasp::math::Vector2,
+		wasp::math::PolarVector
+	>{
 	private:
 		//typedefs
 		using EntityID = wasp::ecs::entity::EntityID;
 		using EntityHandle = wasp::ecs::entity::EntityHandle;
 		using ScriptContainer = ScriptList::value_type;
+		using Point2 = wasp::math::Point2;
+		using Vector2 = wasp::math::Vector2;
+		using PolarVector = wasp::math::PolarVector;
 
 		//fields
 		wasp::channel::ChannelSet* globalChannelSetPointer{};
@@ -66,6 +72,8 @@ namespace process::game::systems {
 		void clearSpawns(ScriptList& scriptList);
 		
 		//native functions
+		static DataType nativeUnaryMinus(const std::vector<DataType>& parameters);
+		
 		static DataType print(const std::vector<DataType>& parameters);
 		DataType timer(const std::vector<DataType>& parameters);
 		DataType stall(const std::vector<DataType>& parameters);
@@ -85,7 +93,10 @@ namespace process::game::systems {
 		DataType flagClearSpawns(const std::vector<DataType>& parameters);
 		DataType addScript(const std::vector<DataType>& parameters);
 		DataType setVelocity(const std::vector<DataType>& parameters);
-		//todo: velocity and vector2 unary minus
+		static DataType makeVector(const std::vector<DataType>& parameters);
+		static DataType makePolar(const std::vector<DataType>& parameters);
+		DataType angleToPlayer(const std::vector<DataType>& parameters);
+		DataType random(const std::vector<DataType>& parameters);
 		
 		template <typename T>
 		DataType removeComponent(

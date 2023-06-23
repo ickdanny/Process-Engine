@@ -151,8 +151,8 @@ namespace process::game {
             : wasp::game::components::DeathCommand{ command } {
         }
     };
-    struct ScriptList : components::ScriptList<wasp::math::Vector2, Velocity> {
-        using components::ScriptList<wasp::math::Vector2, Velocity>::ScriptList;
+    struct ScriptList : components::ScriptList<wasp::math::Vector2, wasp::math::PolarVector> {
+        using components::ScriptList<wasp::math::Vector2, wasp::math::PolarVector>::ScriptList;
     };
 
     struct DeathSpawn {
