@@ -1,0 +1,19 @@
+#func shiftSpeedIncrement(targetSpeed, increment)
+
+let currentSpeed = entitySpeed();
+
+while(currentSpeed != targetSpeed){
+    currentSpeed = currentSpeed + increment;
+    if(increment >= 0 & currentSpeed >= targetSpeed){
+        setSpeed(targetSpeed);
+        return false;
+    }
+    else if(increment <= 0 & currentSpeed <= targetSpeed){
+        setSpeed(targetSpeed);
+        return false;
+    }
+    else{
+        setSpeed(currentSpeed);
+        stall();
+    }
+}

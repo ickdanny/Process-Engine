@@ -17,6 +17,7 @@ namespace process::game::systems {
 		//typedefs
 		using EntityID = wasp::ecs::entity::EntityID;
 		using EntityHandle = wasp::ecs::entity::EntityHandle;
+		using Group = wasp::ecs::component::Group;
 		using ScriptContainer = ScriptList::value_type;
 		using Point2 = wasp::math::Point2;
 		using Vector2 = wasp::math::Vector2;
@@ -74,40 +75,62 @@ namespace process::game::systems {
 		void clearSpawns(ScriptList& scriptList);
 		
 		//native functions
+		
+		//native operator handlers
 		static DataType nativeUnaryMinus(const std::vector<DataType>& parameters);
 		
+		//utility functions
+		static DataType throwError(const std::vector<DataType>& parameters);
 		static DataType print(const std::vector<DataType>& parameters);
 		DataType timer(const std::vector<DataType>& parameters);
 		DataType stall(const std::vector<DataType>& parameters);
 		static DataType stallUntil(const std::vector<DataType>& parameters);
-		static DataType throwError(const std::vector<DataType>& parameters);
-		DataType setVisible(const std::vector<DataType>& parameters);
-		DataType setSpriteInstruction(const std::vector<DataType>& parameters);
-		DataType setDepth(const std::vector<DataType>& parameters);
+		
+		//condition queries
 		DataType isSpawning(const std::vector<DataType>& parameters);
 		DataType isBossDead(const std::vector<DataType>& parameters);
 		DataType isDialogueOver(const std::vector<DataType>& parameters);
 		DataType isWin(const std::vector<DataType>& parameters);
+		
+		//entity graphics
+		DataType setVisible(const std::vector<DataType>& parameters);
+		DataType setSpriteInstruction(const std::vector<DataType>& parameters);
+		DataType setDepth(const std::vector<DataType>& parameters);
+		
+		//entity mutators
 		DataType setCollidable(const std::vector<DataType>& parameters);
 		DataType setHealth(const std::vector<DataType>& parameters);
 		DataType setDamage(const std::vector<DataType>& parameters);
+		DataType setInbound(const std::vector<DataType>& parameters);
+		DataType setOutbound(const std::vector<DataType>& parameters);
+		DataType setVelocity(const std::vector<DataType>& parameters);
+		DataType setSpeed(const std::vector<DataType>& parameters);
+		DataType setAngle(const std::vector<DataType>& parameters);
+		DataType die(const std::vector<DataType>& parameters);
+		DataType removeEntity(const std::vector<DataType>& parameters);
+		
+		//multi-scripting
 		DataType addSpawn(const std::vector<DataType>& parameters);
 		DataType flagClearSpawns(const std::vector<DataType>& parameters);
 		DataType addScript(const std::vector<DataType>& parameters);
-		DataType setVelocity(const std::vector<DataType>& parameters);
+		
+		//math
 		static DataType makeVector(const std::vector<DataType>& parameters);
 		static DataType makePolar(const std::vector<DataType>& parameters);
-		DataType angleToPlayer(const std::vector<DataType>& parameters);
-		DataType random(const std::vector<DataType>& parameters);
-		DataType setInbound(const std::vector<DataType>& parameters);
-		DataType setOutbound(const std::vector<DataType>& parameters);
-		DataType entitySpeed(const std::vector<DataType>& parameters);
-		DataType entityAngle(const std::vector<DataType>& parameters);
-		DataType setSpeed(const std::vector<DataType>& parameters);
-		DataType setAngle(const std::vector<DataType>& parameters);
 		static DataType smallerDifference(const std::vector<DataType>& parameters);
 		static DataType largerDifference(const std::vector<DataType>& parameters);
 		static DataType absoluteValue(const std::vector<DataType>& parameters);
+		DataType random(const std::vector<DataType>& parameters);
+		
+		//entity queries
+		DataType angleToPlayer(const std::vector<DataType>& parameters);
+		DataType entitySpeed(const std::vector<DataType>& parameters);
+		DataType entityAngle(const std::vector<DataType>& parameters);
+		
+		//scene signaling
+		DataType showDialogue(const std::vector<DataType>& parameters);
+		DataType win(const std::vector<DataType>& parameters);
+		DataType endStage(const std::vector<DataType>& parameters);
 		
 		template <typename T>
 		DataType removeComponent(

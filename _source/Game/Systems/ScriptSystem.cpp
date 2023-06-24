@@ -51,18 +51,18 @@ namespace process::game::systems {
 		addNativeVariable("pointEquivalenceEpsilon", 0.5f);
 		
 		//add native functions
+		
+		//native operator handlers
+		addNativeFunction(darkness::reservedFunctionNames::unaryMinus, nativeUnaryMinus);
+		
+		//utility functions
+		addNativeFunction("error", throwError);
 		addNativeFunction("print", print);
 		addNativeFunction("timer", std::bind(&ScriptSystem::timer, this, _1));
 		addNativeFunction("stall", std::bind(&ScriptSystem::stall, this, _1));
 		addNativeFunction("stallUntil", stallUntil);
-		addNativeFunction("error", throwError);
-		addNativeFunction("removeVisible",
-			std::bind(&ScriptSystem::removeComponent<VisibleMarker>, this, "removeVisible", _1)
-		);
-		addNativeFunction("setSpriteInstruction",
-			std::bind(&ScriptSystem::setSpriteInstruction, this, _1)
-		);
-		addNativeFunction("setDepth", std::bind(&ScriptSystem::setDepth, this, _1));
+		
+		//condition queries
 		addNativeFunction("isSpawning", std::bind(&ScriptSystem::isSpawning, this, _1));
 		addNativeFunction("isBossDead", std::bind(&ScriptSystem::isBossDead, this, _1));
 		addNativeFunction("isDialogueOver", std::bind(&ScriptSystem::isDialogueOver, this, _1));
@@ -79,6 +79,18 @@ namespace process::game::systems {
 		addNativeFunction("isYBelow",
 			std::bind(&ScriptSystem::checkCoordinate<false, false>, this, _1)
 		);
+		
+		//entity graphics
+		addNativeFunction("setVisible", std::bind(&ScriptSystem::setVisible, this, _1));
+		addNativeFunction("removeVisible",
+			std::bind(&ScriptSystem::removeComponent<VisibleMarker>, this, "removeVisible", _1)
+		);
+		addNativeFunction("setSpriteInstruction",
+			std::bind(&ScriptSystem::setSpriteInstruction, this, _1)
+		);
+		addNativeFunction("setDepth", std::bind(&ScriptSystem::setDepth, this, _1));
+		
+		//entity mutators
 		addNativeFunction("setCollidable", std::bind(&ScriptSystem::setCollidable, this, _1));
 		addNativeFunction("removeCollidable",
 			std::bind(
@@ -96,14 +108,6 @@ namespace process::game::systems {
 		addNativeFunction("removeDamage",
 			std::bind(&ScriptSystem::removeComponent<Damage>, this, "removeDamage", _1)
 		);
-		addNativeFunction("addSpawn", std::bind(&ScriptSystem::addSpawn, this, _1));
-		addNativeFunction("clearSpawns", std::bind(&ScriptSystem::flagClearSpawns, this, _1));
-		addNativeFunction("addScript", std::bind(&ScriptSystem::addScript, this, _1));
-		addNativeFunction("setVelocity", std::bind(&ScriptSystem::setVelocity, this, _1));
-		addNativeFunction("makeVector", makeVector);
-		addNativeFunction("makePolar", makePolar);
-		addNativeFunction("angleToPlayer", std::bind(&ScriptSystem::angleToPlayer, this, _1));
-		addNativeFunction("random", std::bind(&ScriptSystem::random, this, _1));
 		addNativeFunction("setInbound", std::bind(&ScriptSystem::setInbound, this, _1));
 		addNativeFunction("removeInbound",
 			std::bind(&ScriptSystem::removeComponent<Inbound>, this, "removeInbound", _1)
@@ -112,13 +116,34 @@ namespace process::game::systems {
 		addNativeFunction("removeOutbound",
 			std::bind(&ScriptSystem::removeComponent<Outbound>, this, "removeOutbound", _1)
 		);
-		addNativeFunction("entitySpeed", std::bind(&ScriptSystem::entitySpeed, this, _1));
-		addNativeFunction("entityAngle", std::bind(&ScriptSystem::entityAngle, this, _1));
+		addNativeFunction("setVelocity", std::bind(&ScriptSystem::setVelocity, this, _1));
 		addNativeFunction("setSpeed", std::bind(&ScriptSystem::setSpeed, this, _1));
 		addNativeFunction("setAngle", std::bind(&ScriptSystem::setAngle, this, _1));
+		addNativeFunction("die", std::bind(&ScriptSystem::die, this, _1));
+		addNativeFunction("removeEntity", std::bind(&ScriptSystem::removeEntity, this, _1));
+		
+		//multi-scripting
+		addNativeFunction("addSpawn", std::bind(&ScriptSystem::addSpawn, this, _1));
+		addNativeFunction("clearSpawns", std::bind(&ScriptSystem::flagClearSpawns, this, _1));
+		addNativeFunction("addScript", std::bind(&ScriptSystem::addScript, this, _1));
+		
+		//math
+		addNativeFunction("makeVector", makeVector);
+		addNativeFunction("makePolar", makePolar);
 		addNativeFunction("smallerDifference", smallerDifference);
 		addNativeFunction("largerDifference", largerDifference);
 		addNativeFunction("abs", absoluteValue);
+		addNativeFunction("random", std::bind(&ScriptSystem::random, this, _1));
+		
+		//entity queries
+		addNativeFunction("angleToPlayer", std::bind(&ScriptSystem::angleToPlayer, this, _1));
+		addNativeFunction("entitySpeed", std::bind(&ScriptSystem::entitySpeed, this, _1));
+		addNativeFunction("entityAngle", std::bind(&ScriptSystem::entityAngle, this, _1));
+		
+		//scene signaling
+		addNativeFunction("showDialogue", std::bind(&ScriptSystem::showDialogue, this, _1));
+		addNativeFunction("win", std::bind(&ScriptSystem::win, this, _1));
+		addNativeFunction("endStage", std::bind(&ScriptSystem::endStage, this, _1));
 		
 		//load function scripts, which are files that start with keyword func
 		darkness::Lexer lexer{};
@@ -157,7 +182,7 @@ namespace process::game::systems {
 		currentScenePointer = &scene;
 		
 		//get the group iterator for ScriptProgramList
-		static const Topic<wasp::ecs::component::Group*> groupPointerStorageTopic {};
+		static const Topic<Group*> groupPointerStorageTopic {};
 		auto groupPointer {	getGroupPointer<ScriptList>(scene, groupPointerStorageTopic) };
 		auto groupIterator { groupPointer->groupIterator<ScriptList>() };
 		
@@ -657,8 +682,7 @@ namespace process::game::systems {
 		};
 		
 		//get the iterator for players
-		static const Topic<wasp::ecs::component::Group*>
-			playerGroupPointerStorageTopic{};
+		static const Topic<Group*> playerGroupPointerStorageTopic{};
 		
 		auto playerGroupPointer{
 			getGroupPointer<PlayerData, Position>(
@@ -828,5 +852,126 @@ namespace process::game::systems {
 			default:
 				throw std::runtime_error{ "native func abs bad type!" };
 		}
+	}
+	
+	ScriptSystem::DataType ScriptSystem::die(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(0, parameters, "die");
+		EntityHandle entityHandle{ makeCurrentEntityHandle() };
+		currentScenePointer->getChannel(SceneTopics::deaths).addMessage(entityHandle);
+		return false;
+	}
+	
+	ScriptSystem::DataType ScriptSystem::removeEntity(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(0, parameters, "removeEntity");
+		componentOrderQueue.queueRemoveEntity(makeCurrentEntityHandle());
+		return false;
+	}
+	
+	/**
+	 * string dialogueID
+	 */
+	ScriptSystem::DataType ScriptSystem::showDialogue(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(1, parameters, "showDialogue");
+		const std::string& dialogueID{ std::get<std::string>(parameters[0]) };
+		//add message to sceneEntry and startDialogue topics
+		globalChannelSetPointer->getChannel(GlobalTopics::sceneEntry).addMessage(
+			SceneNames::dialogue
+		);
+		globalChannelSetPointer->getChannel(GlobalTopics::startDialogue).addMessage(
+			convertToWideString(dialogueID)
+		);
+		return false;
+	}
+	
+	ScriptSystem::DataType ScriptSystem::win(const std::vector<DataType>& parameters){
+		currentScenePointer->getChannel(SceneTopics::winFlag).addMessage();
+		return false;
+	}
+	
+	ScriptSystem::DataType ScriptSystem::endStage(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(0, parameters, "endStage");
+		globalChannelSetPointer->getChannel(GlobalTopics::stopMusicFlag).addMessage();
+		auto& gameStateChannel{ globalChannelSetPointer->getChannel(GlobalTopics::gameState) };
+		GameState& gameState{ gameStateChannel.getMessages()[0] };
+		
+		//send us back to the correct menu
+		SceneNames backTo{};
+		switch (gameState.gameMode) {
+			case GameMode::campaign:
+				backTo = SceneNames::main;
+				break;
+			case GameMode::practice:
+				backTo = SceneNames::stage;
+				break;
+			default:
+				throw std::runtime_error{ "native func endStage default case reached!" };
+		}
+		
+		globalChannelSetPointer->getChannel(GlobalTopics::sceneExitTo).addMessage(backTo);
+		if(gameState.gameMode == GameMode::campaign) {
+			auto& sceneEntryChannel{
+				globalChannelSetPointer->getChannel(GlobalTopics::sceneEntry)
+			};
+			switch (gameState.stage) {
+				case 1:
+				case 2:
+				case 3:
+				case 4:
+				{
+					++gameState.stage;
+					//immediately pop up a new game and loading screen
+					sceneEntryChannel.addMessage(SceneNames::game);
+					sceneEntryChannel.addMessage(SceneNames::load);
+					
+					//send player data to global
+					static const Topic<Group*> playerGroupPointerStorageTopic{};
+					
+					auto playerGroupPointer{
+						getGroupPointer<PlayerData>(
+							*currentScenePointer,
+							playerGroupPointerStorageTopic
+						)
+					};
+					
+					auto playerGroupIterator{
+						playerGroupPointer->groupIterator<PlayerData>()
+					};
+					
+					PlayerData playerData{
+						ShotType::shotA,
+						-1,
+						-1,
+						-1,
+						-1
+					};
+					while (playerGroupIterator.isValid()) {
+						playerData = std::get<0>(*playerGroupIterator);
+						break;
+					}
+					auto& playerDataChannel{
+						globalChannelSetPointer->getChannel(
+							GlobalTopics::playerData
+						)
+					};
+					playerDataChannel.clear();
+					playerDataChannel.addMessage(playerData);
+					break;
+				}
+				case 5:
+					//go to credits screen
+					sceneEntryChannel.addMessage(SceneNames::credits);
+					globalChannelSetPointer->getChannel(GlobalTopics::startMusic).addMessage(
+						L"12"
+					);
+					break;
+			}
+		}
+		else {
+			//if we are in practice, then we go back to menu, thus menu track
+			globalChannelSetPointer->getChannel(GlobalTopics::startMusic).addMessage(
+				L"01"
+			);
+		}
+		return false;
 	}
 }
