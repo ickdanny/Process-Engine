@@ -276,7 +276,7 @@ namespace process::game::systems {
 				},
 				ScriptList{
 					ScriptContainer{
-						scriptStoragePointer->get(L"call_hello_world")	//todo: script test
+						scriptStoragePointer->get(L"test")	//todo: script test
 					}
 				},
 				AnimationList{ 

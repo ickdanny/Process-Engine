@@ -22,7 +22,7 @@ foreach(FILE ${HLSL_SHADER_FILES})
     #adds a custom command to a target such as a library or executable
     #the command becomes part of the target and will only execute when the target itself is built
     #if the target is already built, the command will not execute
-    add_custom_command(TARGET shaders
+    add_custom_command(TARGET shaders POST_BUILD
             #the commmand to run
             COMMAND fxc.exe /nologo /Emain /T${ShaderType}_${ShaderModel} $<IF:$<CONFIG:DEBUG>,/Od,/O1> /Zi /Fo ${CMAKE_BINARY_DIR}/${FILE_WE}.cso /Fd ${CMAKE_BINARY_DIR}/${FILE_WE}.pdb ${FILE}
             #specify the primary input source file to the command

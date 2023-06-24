@@ -1,0 +1,13 @@
+#func shiftSpeedPeriod(targetSpeed, ticks)
+
+let currentSpeed = entitySpeed();
+let speedDiff = targetSpeed - currentSpeed;
+let increment = speedDiff / ticks;
+
+for(let tick = 0; tick < ticks; tick = tick + 1){
+    currentSpeed = currentSpeed + increment;
+    setSpeed(currentSpeed);
+    stall();
+}
+
+setSpeed(targetSpeed);

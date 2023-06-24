@@ -33,11 +33,19 @@ add_subdirectory(./wasp)
 add_subdirectory(./darkness)
 add_subdirectory(./_shaders)
 
+# https://stackoverflow.com/questions/13429656/how-to-copy-contents-of-a-directory-into-build-directory-after-make-with-cmake
+# copy scripts
+add_custom_target(scripts)
+
+add_custom_command(TARGET scripts POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/scripts/ $<TARGET_FILE_DIR:${PROJECT_NAME}>/res/scripts)
+
 include_directories(${PROJECT_DIRECTORIES})
 
 add_executable(${PROJECT_NAME} WIN32 ${PROJECT_SOURCES})
 
 add_dependencies(${PROJECT_NAME} shaders)
+add_dependencies(${PROJECT_NAME} scripts)
 
 #https://github.com/holy-shit/clion-directx-example
 set(LIBS d3d11 d3dcompiler winmm shlwapi)

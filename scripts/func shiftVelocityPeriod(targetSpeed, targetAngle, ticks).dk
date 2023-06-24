@@ -1,0 +1,7 @@
+#func shiftVelocityPeriod(targetSpeed, targetAngle, ticks)
+
+#this function immediately sets angle to targetAngle; if want to turn use shiftVelocityTurnPeriod
+setAngle(targetAngle);
+
+#shift speed
+shiftSpeedPeriod(targetSpeed, ticks);

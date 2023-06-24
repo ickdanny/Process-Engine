@@ -1,0 +1,21 @@
+#func shiftVelocityLongTurnPeriod(targetSpeed, targetAngle, ticks)
+
+let currentSpeed = entitySpeed();
+let currentAngle = entityAngle();
+
+let speedDiff = targetSpeed - currentSpeed;
+let angleDiff = largerDifference(targetAngle, currentAngle);
+
+let speedIncrement = speedDiff / ticks;
+let angleIncrement = angleDiff / ticks;
+
+for(let tick = 0; tick < ticks; tick = tick + 1){
+    currentSpeed = currentSpeed + speedIncrement;
+    currentAngle = currentAngle + angleIncrement;
+    setSpeed(currentSpeed);
+    setAngle(currentAngle);
+    stall();
+}
+
+setSpeed(targetSpeed);
+setAngle(targetAngle);

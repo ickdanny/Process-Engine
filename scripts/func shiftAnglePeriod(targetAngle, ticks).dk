@@ -1,0 +1,13 @@
+#func shiftAnglePeriod(targetAngle, ticks)
+
+let currentAngle = entityAngle();
+let angleDiff = smallerDifference(targetAngle, currentAngle);
+let increment = angleDiff / ticks;
+
+for(let tick = 0; tick < ticks; tick = tick + 1){
+    currentAngle = currentAngle + increment;
+    setAngle(currentAngle);
+    stall();
+}
+
+setAngle(targetAngle);

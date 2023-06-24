@@ -45,6 +45,11 @@ namespace process::game::systems {
 		: globalChannelSetPointer { globalChannelSetPointer }
 		, scriptStoragePointer{ scriptStoragePointer }
 		, spriteStoragePointer{ spriteStoragePointer } {
+		
+		//add native vars
+		addNativeVariable("angleEquivalenceEpsilon", 0.05f);
+		addNativeVariable("pointEquivalenceEpsilon", 0.5f);
+		
 		//add native functions
 		addNativeFunction("print", print);
 		addNativeFunction("timer", std::bind(&ScriptSystem::timer, this, _1));
@@ -99,6 +104,21 @@ namespace process::game::systems {
 		addNativeFunction("makePolar", makePolar);
 		addNativeFunction("angleToPlayer", std::bind(&ScriptSystem::angleToPlayer, this, _1));
 		addNativeFunction("random", std::bind(&ScriptSystem::random, this, _1));
+		addNativeFunction("setInbound", std::bind(&ScriptSystem::setInbound, this, _1));
+		addNativeFunction("removeInbound",
+			std::bind(&ScriptSystem::removeComponent<Inbound>, this, "removeInbound", _1)
+		);
+		addNativeFunction("setOutbound", std::bind(&ScriptSystem::setOutbound, this, _1));
+		addNativeFunction("removeOutbound",
+			std::bind(&ScriptSystem::removeComponent<Outbound>, this, "removeOutbound", _1)
+		);
+		addNativeFunction("entitySpeed", std::bind(&ScriptSystem::entitySpeed, this, _1));
+		addNativeFunction("entityAngle", std::bind(&ScriptSystem::entityAngle, this, _1));
+		addNativeFunction("setSpeed", std::bind(&ScriptSystem::setSpeed, this, _1));
+		addNativeFunction("setAngle", std::bind(&ScriptSystem::setAngle, this, _1));
+		addNativeFunction("smallerDifference", smallerDifference);
+		addNativeFunction("largerDifference", largerDifference);
+		addNativeFunction("abs", absoluteValue);
 		
 		//load function scripts, which are files that start with keyword func
 		darkness::Lexer lexer{};
@@ -177,6 +197,17 @@ namespace process::game::systems {
 	
 	EntityHandle ScriptSystem::makeCurrentEntityHandle(){
 		return currentScenePointer->getDataStorage().makeHandle(currentEntityID);
+	}
+	
+	float ScriptSystem::getAsFloat(const DataType& data){
+		switch(data.index()){
+			case floatIndex:
+				return std::get<float>(data);
+			case intIndex:
+				return static_cast<float>(std::get<int>(data));
+			default:
+				throw std::runtime_error{ "expected int or float" };
+		}
 	}
 	
 	void ScriptSystem::throwIfNativeFunctionWrongArity(
@@ -427,10 +458,10 @@ namespace process::game::systems {
 		SpriteInstruction spriteInstruction{sprite, depth};
 		switch(parameters.size()){
 			case 5:
-				spriteInstruction.setScale(std::get<float>(parameters[4]));
+				spriteInstruction.setScale(getAsFloat(parameters[4]));
 				//fall through
 			case 4:
-				spriteInstruction.setRotation(std::get<float>(parameters[3]));
+				spriteInstruction.setRotation(getAsFloat(parameters[3]));
 				//fall through
 			case 3:
 				spriteInstruction.setOffset(std::get<wasp::math::Vector2>(parameters[2]));
@@ -587,8 +618,8 @@ namespace process::game::systems {
 		}
 		else{
 			velocity = Velocity{
-				std::get<float>(parameters[0]),
-				std::get<float>(parameters[1])
+				getAsFloat(parameters[0]),
+				getAsFloat(parameters[1])
 			};
 		}
 		EntityHandle entityHandle{ makeCurrentEntityHandle() };
@@ -601,7 +632,10 @@ namespace process::game::systems {
 	 */
 	ScriptSystem::DataType ScriptSystem::makeVector(const std::vector<DataType>& parameters) {
 		throwIfNativeFunctionWrongArity(2, parameters, "makeVector");
-		return Vector2{ std::get<float>(parameters[0]), std::get<float>(parameters[1]) };
+		return Vector2{
+			getAsFloat(parameters[0]),
+			getAsFloat(parameters[1])
+		};
 	}
 	
 	/**
@@ -609,7 +643,10 @@ namespace process::game::systems {
 	 */
 	ScriptSystem::DataType ScriptSystem::makePolar(const std::vector<DataType>& parameters){
 		throwIfNativeFunctionWrongArity(2, parameters, "makePolar");
-		return PolarVector{ std::get<float>(parameters[0]), std::get<float>(parameters[1]) };
+		return PolarVector{
+			getAsFloat(parameters[0]),
+		    getAsFloat(parameters[1])
+		};
 	}
 	
 	ScriptSystem::DataType ScriptSystem::angleToPlayer(
@@ -652,27 +689,144 @@ namespace process::game::systems {
 		const DataType& minData{ parameters[0] };
 		const DataType& maxData{ parameters[1] };
 		switch(minData.index()){
-			case floatIndex:{
+			case floatIndex: {
 				float min{ std::get<float>(minData) };
-				float max;
 				switch(maxData.index()){
-					case floatIndex:
-						max = std::get<float>(maxData);
-						break;
+					case floatIndex: {
+						float max { std::get<float>(maxData) };
+						std::uniform_real_distribution<float> distribution { min, max };
+						return distribution(prng);
+					}
 					case intIndex:
-						max = static_cast<float>(std::get<int>(maxData));
-						break;
+						throw std::runtime_error{ "native func random type mismatch!" };
 					default:
 						throw std::runtime_error{ "native func random bad type second arg!" };
 				}
-				std::uniform_real_distribution<float> distribution{ min, max };
-				return distribution(prng);
+				
 			}
-			case intIndex{
+			case intIndex: {
+				int min{ std::get<int>(minData) };
 				switch(maxData.index()){
-					//todo: should we throw on type mismatch?
+					case intIndex:{
+						int max{ std::get<int>(maxData) };
+						//inclusive
+						std::uniform_int_distribution<int> distribution { min, max };
+						return distribution(prng);
+					}
+					case floatIndex:
+						throw std::runtime_error{ "native func random type mismatch!" };
+					default:
+						throw std::runtime_error{ "native func random bad type second arg!" };
 				}
 			}
+			default:
+				throw std::runtime_error{ "native func random bad type first arg!" };
+		}
+	}
+	
+	/**
+	 * float inbound
+	 */
+	ScriptSystem::DataType ScriptSystem::setInbound(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(1, parameters, "setInbound");
+		float inbound{ getAsFloat(parameters[0]) };
+		EntityHandle entityHandle{ makeCurrentEntityHandle() };
+		componentOrderQueue.queueSetComponent<Inbound>(entityHandle, { inbound });
+		return false;
+	}
+	
+	/**
+	 * float outbound
+	 */
+	ScriptSystem::DataType ScriptSystem::setOutbound(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(1, parameters, "setOutbound");
+		float outbound{ getAsFloat(parameters[0]) };
+		EntityHandle entityHandle{ makeCurrentEntityHandle() };
+		componentOrderQueue.queueSetComponent<Outbound>(entityHandle, { outbound });
+		return false;
+	}
+	
+	ScriptSystem::DataType ScriptSystem::entitySpeed(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(0, parameters, "entitySpeed");
+		Velocity& velocity{
+			currentScenePointer->getDataStorage().getComponent<Velocity>(currentEntityID)
+		};
+		return velocity.getMagnitude();
+	}
+	
+	ScriptSystem::DataType ScriptSystem::entityAngle(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(0, parameters, "entityAngle");
+		Velocity& velocity{
+			currentScenePointer->getDataStorage().getComponent<Velocity>(currentEntityID)
+		};
+		return static_cast<float>(velocity.getAngle());
+	}
+	
+	/**
+	 * float speed
+	 */
+	ScriptSystem::DataType ScriptSystem::setSpeed(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(1, parameters, "setSpeed");
+		float speed{ getAsFloat(parameters[0]) };
+		Velocity& velocity{
+			currentScenePointer->getDataStorage().getComponent<Velocity>(currentEntityID)
+		};
+		velocity.setMagnitude(speed);
+		return false;
+	}
+	
+	/**
+	 * float angle
+	 */
+	ScriptSystem::DataType ScriptSystem::setAngle(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(1, parameters, "setAngle");
+		float angle{ getAsFloat(parameters[0]) };
+		Velocity& velocity{
+			currentScenePointer->getDataStorage().getComponent<Velocity>(currentEntityID)
+		};
+		velocity.setAngle(angle);
+		return false;
+	}
+	
+	/**
+	 * float left, float right
+	 */
+	ScriptSystem::DataType ScriptSystem::smallerDifference(
+		const std::vector<DataType>& parameters
+	) {
+		throwIfNativeFunctionWrongArity(2, parameters, "smallerDifference");
+		Angle left{ getAsFloat(parameters[0]) };
+		Angle right{ getAsFloat(parameters[1]) };
+		return left.smallerDifference(right);
+	}
+	
+	/**
+	 * float left, float right
+	 */
+	ScriptSystem::DataType ScriptSystem::largerDifference(
+		const std::vector<DataType>& parameters
+	) {
+		throwIfNativeFunctionWrongArity(2, parameters, "largerDifference");
+		Angle left{ getAsFloat(parameters[0]) };
+		Angle right{ getAsFloat(parameters[1]) };
+		return left.largerDifference(right);
+	}
+	
+	/**
+	 * float value OR int value
+	 */
+	ScriptSystem::DataType ScriptSystem::absoluteValue(
+		const std::vector<DataType>& parameters
+	) {
+		throwIfNativeFunctionWrongArity(1, parameters, "abs");
+		const DataType& data{ parameters[0] };
+		switch(data.index()){
+			case intIndex:
+				return std::abs(std::get<int>(data));
+			case floatIndex:
+				return std::abs(std::get<float>(data));
+			default:
+				throw std::runtime_error{ "native func abs bad type!" };
 		}
 	}
 }

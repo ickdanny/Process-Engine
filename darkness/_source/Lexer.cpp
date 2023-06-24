@@ -94,8 +94,7 @@ namespace darkness{
 				}
 				else{
 					throw std::runtime_error{
-						"Darkness lexer bad base char: "
-									+ std::to_string(currentChar)
+						"Darkness lexer bad base char: " + std::to_string(currentChar)
 					};
 				}
 		}

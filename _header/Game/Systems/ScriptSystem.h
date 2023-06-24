@@ -21,6 +21,7 @@ namespace process::game::systems {
 		using Point2 = wasp::math::Point2;
 		using Vector2 = wasp::math::Vector2;
 		using PolarVector = wasp::math::PolarVector;
+		using Angle = wasp::math::Angle;
 
 		//fields
 		wasp::channel::ChannelSet* globalChannelSetPointer{};
@@ -44,6 +45,7 @@ namespace process::game::systems {
 	private:
 		//helper functions
 		EntityHandle makeCurrentEntityHandle();
+		static float getAsFloat(const DataType& data);
 		
 		template <typename T>
 		bool containsComponent(const EntityHandle& entityHandle){
@@ -97,6 +99,15 @@ namespace process::game::systems {
 		static DataType makePolar(const std::vector<DataType>& parameters);
 		DataType angleToPlayer(const std::vector<DataType>& parameters);
 		DataType random(const std::vector<DataType>& parameters);
+		DataType setInbound(const std::vector<DataType>& parameters);
+		DataType setOutbound(const std::vector<DataType>& parameters);
+		DataType entitySpeed(const std::vector<DataType>& parameters);
+		DataType entityAngle(const std::vector<DataType>& parameters);
+		DataType setSpeed(const std::vector<DataType>& parameters);
+		DataType setAngle(const std::vector<DataType>& parameters);
+		static DataType smallerDifference(const std::vector<DataType>& parameters);
+		static DataType largerDifference(const std::vector<DataType>& parameters);
+		static DataType absoluteValue(const std::vector<DataType>& parameters);
 		
 		template <typename T>
 		DataType removeComponent(
