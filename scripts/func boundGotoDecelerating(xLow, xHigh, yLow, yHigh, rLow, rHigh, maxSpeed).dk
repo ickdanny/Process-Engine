@@ -1,0 +1,21 @@
+#func boundGotoDecelerating(xLow, xHigh, yLow, yHigh, rLow, rHigh, maxSpeed)
+
+print("boundGotoDecelerating");
+
+let pos = entityPos();
+let r = max(random(rLow, rHigh), random(rLow, rHigh));
+let angle = random(0.0, 360.0);
+let targetPos = pos + makePolar(r, angle);
+
+#keep rolling until we get a point within the bounds - DON'T CLAMP!
+let x = getX(targetPos);
+let y = getY(targetPos);
+while(x < xLow | x > xHigh | y < yLow | y > yHigh){
+    r = max(random(rLow, rHigh), random(rLow, rHigh));
+    angle = random(0.0, 360.0);
+    targetPos = pos + makePolar(r, angle);
+    x = getX(targetPos);
+    y = getY(targetPos);
+}
+
+gotoDecelerating(x, y, maxSpeed);

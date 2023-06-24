@@ -1,0 +1,38 @@
+#func gotoDecelerating(targetX, targetY, maxSpeed)
+
+func calculateSpeed(currentDist, initDist, maxSpeed){
+    let exponentBase = 2.0;
+    let horizontalShift = 0.1;
+    let horizontalStretch = 7.0;
+
+    let distRatio = currentDist / initDist;
+    let exponent = (horizontalStretch * distRatio) + horizontalShift;
+    let speedMulti = 1.0 - (1.0 / pow(exponentBase, exponent));
+    return min(maxSpeed * speedMulti, currentDist);
+}
+
+let targetPos = makePoint(targetX, targetY);
+let pos = entityPos();
+let initDist = pointDist(pos, targetPos);
+let currentDist = initDist;
+
+#while entity has not reached target, continually modulate speed
+if(currentDist > pointEquivalenceEpsilon){
+    let angle;
+    let speed;
+
+    while(currentDist > pointEquivalenceEpsilon){
+        angle = pointAngle(pos, targetPos);
+        speed = calculateSpeed(currentDist, initDist, maxSpeed);
+        setVelocity(speed, angle);
+        stall();
+        pos = entityPos();
+        currentDist = pointDist(pos, targetPos);
+    }
+}
+
+#after entity has reached target, set position and velocity to exact values
+setPosition(targetPos);
+setVelocity(0.0, 0.0);
+
+return false;

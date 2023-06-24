@@ -54,6 +54,8 @@ namespace process::game::systems {
 		
 		//native operator handlers
 		addNativeFunction(darkness::reservedFunctionNames::unaryMinus, nativeUnaryMinus);
+		addNativeFunction(darkness::reservedFunctionNames::binaryPlus, nativeBinaryPlus);
+		addNativeFunction(darkness::reservedFunctionNames::binaryMinus, nativeBinaryMinus);
 		
 		//utility functions
 		addNativeFunction("error", throwError);
@@ -116,6 +118,7 @@ namespace process::game::systems {
 		addNativeFunction("removeOutbound",
 			std::bind(&ScriptSystem::removeComponent<Outbound>, this, "removeOutbound", _1)
 		);
+		addNativeFunction("setPosition", std::bind(&ScriptSystem::setPosition, this, _1));
 		addNativeFunction("setVelocity", std::bind(&ScriptSystem::setVelocity, this, _1));
 		addNativeFunction("setSpeed", std::bind(&ScriptSystem::setSpeed, this, _1));
 		addNativeFunction("setAngle", std::bind(&ScriptSystem::setAngle, this, _1));
@@ -128,15 +131,26 @@ namespace process::game::systems {
 		addNativeFunction("addScript", std::bind(&ScriptSystem::addScript, this, _1));
 		
 		//math
+		addNativeFunction("makePoint", makePoint);
 		addNativeFunction("makeVector", makeVector);
 		addNativeFunction("makePolar", makePolar);
+		addNativeFunction("getX", getX);
+		addNativeFunction("getY", getY);
+		addNativeFunction("getR", getR);
+		addNativeFunction("getTheta", getTheta);
+		addNativeFunction("pow", exponent);
+		addNativeFunction("min", min);
+		addNativeFunction("max", max);
 		addNativeFunction("smallerDifference", smallerDifference);
 		addNativeFunction("largerDifference", largerDifference);
 		addNativeFunction("abs", absoluteValue);
+		addNativeFunction("pointDist", pointDistance);
+		addNativeFunction("pointAngle", pointAngle);
 		addNativeFunction("random", std::bind(&ScriptSystem::random, this, _1));
 		
 		//entity queries
 		addNativeFunction("angleToPlayer", std::bind(&ScriptSystem::angleToPlayer, this, _1));
+		addNativeFunction("entityPos", std::bind(&ScriptSystem::entityPosition, this, _1));
 		addNativeFunction("entitySpeed", std::bind(&ScriptSystem::entitySpeed, this, _1));
 		addNativeFunction("entityAngle", std::bind(&ScriptSystem::entityAngle, this, _1));
 		
@@ -322,7 +336,113 @@ namespace process::game::systems {
 			return -std::get<PolarVector>(data);
 		}
 		else{
-			throw std::runtime_error{ "Native unary minus bad type!" };
+			throw std::runtime_error{ "native unary minus bad type!" };
+		}
+	}
+	
+	ScriptSystem::DataType ScriptSystem::nativeBinaryPlus(
+		const std::vector<DataType>& parameters
+	) {
+		throwIfNativeFunctionWrongArity(2, parameters, "native binary plus");
+		const DataType& leftData{ parameters[0] };
+		const DataType& rightData{ parameters[1] };
+		if(std::holds_alternative<Point2>(leftData)){
+			const Point2& left{ std::get<Point2>(leftData) };
+			if(std::holds_alternative<Vector2>(rightData)){
+				const Vector2& right{ std::get<Vector2>(rightData) };
+				return left + right;
+			}
+			else if(std::holds_alternative<PolarVector>(rightData)){
+				const Velocity& right{ std::get<PolarVector>(rightData) };
+				return left + right;
+			}
+			else{
+				throw std::runtime_error{ "native binary plus bad right type for point!" };
+			}
+		}
+		else if(std::holds_alternative<Vector2>(leftData)){
+			const Vector2& left{ std::get<Vector2>(leftData) };
+			if(std::holds_alternative<Vector2>(rightData)){
+				const Vector2& right{ std::get<Vector2>(rightData) };
+				return left + right;
+			}
+			else if(std::holds_alternative<PolarVector>(rightData)){
+				const Velocity& right{ std::get<PolarVector>(rightData) };
+				return left + right;
+			}
+			else{
+				throw std::runtime_error{ "native binary plus bad right type for vector!" };
+			}
+		}
+		else if(std::holds_alternative<PolarVector>(leftData)){
+			const PolarVector& left{ std::get<PolarVector>(leftData) };
+			if(std::holds_alternative<Vector2>(rightData)){
+				const Vector2& right{ std::get<Vector2>(rightData) };
+				return left + right;
+			}
+			else if(std::holds_alternative<PolarVector>(rightData)){
+				const Velocity& right{ std::get<PolarVector>(rightData) };
+				return left + right;
+			}
+			else{
+				throw std::runtime_error{ "native binary plus bad right type for polar!" };
+			}
+		}
+		else{
+			throw std::runtime_error{ "native binary plus bad left type!" };
+		}
+	}
+	
+	ScriptSystem::DataType ScriptSystem::nativeBinaryMinus(
+		const std::vector<DataType>& parameters
+	) {
+		throwIfNativeFunctionWrongArity(2, parameters, "native binary minus");
+		const DataType& leftData{ parameters[0] };
+		const DataType& rightData{ parameters[1] };
+		if(std::holds_alternative<Point2>(leftData)){
+			const Point2& left{ std::get<Point2>(leftData) };
+			if(std::holds_alternative<Vector2>(rightData)){
+				const Vector2& right{ std::get<Vector2>(rightData) };
+				return left - right;
+			}
+			else if(std::holds_alternative<PolarVector>(rightData)){
+				const Velocity& right{ std::get<PolarVector>(rightData) };
+				return left - right;
+			}
+			else{
+				throw std::runtime_error{ "native binary minus bad right type for point!" };
+			}
+		}
+		else if(std::holds_alternative<Vector2>(leftData)){
+			const Vector2& left{ std::get<Vector2>(leftData) };
+			if(std::holds_alternative<Vector2>(rightData)){
+				const Vector2& right{ std::get<Vector2>(rightData) };
+				return left - right;
+			}
+			else if(std::holds_alternative<PolarVector>(rightData)){
+				const Velocity& right{ std::get<PolarVector>(rightData) };
+				return left - right;
+			}
+			else{
+				throw std::runtime_error{ "native binary minus bad right type for vector!" };
+			}
+		}
+		else if(std::holds_alternative<PolarVector>(leftData)){
+			const PolarVector& left{ std::get<PolarVector>(leftData) };
+			if(std::holds_alternative<Vector2>(rightData)){
+				const Vector2& right{ std::get<Vector2>(rightData) };
+				return left - right;
+			}
+			else if(std::holds_alternative<PolarVector>(rightData)){
+				const Velocity& right{ std::get<PolarVector>(rightData) };
+				return left - right;
+			}
+			else{
+				throw std::runtime_error{ "native binary minus bad right type for polar!" };
+			}
+		}
+		else{
+			throw std::runtime_error{ "native binary minus bad left type!" };
 		}
 	}
 	
@@ -633,6 +753,36 @@ namespace process::game::systems {
 	}
 	
 	/**
+	 * either Point2 position OR float x, float y
+	 */
+	ScriptSystem::DataType ScriptSystem::setPosition(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionArityOutOfRange(1, 2, parameters, "setPosition");
+		Point2 position;
+		if(parameters.size() == 1){
+			position = std::get<Point2>(parameters[0]);
+		}
+		else{
+			position = Point2{
+				getAsFloat(parameters[0]),
+				getAsFloat(parameters[1])
+			};
+		}
+		EntityHandle entityHandle{ makeCurrentEntityHandle() };
+		auto& dataStorage{ currentScenePointer->getDataStorage() };
+		if(dataStorage.containsComponent<Position>(entityHandle)){
+			Position& entityPosition{ dataStorage.getComponent<Position>(entityHandle) };
+			entityPosition = position;
+		}
+		else {
+			componentOrderQueue.queueSetComponent<Position>(
+				entityHandle,
+				Position{ position }
+			);
+		}
+		return false;
+	}
+	
+	/**
 	 * either Velocity velocity OR float magnitude, float angle
 	 */
 	ScriptSystem::DataType ScriptSystem::setVelocity(const std::vector<DataType>& parameters) {
@@ -655,6 +805,17 @@ namespace process::game::systems {
 	/**
 	 * float x, float y
 	 */
+	ScriptSystem::DataType ScriptSystem::makePoint(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(2, parameters, "makePoint");
+		return Point2{
+			getAsFloat(parameters[0]),
+			getAsFloat(parameters[1])
+		};
+	}
+	
+	/**
+	 * float x, float y
+	 */
 	ScriptSystem::DataType ScriptSystem::makeVector(const std::vector<DataType>& parameters) {
 		throwIfNativeFunctionWrongArity(2, parameters, "makeVector");
 		return Vector2{
@@ -672,6 +833,154 @@ namespace process::game::systems {
 			getAsFloat(parameters[0]),
 		    getAsFloat(parameters[1])
 		};
+	}
+	
+	/**
+	 * Point2 point OR Vector2 vector
+	 */
+	ScriptSystem::DataType ScriptSystem::getX(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(1, parameters, "getX");
+		const DataType& data{ parameters[0] };
+		if(std::holds_alternative<Point2>(data)){
+			return std::get<Point2>(data).x;
+		}
+		else if(std::holds_alternative<Vector2>(data)){
+			return std::get<Vector2>(data).x;
+		}
+		else{
+			throw std::runtime_error{ "native func getX bad type!" };
+		}
+	}
+	
+	/**
+	 * Point2 point OR Vector2 vector
+	 */
+	ScriptSystem::DataType ScriptSystem::getY(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(1, parameters, "getY");
+		const DataType& data{ parameters[0] };
+		if(std::holds_alternative<Point2>(data)){
+			return std::get<Point2>(data).y;
+		}
+		else if(std::holds_alternative<Vector2>(data)){
+			return std::get<Vector2>(data).y;
+		}
+		else{
+			throw std::runtime_error{ "native func getY bad type!" };
+		}
+	}
+	
+	/**
+	 * PolarVector polar
+	 */
+	ScriptSystem::DataType ScriptSystem::getR(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(1, parameters, "getR");
+		const DataType& data{ parameters[0] };
+		if(std::holds_alternative<PolarVector>(data)){
+			return std::get<PolarVector>(data).getMagnitude();
+		}
+		else{
+			throw std::runtime_error{ "native func getR bad type!" };
+		}
+	}
+	
+	/**
+	 * PolarVector polar
+	 */
+	ScriptSystem::DataType ScriptSystem::getTheta(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(1, parameters, "getTheta");
+		const DataType& data{ parameters[0] };
+		if(std::holds_alternative<PolarVector>(data)){
+			return static_cast<float>(std::get<PolarVector>(data).getAngle());
+		}
+		else{
+			throw std::runtime_error{ "native func getTheta bad type!" };
+		}
+	}
+	
+	/**
+	 * float base, float exponent
+	 */
+	ScriptSystem::DataType ScriptSystem::exponent(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(2, parameters, "pow");
+		return std::powf(getAsFloat(parameters[0]),	getAsFloat(parameters[1]));
+	}
+	
+	/**
+	 * float a, float b OR int a, int b
+	 */
+	ScriptSystem::DataType ScriptSystem::min(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(2, parameters, "min");
+		const DataType& dataA{ parameters[0] };
+		const DataType& dataB{ parameters[1] };
+		switch(dataA.index()){
+			case floatIndex: {
+				float a{ std::get<float>(dataA) };
+				switch(dataB.index()){
+					case floatIndex: {
+						float b { std::get<float>(dataB) };
+						return std::fminf(a, b);
+					}
+					case intIndex:
+						throw std::runtime_error{ "native func min type mismatch!" };
+					default:
+						throw std::runtime_error{ "native func min bad type second arg!" };
+				}
+			}
+			case intIndex: {
+				int a{ std::get<int>(dataA) };
+				switch(dataB.index()){
+					case intIndex:{
+						int b{ std::get<int>(dataB) };
+						return std::min(a, b);
+					}
+					case floatIndex:
+						throw std::runtime_error{ "native func min type mismatch!" };
+					default:
+						throw std::runtime_error{ "native func min bad type second arg!" };
+				}
+			}
+			default:
+				throw std::runtime_error{ "native func min bad type first arg!" };
+		}
+	}
+	
+	/**
+	 * float a, float b OR int a, int b
+	 */
+	ScriptSystem::DataType ScriptSystem::max(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(2, parameters, "max");
+		const DataType& dataA{ parameters[0] };
+		const DataType& dataB{ parameters[1] };
+		switch(dataA.index()){
+			case floatIndex: {
+				float a{ std::get<float>(dataA) };
+				switch(dataB.index()){
+					case floatIndex: {
+						float b { std::get<float>(dataB) };
+						return std::fmaxf(a, b);
+					}
+					case intIndex:
+						throw std::runtime_error{ "native func max type mismatch!" };
+					default:
+						throw std::runtime_error{ "native func max bad type second arg!" };
+				}
+			}
+			case intIndex: {
+				int a{ std::get<int>(dataA) };
+				switch(dataB.index()){
+					case intIndex:{
+						int b{ std::get<int>(dataB) };
+						return std::max(a, b);
+					}
+					case floatIndex:
+						throw std::runtime_error{ "native func max type mismatch!" };
+					default:
+						throw std::runtime_error{ "native func max bad type second arg!" };
+				}
+			}
+			default:
+				throw std::runtime_error{ "native func max bad type first arg!" };
+		}
 	}
 	
 	ScriptSystem::DataType ScriptSystem::angleToPlayer(
@@ -704,11 +1013,23 @@ namespace process::game::systems {
 		}
 	}
 	
+	ScriptSystem::DataType ScriptSystem::entityPosition(
+		const std::vector<DataType>& parameters)
+	{
+		return Point2{
+			currentScenePointer->getDataStorage().getComponent<Position>(currentEntityID)
+		};
+	}
+	
 	/**
 	 * float min, float max OR int min, int max
 	 */
 	ScriptSystem::DataType ScriptSystem::random(const std::vector<DataType>& parameters) {
 		throwIfNativeFunctionWrongArity(2, parameters, "random");
+		const auto& randomChannel{ currentScenePointer->getChannel(SceneTopics::random) };
+		if(randomChannel.isEmpty()){
+			throw std::runtime_error{ "native func random no prng in scene!" };
+		}
 		auto& prng{ currentScenePointer->getChannel(SceneTopics::random).getMessages()[0] };
 		const DataType& minData{ parameters[0] };
 		const DataType& maxData{ parameters[1] };
@@ -852,6 +1173,28 @@ namespace process::game::systems {
 			default:
 				throw std::runtime_error{ "native func abs bad type!" };
 		}
+	}
+	
+	/**
+	 * Point2 pointA, Point2 pointB
+	 */
+	ScriptSystem::DataType ScriptSystem::pointDistance(
+		const std::vector<DataType>& parameters
+	){
+		throwIfNativeFunctionWrongArity(2, parameters, "pointDist");
+		const Point2& pointA{ std::get<Point2>(parameters[0]) };
+		const Point2& pointB{ std::get<Point2>(parameters[1]) };
+		return wasp::math::distanceFromAToB(pointA, pointB);
+	}
+	
+	/**
+	 * Point2 pointA, Point2 pointB
+	 */
+	ScriptSystem::DataType ScriptSystem::pointAngle(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(2, parameters, "pointAngle");
+		const Point2& pointA{ std::get<Point2>(parameters[0]) };
+		const Point2& pointB{ std::get<Point2>(parameters[1]) };
+		return static_cast<float>(wasp::math::getAngleFromAToB(pointA, pointB));
 	}
 	
 	ScriptSystem::DataType ScriptSystem::die(const std::vector<DataType>& parameters) {

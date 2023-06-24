@@ -76,10 +76,10 @@ namespace process::game {
         using wasp::game::components::TwoFramePosition::TwoFramePosition;
 
         //Explicitly define copy and move constructors taking Point2
-        explicit Position(const wasp::math::Point2& toCopy)
+        Position(const wasp::math::Point2& toCopy)
             : wasp::game::components::TwoFramePosition(toCopy) {
         }
-        explicit Position(wasp::math::Point2&& toMove)
+        Position(wasp::math::Point2&& toMove)
             : wasp::game::components::TwoFramePosition(toMove) {
         }
     };
@@ -92,15 +92,15 @@ namespace process::game {
         using PolarVector::PolarVector;
 
         //Explicitly define copy and move constructors taking PolarVector
-        explicit Velocity(const PolarVector& toCopy)
+        Velocity(const PolarVector& toCopy)
             : PolarVector(toCopy) {
         }
-        explicit Velocity(PolarVector&& toMove)
+        Velocity(PolarVector&& toMove)
             : PolarVector(toMove) {
         }
 
         //Explicitly define copy constructor taking Vector2
-        explicit Velocity(const Vector2& toCopy)
+        Velocity(const Vector2& toCopy)
             : PolarVector(toCopy) {
         }
 
@@ -124,10 +124,10 @@ namespace process::game {
         using wasp::math::AABB::AABB;
 
         //Explicitly define copy and move constructors taking AABB
-        explicit Hitbox(const AABB& toCopy)
+        Hitbox(const AABB& toCopy)
             : wasp::math::AABB(toCopy) {
         }
-        explicit Hitbox(AABB&& toMove)
+        Hitbox(AABB&& toMove)
             : wasp::math::AABB(toMove) {
         }
     };
@@ -147,12 +147,20 @@ namespace process::game {
         using wasp::game::components::DeathCommand::DeathCommand;
 
         //Explicitly defined constructor taking the command
-        explicit DeathCommand(wasp::game::components::DeathCommand::Commands command)
+        DeathCommand(wasp::game::components::DeathCommand::Commands command)
             : wasp::game::components::DeathCommand{ command } {
         }
     };
-    struct ScriptList : components::ScriptList<wasp::math::Vector2, wasp::math::PolarVector> {
-        using components::ScriptList<wasp::math::Vector2, wasp::math::PolarVector>::ScriptList;
+    struct ScriptList : components::ScriptList<
+		wasp::math::Point2,
+		wasp::math::Vector2,
+		wasp::math::PolarVector
+	> {
+        using components::ScriptList<
+			wasp::math::Point2,
+            wasp::math::Vector2,
+			wasp::math::PolarVector
+		>::ScriptList;
     };
 
     struct DeathSpawn {

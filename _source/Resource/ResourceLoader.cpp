@@ -4,6 +4,8 @@
 
 #include "File\FileUtil.h"
 
+#include "Logging.h"
+
 namespace process::resource {
 	
 	void ResourceLoader::insertFileLoadableIntoMap(
@@ -32,17 +34,32 @@ namespace process::resource {
 		const std::wstring& extension {
 			file::getFileExtension(fileOrigin.fileName)
 		};
-		return fileExtensionMap.at(extension)->loadFromFile(fileOrigin, *this);
+		try {
+			return fileExtensionMap.at(extension)->loadFromFile(fileOrigin, *this);
+		}
+		catch(...){
+			wasp::debug::log(L"failed to load from file: " + fileOrigin.fileName);
+			throw;
+		}
 	}
 	
 	ResourceLoader::ResourceBase* ResourceLoader::loadManifestEntry(
 		const ManifestOrigin& manifestOrigin
 	) const {
 		const std::wstring& prefix { manifestOrigin.manifestArguments[0] };
-		return manifestPrefixMap.at(prefix)->loadFromManifest(
-			manifestOrigin,
-			*this
-		);
+		try {
+			return manifestPrefixMap.at(prefix)->loadFromManifest(
+				manifestOrigin,
+				*this
+			);
+		}
+		catch(...){
+			wasp::debug::log(L"failed to load from manifest: ");
+			for(const auto& arg : manifestOrigin.manifestArguments){
+				wasp::debug::log(arg);
+			}
+			throw;
+		}
 	}
 }
 

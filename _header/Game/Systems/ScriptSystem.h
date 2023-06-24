@@ -10,6 +10,7 @@
 namespace process::game::systems {
 
 	class ScriptSystem : private darkness::Interpreter<
+		wasp::math::Point2,
 		wasp::math::Vector2,
 		wasp::math::PolarVector
 	>{
@@ -78,6 +79,8 @@ namespace process::game::systems {
 		
 		//native operator handlers
 		static DataType nativeUnaryMinus(const std::vector<DataType>& parameters);
+		static DataType nativeBinaryPlus(const std::vector<DataType>& parameters);
+		static DataType nativeBinaryMinus(const std::vector<DataType>& parameters);
 		
 		//utility functions
 		static DataType throwError(const std::vector<DataType>& parameters);
@@ -103,6 +106,7 @@ namespace process::game::systems {
 		DataType setDamage(const std::vector<DataType>& parameters);
 		DataType setInbound(const std::vector<DataType>& parameters);
 		DataType setOutbound(const std::vector<DataType>& parameters);
+		DataType setPosition(const std::vector<DataType>& parameters);
 		DataType setVelocity(const std::vector<DataType>& parameters);
 		DataType setSpeed(const std::vector<DataType>& parameters);
 		DataType setAngle(const std::vector<DataType>& parameters);
@@ -115,15 +119,26 @@ namespace process::game::systems {
 		DataType addScript(const std::vector<DataType>& parameters);
 		
 		//math
+		static DataType makePoint(const std::vector<DataType>& parameters);
 		static DataType makeVector(const std::vector<DataType>& parameters);
 		static DataType makePolar(const std::vector<DataType>& parameters);
+		static DataType getX(const std::vector<DataType>& parameters);
+		static DataType getY(const std::vector<DataType>& parameters);
+		static DataType getR(const std::vector<DataType>& parameters);
+		static DataType getTheta(const std::vector<DataType>& parameters);
+		static DataType exponent(const std::vector<DataType>& parameters);
+		static DataType min(const std::vector<DataType>& parameters);
+		static DataType max(const std::vector<DataType>& parameters);
 		static DataType smallerDifference(const std::vector<DataType>& parameters);
 		static DataType largerDifference(const std::vector<DataType>& parameters);
 		static DataType absoluteValue(const std::vector<DataType>& parameters);
+		static DataType pointDistance(const std::vector<DataType>& parameters);
+		static DataType pointAngle(const std::vector<DataType>& parameters);
 		DataType random(const std::vector<DataType>& parameters);
 		
 		//entity queries
 		DataType angleToPlayer(const std::vector<DataType>& parameters);
+		DataType entityPosition(const std::vector<DataType>& parameters);
 		DataType entitySpeed(const std::vector<DataType>& parameters);
 		DataType entityAngle(const std::vector<DataType>& parameters);
 		
