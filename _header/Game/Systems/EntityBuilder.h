@@ -3,6 +3,7 @@
 #include <tuple>
 #include <type_traits>
 
+#include "systemInclude.h"
 #include "ECS/CriticalOrders.h"
 #include "Game/Components.h"
 
@@ -10,7 +11,7 @@ namespace process::game::systems {
 
 	//utility for creating entities
 
-	//utility type for testing whether or not a list of types contains a type
+	//utility type for testing whether a list of types contains a type
 	template <typename T, typename... Ts>
 	constexpr auto contains() {
 		return !std::is_same<
@@ -30,22 +31,22 @@ namespace process::game::systems {
 		virtual EntityHandle addTo(wasp::ecs::DataStorage& dataStorage) const = 0;
 
 		//returns a shared pointer to a clone of this object made on the heap
+		[[nodiscard]]
 		virtual std::shared_ptr<ComponentTupleBase> heapClone() const = 0;
-
-		//Special function for adding position to a tuple
-		virtual std::shared_ptr<ComponentTupleBase> addPosition(
-			const Position& position
-		) const = 0;
-
-		//Special function for adding velocity to a tuple
-		virtual std::shared_ptr<ComponentTupleBase> addVelocity(
-			const Velocity& velocity
-		) const = 0;
-
-		//Special function for adding position AND velocity to a tuple
-		virtual std::shared_ptr<ComponentTupleBase> addPosVel(
+		
+		//add position and velocity to a tuple
+		[[nodiscard]]
+		virtual std::shared_ptr<ComponentTupleBase> addPositionVelocity(
 			const Position& position,
 			const Velocity& velocity
+		) const = 0;
+		
+		//add position, velocity, and scriptList to a tuple
+		[[nodiscard]]
+		virtual std::shared_ptr<ComponentTupleBase> addPositionVelocityScript(
+			const Position& position,
+			const Velocity& velocity,
+			const ScriptList& scriptList
 		) const = 0;
 	};
 
@@ -61,6 +62,7 @@ namespace process::game::systems {
 		}
 
 		//conversion to AddEntityOrder
+		[[nodiscard]]
 		wasp::ecs::AddEntityOrder<Ts...> package() const {
 			return wasp::ecs::AddEntityOrder{ *this };
 		}
@@ -70,46 +72,16 @@ namespace process::game::systems {
 			return dataStorage.addEntity(package());
 		}
 
+		[[nodiscard]]
 		std::shared_ptr<ComponentTupleBase> heapClone() const override {
 			ComponentTuple<Ts...>* rawPointer{
 				new ComponentTuple<Ts...>(*this)
 			};
 			return std::shared_ptr<ComponentTupleBase>(rawPointer);
 		}
-
-		std::shared_ptr<ComponentTupleBase> addPosition(
-			const Position& position
-		) const override {
-			if constexpr (contains<Position, Ts...>()) {
-				throw std::runtime_error{ "add position template wrong somewhere " };
-			}
-			else {
-				ComponentTupleBase* newTuplePointer{
-					static_cast<ComponentTupleBase*>(new auto (*this + position))
-				};
-				return std::shared_ptr<ComponentTupleBase>{
-					newTuplePointer
-				};
-			}
-		}
-
-		std::shared_ptr<ComponentTupleBase> addVelocity(
-			const Velocity& velocity
-		) const override {
-			if constexpr (contains<Velocity, Ts...>()) {
-				throw std::runtime_error{ "add velocity template wrong somewhere " };
-			}
-			else {
-				ComponentTupleBase* newTuplePointer{
-					static_cast<ComponentTupleBase*>(new auto (*this + velocity))
-				};
-				return std::shared_ptr<ComponentTupleBase>{
-					newTuplePointer
-				};
-			}
-		}
-
-		std::shared_ptr<ComponentTupleBase> addPosVel(
+		
+		[[nodiscard]]
+		std::shared_ptr<ComponentTupleBase> addPositionVelocity(
 			const Position& position,
 			const Velocity& velocity
 		) const override {
@@ -123,6 +95,33 @@ namespace process::game::systems {
 				ComponentTupleBase* newTuplePointer{
 					static_cast<ComponentTupleBase*>(
 						new auto ((*this + position) + velocity)
+					)
+				};
+				return std::shared_ptr<ComponentTupleBase>{
+					newTuplePointer
+				};
+			}
+		}
+		
+		[[nodiscard]]
+		std::shared_ptr<ComponentTupleBase> addPositionVelocityScript(
+			const Position& position,
+			const Velocity& velocity,
+			const ScriptList& scriptList
+		) const override {
+			if constexpr (contains<Position, Ts...>()) {
+				throw std::runtime_error{ "add position template wrong somewhere" };
+			}
+			else if constexpr (contains<Velocity, Ts...>()) {
+				throw std::runtime_error{ "add velocity template wrong somewhere" };
+			}
+			else if constexpr (contains<ScriptList, Ts...>()) {
+				throw std::runtime_error{ "add script list template wrong somewhere" };
+			}
+			else {
+				ComponentTupleBase* newTuplePointer{
+					static_cast<ComponentTupleBase*>(
+						new auto (((*this + position) + velocity) + scriptList)
 					)
 				};
 				return std::shared_ptr<ComponentTupleBase>{
@@ -240,22 +239,7 @@ namespace process::game::systems {
 		}
 
 		template <typename... Ts>
-		static auto makePosPrototype(
-			const Velocity& velocity,
-			const AABB& hitbox,
-			const Ts&... args
-		) {
-			return ComponentTuple{
-				Velocity{ velocity },
-				VisibleMarker{},
-				Hitbox{ hitbox },
-				CollidableMarker{},
-				args...
-			};
-		}
-
-		template <typename... Ts>
-		static auto makePosVelPrototype(
+		static auto makeVisibleCollidablePrototype(
 			const AABB& hitbox,
 			const Ts&... args
 		) {

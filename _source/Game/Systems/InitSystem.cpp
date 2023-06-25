@@ -275,9 +275,9 @@ namespace process::game::systems {
 					wasp::math::Vector2{ 0.0f, 4.0f }			//offset
 				},
 				ScriptList{
-					ScriptContainer{
-						scriptStoragePointer->get(L"test")	//todo: script test
-					}
+					/*
+					shot a preview program
+					 */
 				},
 				AnimationList{ 
 					components::Animation{ {
@@ -679,7 +679,7 @@ namespace process::game::systems {
 				PickupCollisions::Target{},
 				DeathCommand{ DeathCommand::Commands::playerDeath },
 				ScriptList{},
-				DeathSpawn{ /*{ programsPointer->playerPrograms.deathSpawnProgram }*/ },
+				DeathSpawn{ /*{ programsPointer->playerPrograms.deathSpawnProgram }*/ }, //todo
 				AnimationList{ 
 					{
 						components::Animation{ {

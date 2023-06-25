@@ -138,6 +138,8 @@ namespace process::game {
     struct Damage {
         int value{};
     };
+	
+	struct ClearMarker {};
 
     struct PickupType : wasp::game::components::PickupType {
         using wasp::game::components::PickupType::PickupType;
@@ -161,6 +163,11 @@ namespace process::game {
             wasp::math::Vector2,
 			wasp::math::PolarVector
 		>::ScriptList;
+	
+		static constexpr char spawnString[] = "spawn";//for some reason needs = and not {}
+		static bool containsSpawnString(const std::string& string){
+			return string.find(ScriptList::spawnString) != std::string::npos;
+		}
     };
 
     struct DeathSpawn {

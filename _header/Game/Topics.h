@@ -95,6 +95,9 @@ namespace process::game {
 
 		//set by DeathHandlerSystem, cleared by ScriptSystem (boss's program)
 		static const Topic<EntityHandle> bossDeaths;
+		
+		//set by any system that clears the screen, cleared by ClearSystem
+		static const Topic<> clearFlag;
 
 		//set by ContinueSystem and PauseSystem, cleared by MiscellaneousSystem
 		static const Topic<> pauseFlag;

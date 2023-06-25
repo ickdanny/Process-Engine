@@ -1,12 +1,7 @@
 #include "Game/Topics.h"
 
 namespace process::game {
-
-	/*
-	template <typename T>
-	using Topic = wasp::channel::Topic<T>;
-	 */
-
+	
 	//global topics
 	const Topic<SceneNames> GlobalTopics::sceneEntry{};
 	const Topic<SceneNames> GlobalTopics::sceneExitTo{};
@@ -37,6 +32,7 @@ namespace process::game {
 	const Topic<wasp::ecs::entity::EntityHandle> SceneTopics::playerHits{};
 	const Topic<wasp::ecs::entity::EntityHandle> SceneTopics::deaths{};
 	const Topic<wasp::ecs::entity::EntityHandle> SceneTopics::bossDeaths{};
+	const Topic<> SceneTopics::clearFlag{};
 	const Topic<> SceneTopics::pauseFlag{};
 	const Topic<> SceneTopics::winFlag{};
 }

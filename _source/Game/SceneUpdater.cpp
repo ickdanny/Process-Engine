@@ -55,6 +55,7 @@ namespace process::game {
 		velocitySystem(scene);
 		collisionDetectorSystem(scene);
 		collisionHandlerSystem(scene);
+		clearSystem(scene);
 		playerShotSystem(scene);
 		playerStateSystem(scene);
 		playerBombSystem(scene);

@@ -18,6 +18,7 @@
 #include "Game/Systems/PlayerMovementSystem.h"
 #include "Game/Systems/PlayerShotSystem.h"
 #include "Game/Systems/CollisionHandlerSystem.h"
+#include "Game/Systems/ClearSystem.h"
 #include "Game/Systems/PlayerStateSystem.h"
 #include "Game/Systems/PlayerBombSystem.h"
 #include "Game/Systems/PlayerDeathDetectorSystem.h"
@@ -61,6 +62,7 @@ namespace process::game {
 		systems::VelocitySystem velocitySystem{};
 		systems::CollisionDetectorSystem collisionDetectorSystem{};
 		systems::CollisionHandlerSystem collisionHandlerSystem;	//not initialized!
+		systems::ClearSystem clearSystem{};
 		systems::PlayerShotSystem playerShotSystem;				//not initialized!
 		systems::PlayerStateSystem playerStateSystem{};
 		systems::PlayerBombSystem playerBombSystem;				//not initialized!

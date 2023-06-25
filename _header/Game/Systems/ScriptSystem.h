@@ -154,11 +154,13 @@ namespace process::game::systems {
 		DataType chance(const std::vector<DataType>& parameters);
 		
 		//scene signaling
+		DataType clearBullets(const std::vector<DataType>& parameters);
 		DataType showDialogue(const std::vector<DataType>& parameters);
 		DataType win(const std::vector<DataType>& parameters);
 		DataType endStage(const std::vector<DataType>& parameters);
 		
 		//todo: spawn via prototypes
+		DataType spawn(const std::vector<DataType>& parameters);
 		
 		template <typename T>
 		DataType removeComponent(

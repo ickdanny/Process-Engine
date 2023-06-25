@@ -1,5 +1,7 @@
 #include "Game/Systems/ScriptSystem.h"
 
+#include "Prototypes.h"
+
 #include <locale>
 #include <codecvt>
 
@@ -8,8 +10,6 @@
 namespace process::game::systems {
 	
 	namespace{
-		constexpr char spawnString[] { "spawn" };
-		
 		#define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
 		std::string convertFromWideString(const std::wstring& wideString){
 			//setup converter
@@ -27,9 +27,7 @@ namespace process::game::systems {
 		}
 		#undef _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
 		
-		bool containsSpawnString(const std::string& string){
-			return string.find(spawnString) != std::string::npos;
-		}
+		const Prototypes prototypes{};
 	}
 	
 	using namespace wasp::ecs;
@@ -173,9 +171,13 @@ namespace process::game::systems {
 		addNativeFunction("chance", std::bind(&ScriptSystem::chance, this, _1));
 		
 		//scene signaling
+		addNativeFunction("clearBullets", std::bind(&ScriptSystem::clearBullets, this, _1));
 		addNativeFunction("showDialogue", std::bind(&ScriptSystem::showDialogue, this, _1));
 		addNativeFunction("win", std::bind(&ScriptSystem::win, this, _1));
 		addNativeFunction("endStage", std::bind(&ScriptSystem::endStage, this, _1));
+		
+		//spawning
+		addNativeFunction("spawn", std::bind(&ScriptSystem::spawn, this, _1));
 		
 		//load function scripts, which are files that start with keyword func
 		darkness::Lexer lexer{};
@@ -333,7 +335,7 @@ namespace process::game::systems {
 		for( auto itr { scriptList.begin() }; itr != scriptList.end(); ) {
 			auto& scriptContainer { *itr };
 			//if the script is a spawn, remove it
-			if(containsSpawnString(scriptContainer.name)){
+			if(ScriptList::containsSpawnString(scriptContainer.name)){
 				itr = scriptList.erase(itr);
 			}
 			else{
@@ -674,7 +676,7 @@ namespace process::game::systems {
 		//since this is the script system, the entity obviously has a script list
 		const auto& scriptList{ getComponent<ScriptList>(entityHandle) };
 		for(const auto& scriptContainer : scriptList){
-			if(containsSpawnString(scriptContainer.name)){
+			if(ScriptList::containsSpawnString(scriptContainer.name)){
 				return true;
 			}
 		}
@@ -768,7 +770,7 @@ namespace process::game::systems {
 		const auto& scriptPointer{ scriptStoragePointer->get(convertToWideString(spawnID)) };
 		scriptsToAddToCurrentEntity.push_back({
 				scriptPointer,
-				std::string { spawnString } + "_" + spawnID
+				std::string { ScriptList::spawnString } + " " + spawnID
 		});
 		return false;
 	}
@@ -1352,6 +1354,13 @@ namespace process::game::systems {
 		return false;
 	}
 	
+	ScriptSystem::DataType ScriptSystem::clearBullets(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(0, parameters, "clearBullets");
+		currentScenePointer->getChannel(SceneTopics::clearFlag).addMessage();
+		return false;
+	}
+	
+	
 	/**
 	 * string dialogueID
 	 */
@@ -1457,6 +1466,13 @@ namespace process::game::systems {
 				L"01"
 			);
 		}
+		return false;
+	}
+	
+	//string prototypeID, Point pos, PolarVector vel, string scriptID, int depth
+	ScriptSystem::DataType ScriptSystem::spawn(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(5, parameters, "spawn");
+		//todo: how to actually spawn shit
 		return false;
 	}
 }

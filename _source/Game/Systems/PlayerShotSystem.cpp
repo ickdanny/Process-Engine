@@ -38,21 +38,17 @@ namespace process::game::systems {
 		while (groupIterator.isValid()) {
 			auto [playerData, scriptList] = *groupIterator;
 
-			//check to see if the player already has a shot spawn program by
-			//checking each active spawn program's max tick
-			bool isPlayerAlreadyShooting{ false };
+			//check to see if the player is already spawning
+			bool isPlayerSpawning{ false };
 			for (const auto& scriptContainer : scriptList) {
-				//todo: check for player shot program
-				/*
-				if (spawnProgram.getMaxTick() == config::playerShotMaxTick) {
-					isPlayerAlreadyShooting = true;
+				if (ScriptList::containsSpawnString(scriptContainer.name)) {
+					isPlayerSpawning = true;
 					break;
 				}
-				 */
 			}
 
-			//if there is no pre-existing shot program, add one
-			if (!isPlayerAlreadyShooting) {
+			//if there is no pre-existing spawn, add one
+			if (!isPlayerSpawning) {
 				//todo: player shot programs
 				/*
 				if (playerData.shotType == ShotType::shotA) {
