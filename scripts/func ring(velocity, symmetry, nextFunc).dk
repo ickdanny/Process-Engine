@@ -1,0 +1,7 @@
+#func ring(velocity, symmetry, nextFunc)
+
+let increment = 360.0 / symmetry;
+for(let i = 0; i < symmetry; i = i + 1){
+    nextFunc(velocity);
+    velocity = setTheta(velocity, getTheta(velocity) + increment);
+}

@@ -1,0 +1,9 @@
+#func initPickupSpeed()
+
+let initSpeedMulti = 0.7;
+let initSpeedBase = 1.5;
+
+let yCoord = entityY();
+let heightRatio = (yCoord - getY(gameOffset)) / gameHeight;
+let speedMulti = 1 + (heightRatio * initSpeedMulti);
+return initSpeedBase * speedMulti;

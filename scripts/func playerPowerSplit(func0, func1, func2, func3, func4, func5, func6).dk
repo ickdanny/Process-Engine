@@ -1,0 +1,34 @@
+#func playerPowerSplit(func0, func1, func2, func3, func4, func5, func6)
+
+let power = playerPower();
+if(power < 48){
+    if(power < 16){
+        if(power < 8){
+            func1();        # 0 - 7
+        }
+        else{
+            func2();        # 8 - 15
+        }
+    }
+    else{
+        if(power < 32){
+            func3();        # 16-31
+        }
+        else{
+            func4();        # 32-47
+        }
+    }
+}
+else{
+    if(power < 64){
+        func4();            # 48-63
+    }
+    else{
+        if(power < 80){
+            func5();        # 64-79
+        }
+        else{
+            func6();        # 80
+        }
+    }
+}

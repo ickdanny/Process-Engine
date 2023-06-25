@@ -51,9 +51,6 @@ namespace process::game::config {
 	constexpr int playerShotMaxTick{ 40 };
 	
 	//pickups
-	constexpr float pickupInitSpeedBase{ 1.5f };
-	constexpr float pickupInitSpeedMulti{ .7f };
-	
 	constexpr float pickupFinalSpeed{ -1.7f };
 	
 	constexpr float smallPickupHitbox{ 8.0f };

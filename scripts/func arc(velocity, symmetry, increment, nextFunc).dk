@@ -1,0 +1,7 @@
+#func(velocity, symmetry, increment, nextFunc)
+
+velocity = setTheta(velocity, getTheta(velocity) - ((symmetry - 1) * increment / 2.0));
+for(let i = 0; i < symmetry; i = i + 1){
+    nextFunc(velocity);
+    velocity = setTheta(velocity, getTheta(velocity) + increment);
+}

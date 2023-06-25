@@ -1,0 +1,6 @@
+#column(velocity, count, increment, nextFunc)
+
+for(let i = 0; i < count; i = i + 1){
+    nextFunc(velocity);
+    velocity = setR(velocity, getR(velocity) + increment);
+}

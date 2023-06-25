@@ -49,6 +49,9 @@ namespace process::game::systems {
 		//add native vars
 		addNativeVariable("angleEquivalenceEpsilon", 0.05f);
 		addNativeVariable("pointEquivalenceEpsilon", 0.5f);
+		addNativeVariable("gameOffset", config::gameOffset);
+		addNativeVariable("gameWidth", config::gameWidth);
+		addNativeVariable("gameHeight", config::gameHeight);
 		
 		//add native functions
 		
@@ -64,11 +67,37 @@ namespace process::game::systems {
 		addNativeFunction("stall", std::bind(&ScriptSystem::stall, this, _1));
 		addNativeFunction("stallUntil", stallUntil);
 		
-		//condition queries
-		addNativeFunction("isSpawning", std::bind(&ScriptSystem::isSpawning, this, _1));
+		//general queries
 		addNativeFunction("isBossDead", std::bind(&ScriptSystem::isBossDead, this, _1));
 		addNativeFunction("isDialogueOver", std::bind(&ScriptSystem::isDialogueOver, this, _1));
 		addNativeFunction("isWin", std::bind(&ScriptSystem::isWin, this, _1));
+		addNativeFunction("getDifficulty", std::bind(&ScriptSystem::getDifficulty, this, _1));
+		
+		//entity graphics
+		addNativeFunction("setVisible", std::bind(&ScriptSystem::setVisible, this, _1));
+		addNativeFunction("removeVisible",
+			std::bind(&ScriptSystem::removeComponent<VisibleMarker>, this, "removeVisible", _1)
+		);
+		addNativeFunction("setSpriteInstruction",
+			std::bind(&ScriptSystem::setSpriteInstruction, this, _1)
+		);
+		addNativeFunction("setDepth", std::bind(&ScriptSystem::setDepth, this, _1));
+		
+		//entity queries
+		addNativeFunction("angleToPlayer", std::bind(&ScriptSystem::angleToPlayer, this, _1));
+		addNativeFunction("entityPosition",
+			std::bind(&ScriptSystem::entityPosition, this, _1)
+		);
+		addNativeFunction("entityX", std::bind(&ScriptSystem::entityX, this, _1));
+		addNativeFunction("entityY", std::bind(&ScriptSystem::entityY, this, _1));
+		addNativeFunction("entityVelocity",
+			std::bind(&ScriptSystem::entityVelocity, this, _1)
+		);
+		addNativeFunction("entitySpeed", std::bind(&ScriptSystem::entitySpeed, this, _1));
+		addNativeFunction("entityAngle", std::bind(&ScriptSystem::entityAngle, this, _1));
+		addNativeFunction("isSpawning", std::bind(&ScriptSystem::isSpawning, this, _1));
+		addNativeFunction("playerPower", std::bind(&ScriptSystem::playerPower, this, _1));
+		addNativeFunction("isFocused", std::bind(&ScriptSystem::isFocused, this, _1));
 		addNativeFunction("isXAbove",
 			std::bind(&ScriptSystem::checkCoordinate<true, true>, this, _1)
 		);
@@ -81,16 +110,6 @@ namespace process::game::systems {
 		addNativeFunction("isYBelow",
 			std::bind(&ScriptSystem::checkCoordinate<false, false>, this, _1)
 		);
-		
-		//entity graphics
-		addNativeFunction("setVisible", std::bind(&ScriptSystem::setVisible, this, _1));
-		addNativeFunction("removeVisible",
-			std::bind(&ScriptSystem::removeComponent<VisibleMarker>, this, "removeVisible", _1)
-		);
-		addNativeFunction("setSpriteInstruction",
-			std::bind(&ScriptSystem::setSpriteInstruction, this, _1)
-		);
-		addNativeFunction("setDepth", std::bind(&ScriptSystem::setDepth, this, _1));
 		
 		//entity mutators
 		addNativeFunction("setCollidable", std::bind(&ScriptSystem::setCollidable, this, _1));
@@ -138,6 +157,10 @@ namespace process::game::systems {
 		addNativeFunction("getY", getY);
 		addNativeFunction("getR", getR);
 		addNativeFunction("getTheta", getTheta);
+		addNativeFunction("setX", setX);
+		addNativeFunction("setY", setY);
+		addNativeFunction("setR", setR);
+		addNativeFunction("setTheta", setTheta);
 		addNativeFunction("pow", exponent);
 		addNativeFunction("min", min);
 		addNativeFunction("max", max);
@@ -147,12 +170,7 @@ namespace process::game::systems {
 		addNativeFunction("pointDist", pointDistance);
 		addNativeFunction("pointAngle", pointAngle);
 		addNativeFunction("random", std::bind(&ScriptSystem::random, this, _1));
-		
-		//entity queries
-		addNativeFunction("angleToPlayer", std::bind(&ScriptSystem::angleToPlayer, this, _1));
-		addNativeFunction("entityPos", std::bind(&ScriptSystem::entityPosition, this, _1));
-		addNativeFunction("entitySpeed", std::bind(&ScriptSystem::entitySpeed, this, _1));
-		addNativeFunction("entityAngle", std::bind(&ScriptSystem::entityAngle, this, _1));
+		addNativeFunction("chance", std::bind(&ScriptSystem::chance, this, _1));
 		
 		//scene signaling
 		addNativeFunction("showDialogue", std::bind(&ScriptSystem::showDialogue, this, _1));
@@ -471,8 +489,24 @@ namespace process::game::systems {
 					break;
 				case functionIndex:
 					throw std::runtime_error{ "native func print cannot print a function" };
-				default:
-					throw std::runtime_error{ "native func print bad type" };
+				default:{
+					if(std::holds_alternative<Point2>(data)){
+						const Point2& point2{ std::get<Point2>(data) };
+						wasp::debug::log(static_cast<std::string>(point2));
+					}
+					else if(std::holds_alternative<Vector2>(data)){
+						const Vector2& vector2{ std::get<Vector2>(data) };
+						wasp::debug::log(static_cast<std::string>(vector2));
+					}
+					else if(std::holds_alternative<PolarVector>(data)){
+						const PolarVector& polarVector{ std::get<PolarVector>(data) };
+						wasp::debug::log("P(" + std::to_string(polarVector.getMagnitude()) + ", "
+							+ std::to_string(polarVector.getAngle()) + ")");
+					}
+					else{
+						throw std::runtime_error{ "native func print bad type" };
+					}
+				}
 			}
 		}
 		return false;
@@ -683,6 +717,15 @@ namespace process::game::systems {
 			return true;
 		}
 		return false;
+	}
+	
+	ScriptSystem::DataType ScriptSystem::getDifficulty(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(0, parameters, "getDifficulty");
+		auto& gameStateChannel{ globalChannelSetPointer->getChannel(GlobalTopics::gameState) };
+		if(gameStateChannel.isEmpty()){
+			throw std::runtime_error{ "native func getDifficulty game state channel empty!" };
+		}
+		return static_cast<int>(gameStateChannel.getMessages()[0].difficulty);
 	}
 	
 	ScriptSystem::DataType ScriptSystem::setCollidable(
@@ -898,6 +941,46 @@ namespace process::game::systems {
 	}
 	
 	/**
+	 * Vector2 vector, float x
+	 */
+	ScriptSystem::DataType ScriptSystem::setX(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(2, parameters, "setX");
+		const Vector2& vector{ std::get<Vector2>(parameters[0]) };
+		float x{ std::get<float>(parameters[1]) };
+		return Vector2{ x, vector.y };
+	}
+	
+	/**
+	 * Vector2 vector, float y
+	 */
+	ScriptSystem::DataType ScriptSystem::setY(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(2, parameters, "setY");
+		const Vector2& vector{ std::get<Vector2>(parameters[0]) };
+		float y{ std::get<float>(parameters[1]) };
+		return Vector2{ vector.x, y };
+	}
+	
+	/**
+	 * PolarVector vector, float r
+	 */
+	ScriptSystem::DataType ScriptSystem::setR(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(2, parameters, "setR");
+		const PolarVector& vector{ std::get<PolarVector>(parameters[0]) };
+		float r{ std::get<float>(parameters[1]) };
+		return PolarVector{ r, vector.getAngle() };
+	}
+	
+	/**
+	 * PolarVector vector, float theta
+	 */
+	ScriptSystem::DataType ScriptSystem::setTheta(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(2, parameters, "setTheta");
+		const PolarVector& vector{ std::get<PolarVector>(parameters[0]) };
+		float theta{ std::get<float>(parameters[1]) };
+		return PolarVector{ vector.getMagnitude(), theta };
+	}
+	
+	/**
 	 * float base, float exponent
 	 */
 	ScriptSystem::DataType ScriptSystem::exponent(const std::vector<DataType>& parameters){
@@ -986,6 +1069,7 @@ namespace process::game::systems {
 	ScriptSystem::DataType ScriptSystem::angleToPlayer(
 		const std::vector<DataType>& parameters
 	) {
+		throwIfNativeFunctionWrongArity(0, parameters, "angleToPlayer");
 		Point2 pos{
 			currentScenePointer->getDataStorage().getComponent<Position>(currentEntityID)
 		};
@@ -1016,9 +1100,22 @@ namespace process::game::systems {
 	ScriptSystem::DataType ScriptSystem::entityPosition(
 		const std::vector<DataType>& parameters)
 	{
+		throwIfNativeFunctionWrongArity(0, parameters, "entityPosition");
 		return Point2{
 			currentScenePointer->getDataStorage().getComponent<Position>(currentEntityID)
 		};
+	}
+	
+	ScriptSystem::DataType ScriptSystem::entityX(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(0, parameters, "entityX");
+		return currentScenePointer->getDataStorage()
+			.getComponent<Position>(currentEntityID).x;
+	}
+	
+	ScriptSystem::DataType ScriptSystem::entityY(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(0, parameters, "entityY");
+		return currentScenePointer->getDataStorage()
+			.getComponent<Position>(currentEntityID).y;
 	}
 	
 	/**
@@ -1026,11 +1123,11 @@ namespace process::game::systems {
 	 */
 	ScriptSystem::DataType ScriptSystem::random(const std::vector<DataType>& parameters) {
 		throwIfNativeFunctionWrongArity(2, parameters, "random");
-		const auto& randomChannel{ currentScenePointer->getChannel(SceneTopics::random) };
+		auto& randomChannel{ currentScenePointer->getChannel(SceneTopics::random) };
 		if(randomChannel.isEmpty()){
 			throw std::runtime_error{ "native func random no prng in scene!" };
 		}
-		auto& prng{ currentScenePointer->getChannel(SceneTopics::random).getMessages()[0] };
+		auto& prng{ randomChannel.getMessages()[0] };
 		const DataType& minData{ parameters[0] };
 		const DataType& maxData{ parameters[1] };
 		switch(minData.index()){
@@ -1047,7 +1144,6 @@ namespace process::game::systems {
 					default:
 						throw std::runtime_error{ "native func random bad type second arg!" };
 				}
-				
 			}
 			case intIndex: {
 				int min{ std::get<int>(minData) };
@@ -1067,6 +1163,21 @@ namespace process::game::systems {
 			default:
 				throw std::runtime_error{ "native func random bad type first arg!" };
 		}
+	}
+	
+	/**
+	 * float percentChance
+	 */
+	ScriptSystem::DataType ScriptSystem::chance(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(1, parameters, "chance");
+		float percentChance{ std::get<float>(parameters[0]) };
+		auto& randomChannel{ currentScenePointer->getChannel(SceneTopics::random) };
+		if(randomChannel.isEmpty()){
+			throw std::runtime_error{ "native func chance no prng in scene!" };
+		}
+		auto& prng{ randomChannel.getMessages()[0] };
+		static std::uniform_real_distribution<float> distribution{ 0.0f, 1.0f };
+		return distribution(prng) < percentChance;
 	}
 	
 	/**
@@ -1091,6 +1202,16 @@ namespace process::game::systems {
 		return false;
 	}
 	
+	ScriptSystem::DataType ScriptSystem::entityVelocity(
+		const std::vector<DataType>& parameters
+	) {
+		throwIfNativeFunctionWrongArity(0, parameters, "entityVelocity");
+		Velocity& velocity{
+			currentScenePointer->getDataStorage().getComponent<Velocity>(currentEntityID)
+		};
+		return PolarVector{ velocity };
+	}
+	
 	ScriptSystem::DataType ScriptSystem::entitySpeed(const std::vector<DataType>& parameters) {
 		throwIfNativeFunctionWrongArity(0, parameters, "entitySpeed");
 		Velocity& velocity{
@@ -1105,6 +1226,27 @@ namespace process::game::systems {
 			currentScenePointer->getDataStorage().getComponent<Velocity>(currentEntityID)
 		};
 		return static_cast<float>(velocity.getAngle());
+	}
+	
+	ScriptSystem::DataType ScriptSystem::playerPower(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(0, parameters, "playerPower");
+		const PlayerData& playerData{
+			currentScenePointer->getDataStorage().getComponent<PlayerData>(currentEntityID)
+		};
+		return playerData.power;
+	}
+	
+	ScriptSystem::DataType ScriptSystem::isFocused(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(0, parameters, "isFocused");
+		const auto& gameCommandChannel{
+			currentScenePointer->getChannel(SceneTopics::gameCommands)
+		};
+		for (GameCommands gameCommand : gameCommandChannel.getMessages()) {
+			if (gameCommand == GameCommands::focus) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/**

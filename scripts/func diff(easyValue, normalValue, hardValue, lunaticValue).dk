@@ -1,0 +1,19 @@
+#func diff(easyValue, normalValue, hardValue, lunaticValue)
+
+let difficulty = getDifficulty();
+if(difficulty <= 1){
+    if(difficulty == 0){
+        return easyValue;
+    }
+    else{
+        return normalValue;
+    }
+}
+else{
+    if(difficulty == 2){
+        return hardValue;
+    }
+    else{
+        return lunaticValue;
+    }
+}

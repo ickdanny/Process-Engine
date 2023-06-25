@@ -89,16 +89,28 @@ namespace process::game::systems {
 		DataType stall(const std::vector<DataType>& parameters);
 		static DataType stallUntil(const std::vector<DataType>& parameters);
 		
-		//condition queries
-		DataType isSpawning(const std::vector<DataType>& parameters);
+		//general queries
 		DataType isBossDead(const std::vector<DataType>& parameters);
 		DataType isDialogueOver(const std::vector<DataType>& parameters);
 		DataType isWin(const std::vector<DataType>& parameters);
+		DataType getDifficulty(const std::vector<DataType>& parameters);
 		
 		//entity graphics
 		DataType setVisible(const std::vector<DataType>& parameters);
 		DataType setSpriteInstruction(const std::vector<DataType>& parameters);
 		DataType setDepth(const std::vector<DataType>& parameters);
+		
+		//entity queries
+		DataType angleToPlayer(const std::vector<DataType>& parameters);
+		DataType entityPosition(const std::vector<DataType>& parameters);
+		DataType entityX(const std::vector<DataType>& parameters);
+		DataType entityY(const std::vector<DataType>& parameters);
+		DataType entityVelocity(const std::vector<DataType>& parameters);
+		DataType entitySpeed(const std::vector<DataType>& parameters);
+		DataType entityAngle(const std::vector<DataType>& parameters);
+		DataType isSpawning(const std::vector<DataType>& parameters);
+		DataType playerPower(const std::vector<DataType>& parameters);
+		DataType isFocused(const std::vector<DataType>& parameters);
 		
 		//entity mutators
 		DataType setCollidable(const std::vector<DataType>& parameters);
@@ -126,6 +138,10 @@ namespace process::game::systems {
 		static DataType getY(const std::vector<DataType>& parameters);
 		static DataType getR(const std::vector<DataType>& parameters);
 		static DataType getTheta(const std::vector<DataType>& parameters);
+		static DataType setX(const std::vector<DataType>& parameters);
+		static DataType setY(const std::vector<DataType>& parameters);
+		static DataType setR(const std::vector<DataType>& parameters);
+		static DataType setTheta(const std::vector<DataType>& parameters);
 		static DataType exponent(const std::vector<DataType>& parameters);
 		static DataType min(const std::vector<DataType>& parameters);
 		static DataType max(const std::vector<DataType>& parameters);
@@ -135,17 +151,14 @@ namespace process::game::systems {
 		static DataType pointDistance(const std::vector<DataType>& parameters);
 		static DataType pointAngle(const std::vector<DataType>& parameters);
 		DataType random(const std::vector<DataType>& parameters);
-		
-		//entity queries
-		DataType angleToPlayer(const std::vector<DataType>& parameters);
-		DataType entityPosition(const std::vector<DataType>& parameters);
-		DataType entitySpeed(const std::vector<DataType>& parameters);
-		DataType entityAngle(const std::vector<DataType>& parameters);
+		DataType chance(const std::vector<DataType>& parameters);
 		
 		//scene signaling
 		DataType showDialogue(const std::vector<DataType>& parameters);
 		DataType win(const std::vector<DataType>& parameters);
 		DataType endStage(const std::vector<DataType>& parameters);
+		
+		//todo: spawn via prototypes
 		
 		template <typename T>
 		DataType removeComponent(

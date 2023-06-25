@@ -1,0 +1,7 @@
+#func mirror(position, velocity, axis, nextFunc)
+
+let mirrorPosition = makePoint(-getX(position) + (2.0 * axis), getY(position));
+let mirrorVelocity = makePolar(getR(velocity), 180.0 - getTheta(velocity));
+
+nextFunc(position, velocity);
+nextFunc(mirrorPosition, mirrorVelocity);
