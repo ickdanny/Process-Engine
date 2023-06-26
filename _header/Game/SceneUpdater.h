@@ -43,12 +43,7 @@ namespace process::game {
 
 	class SceneUpdater {
 	private:
-		
-		//fields
-		//todo: do we need a prototypes struct?
-		//systems::Programs programs;								//not initialized!
-
-		//systems
+		//fields (systems)
 		systems::InitSystem initSystem;							//not initialized!
 		systems::MiscellaneousSystem miscellaneousSystem;
 		systems::InputParserSystem inputParserSystem;			//not initialized!
@@ -70,7 +65,7 @@ namespace process::game {
 		systems::ContinueSystem continueSystem;					//not initialized!
 		systems::PlayerRespawnSystem playerRespawnSystem{};
 		systems::PlayerReactivateSystem playerReactivateSystem{};
-		systems::DeathHandlerSystem deathHandlerSystem{};
+		systems::DeathHandlerSystem deathHandlerSystem;
 		systems::OverlaySystem overlaySystem;					//not initialized!
 		systems::PauseSystem pauseSystem;						//not initialized!
 		systems::AnimationSystem animationSystem;				//not initialized!

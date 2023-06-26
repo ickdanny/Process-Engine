@@ -9,12 +9,21 @@ namespace process::game::systems{
 		constexpr float outbound{ -21.0f };
 	}
 	
-	Prototypes::Prototypes(){
-		EntityBuilder entityBuilder{};
-		//todo: create prototypes
+	using AABB = wasp::math::AABB;
+	
+	Prototypes::Prototypes(resources::SpriteStorage& spriteStorage){
+		add("test", EntityBuilder::makeVisibleCollidablePrototype(
+			AABB{ 0.0f },
+			SpriteInstruction{
+				spriteStorage.get(L"life")->sprite,
+				config::playerDepth
+			}
+		).heapClone());
 	}
 	
-	Prototypes::ComponentTupleSharedPointer Prototypes::get(const std::string& prototypeID){
+	Prototypes::ComponentTupleSharedPointer Prototypes::get(
+		const std::string& prototypeID
+	) const{
 		const auto& found{ prototypeMap.find(prototypeID) };
 		if(found != prototypeMap.end()){
 			return found->second;

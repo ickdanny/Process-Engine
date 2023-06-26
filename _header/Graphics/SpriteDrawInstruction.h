@@ -40,13 +40,13 @@ namespace process::graphics {
 	public:
 		//constructor
 		explicit SpriteDrawInstruction(
-			const Sprite& sprite,
+			Sprite sprite,
 			int depth,
 			const Vector2& offset = {},
 			Angle rotation = { defaultRotation },
 			float scale = defaultScale
 		)
-			: sprite{ sprite }
+			: sprite{ std::move( sprite ) }
 			, depth{ depth }
 			, offset{ offset }
 			, rotation{ rotation }

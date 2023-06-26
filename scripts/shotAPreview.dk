@@ -1,0 +1,9 @@
+print("TO DO shot A preview");
+
+let position = entityPosition();
+let velocity = makePolar(1.0, 90.0);
+while(true){
+    print("test spawning");
+    spawn("test", position, velocity);
+    timer(30);
+}

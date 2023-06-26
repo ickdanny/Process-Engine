@@ -73,6 +73,7 @@ namespace process::game::systems {
 				break;
 			case PickupType::Types::powerSmall:
 			case PickupType::Types::powerLarge:
+				//if the player is at max power, do nothing
 				if (playerData.power < config::maxPower) {
 					int powerGain{
 						pickupType == PickupType::Types::powerSmall
@@ -80,25 +81,10 @@ namespace process::game::systems {
 							: config::largePowerGain
 					};
 					playerData.power += powerGain;
+					//if player has reached max power, cap the power and clear
 					if (playerData.power >= config::maxPower) {
 						playerData.power = config::maxPower;
-
-						//max power clear by adding death spawn to the pickup
-						//ideally should refactor into some sort of message but whatever
-						
-						//todo: collision death spawn
-						/*
-						dataStorage.addComponent<DeathCommand>({
-							pickupHandle,
-							{ DeathCommand::Commands::deathSpawn }
-						});
-						dataStorage.addComponent<DeathSpawn>({
-							pickupHandle,
-							{ SpawnProgramList{ 
-								programsPointer->pickupPrograms.maxPowerClearSpawnProgram
-							}}
-						});
-						 */
+						scene.getChannel(SceneTopics::clearFlag).addMessage();
 					}
 				}
 		}

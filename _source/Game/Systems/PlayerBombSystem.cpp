@@ -37,22 +37,21 @@ namespace process::game::systems {
 		auto& scriptList{
 			dataStorage.getComponent<ScriptList>(playerHandle)
 		};
-		//todo:: player bomb programs
-		/*
 		if (playerData.shotType == ShotType::shotA) {
-			spawnProgramList.push_back(
-				{ programsPointer->playerPrograms.bombASpawnProgram }
-			);
+			scriptList.push_back({
+				scriptStoragePointer->get(L"bombA"),
+				"bombA"		//don't mark as a spawn script since shot system uses that
+			});
 		}
 		else if (playerData.shotType == ShotType::shotB) {
-			spawnProgramList.push_back(
-				{ programsPointer->playerPrograms.bombBSpawnProgram }
-			);
+			scriptList.push_back({
+				scriptStoragePointer->get(L"bombB"),
+				"bombB"		//don't mark as a spawn script since shot system uses that
+			});
 		}
 		else {
 			throw std::runtime_error("unexpected player shot type!");
 		}
-		 */
 		--playerData.bombs;
 	}
 }

@@ -25,8 +25,7 @@ namespace process::game::systems {
 	) {
 		//reactivate player by adding a spawn program list and pickup collision
 		auto& dataStorage{ scene.getDataStorage() };
-		//todo: reactivate player spawning
-		//dataStorage.addComponent<SpawnProgramList>({ playerHandle, {} });
+		dataStorage.addComponent<ScriptList>({ playerHandle, {} });
 		dataStorage.addComponent<PickupCollisions::Target>({ playerHandle, {} });
 	}
 }

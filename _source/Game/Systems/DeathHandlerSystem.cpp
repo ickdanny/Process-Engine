@@ -1,7 +1,6 @@
 #include "Game/Systems/DeathHandlerSystem.h"
 
 #include "Game/Systems/EntityBuilder.h"
-//#include "Game/Systems/Programs/ScriptProgramUtil.h"
 
 #include "Logging.h"
 
@@ -30,16 +29,11 @@ namespace process::game::systems {
 		}
 	}
 
-	DeathHandlerSystem::DeathHandlerSystem()
+	DeathHandlerSystem::DeathHandlerSystem(resources::ScriptStorage& scriptStorage)
 		: ghostScriptContainer{
-			//todo: death handler system ghost program
-			/*
-			ScriptProgramUtil::makeStallingIfNode(
-				std::make_shared<ScriptNode>(ScriptInstructions::isNotSpawning),
-				std::make_shared<ScriptNode>(ScriptInstructions::removeEntity)
-			)
-			 */
-		} 
+			scriptStorage.get(L"ghostSpawner"),
+			"ghostSpawner"
+		}
 	{
 	}
 
@@ -94,8 +88,7 @@ namespace process::game::systems {
 		auto& dataStorage{ scene.getDataStorage() };
 
 		//remove spawn component and pickup collision
-		//todo: need to remove player's specific spawn program
-		//dataStorage.removeComponent<SpawnProgramList>(playerHandle);
+		dataStorage.removeComponent<ScriptList>(playerHandle);
 		dataStorage.removeComponent<PickupCollisions::Target>(playerHandle);
 
 		//spawn blocker + pickups

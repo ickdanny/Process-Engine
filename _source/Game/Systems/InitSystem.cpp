@@ -274,11 +274,10 @@ namespace process::game::systems {
 					config::playerDepth,
 					wasp::math::Vector2{ 0.0f, 4.0f }			//offset
 				},
-				ScriptList{
-					/*
-					shot a preview program
-					 */
-				},
+				ScriptList{ {
+					scriptStoragePointer->get(L"shotAPreview"),
+					std::string{ ScriptList::spawnString } + " shotAPreview"
+				} },
 				AnimationList{ 
 					components::Animation{ {
 						L"p_idle_1", L"p_idle_2", L"p_idle_3", L"p_idle_4"
@@ -297,11 +296,10 @@ namespace process::game::systems {
 					wasp::math::Vector2{ 0.0f, 4.0f }			//offset
 				},
 				ScriptList{
-					/*
-					components::SpawnProgram{ 
-						programsPointer->playerPrograms.shotBPreviewProgram
-					}
-					 */
+					ScriptList{ {
+						scriptStoragePointer->get(L"shotBPreview"),
+						std::string{ ScriptList::spawnString } + " shotBPreview"
+					} },
 				},
 				AnimationList{ 
 					components::Animation{ {
@@ -679,7 +677,10 @@ namespace process::game::systems {
 				PickupCollisions::Target{},
 				DeathCommand{ DeathCommand::Commands::playerDeath },
 				ScriptList{},
-				DeathSpawn{ /*{ programsPointer->playerPrograms.deathSpawnProgram }*/ }, //todo
+				DeathSpawn{ ScriptList{ {
+					scriptStoragePointer->get(L"playerDeathSpawn"),
+					"playerDeathSpawn"
+				} } },
 				AnimationList{ 
 					{
 						components::Animation{ {
@@ -717,34 +718,31 @@ namespace process::game::systems {
 		);
 
 		//adding the spawner
-		components::ScriptContainer scriptContainer;//uninitialized
+		ScriptList::value_type stageScriptContainer;//uninitialized
 		
-		//todo: add spawner script
-		/*
 		switch (gameState.stage) {
 			case 1:
-				scriptProgramPointer = &programsPointer->enemyPrograms.stage1ScriptProgram;
+				stageScriptContainer = { scriptStoragePointer->get(L"stage1"), "stage1" };
 				break;
 			case 2:
-				scriptProgramPointer = &programsPointer->enemyPrograms.stage2ScriptProgram;
+				stageScriptContainer = { scriptStoragePointer->get(L"stage2"), "stage2" };
 				break;
 			case 3:
-				scriptProgramPointer = &programsPointer->enemyPrograms.stage3ScriptProgram;
+				stageScriptContainer = { scriptStoragePointer->get(L"stage3"), "stage3" };
 				break;
 			case 4:
-				scriptProgramPointer = &programsPointer->enemyPrograms.stage4ScriptProgram;
+				stageScriptContainer = { scriptStoragePointer->get(L"stage4"), "stage4" };
 				break;
 			case 5:
-				scriptProgramPointer = &programsPointer->enemyPrograms.stage5ScriptProgram;
+				stageScriptContainer = { scriptStoragePointer->get(L"stage5"), "stage5" };
 				break;
 			default:
-				throw std::runtime_error{ "no stage script!" };
+				throw std::runtime_error{ "bad stage!" };
 		}
-		 */
 
 		dataStorage.addEntity(
 			EntityBuilder::makeEntity(
-				ScriptList{ /*scriptContainer*/ }
+				ScriptList{ stageScriptContainer }
 			).package()
 		);
 

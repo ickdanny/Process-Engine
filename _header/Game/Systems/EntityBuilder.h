@@ -27,6 +27,9 @@ namespace process::game::systems {
 		using EntityHandle = wasp::ecs::entity::EntityHandle;
 
 	public:
+		//virtual destructor
+		virtual ~ComponentTupleBase() = default;
+		
 		//Adds the entity represented by this object to the given data storage.
 		virtual EntityHandle addTo(wasp::ecs::DataStorage& dataStorage) const = 0;
 
@@ -53,6 +56,7 @@ namespace process::game::systems {
 	//ComponentTuple struct
 	template <typename... Ts>
 	struct ComponentTuple : public std::tuple<Ts...>, ComponentTupleBase {
+		//constructors
 		ComponentTuple(const Ts&... args)
 			: std::tuple<Ts...>{ args... } {
 		}
@@ -60,6 +64,9 @@ namespace process::game::systems {
 		ComponentTuple(std::tuple<Ts...> tuple)
 			: std::tuple<Ts...>(tuple) {
 		}
+		
+		//override base virtual destructor
+		~ComponentTuple() override = default;
 
 		//conversion to AddEntityOrder
 		[[nodiscard]]
@@ -68,7 +75,9 @@ namespace process::game::systems {
 		}
 
 		//override base functions
-		wasp::ecs::entity::EntityHandle addTo(wasp::ecs::DataStorage& dataStorage) const override {
+		wasp::ecs::entity::EntityHandle addTo(
+			wasp::ecs::DataStorage& dataStorage
+		) const override {
 			return dataStorage.addEntity(package());
 		}
 

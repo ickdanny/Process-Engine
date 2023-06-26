@@ -3,9 +3,11 @@
 #include "systemInclude.h"
 
 #include "Game/Systems/ComponentOrderQueue.h"
+#include "SpawnQueue.h"
 #include "Interpreter.h"
 #include "ScriptStorage.h"
 #include "SpriteStorage.h"
+#include "Prototypes.h"
 
 namespace process::game::systems {
 
@@ -29,12 +31,15 @@ namespace process::game::systems {
 		wasp::channel::ChannelSet* globalChannelSetPointer{};
 		resources::ScriptStorage* scriptStoragePointer{};
 		resources::SpriteStorage* spriteStoragePointer{};
+		Prototypes prototypes;	//not initialized
+		
 		Scene* currentScenePointer{};
 		EntityID currentEntityID{};
 		ScriptContainer* currentScriptContainerPointer{};
 		ScriptList scriptsToAddToCurrentEntity{};
 		bool clearSpawnsFlag{ false };
-		ComponentOrderQueue componentOrderQueue{};//cleared at end of every call
+		ComponentOrderQueue componentOrderQueue{};	//cleared at end of every call
+		SpawnQueue spawnQueue{};	//cleared at end of every call
 
 	public:
 		ScriptSystem(
@@ -109,6 +114,7 @@ namespace process::game::systems {
 		DataType entitySpeed(const std::vector<DataType>& parameters);
 		DataType entityAngle(const std::vector<DataType>& parameters);
 		DataType isSpawning(const std::vector<DataType>& parameters);
+		DataType isNotSpawning(const std::vector<DataType>& parameters);
 		DataType playerPower(const std::vector<DataType>& parameters);
 		DataType isFocused(const std::vector<DataType>& parameters);
 		
@@ -159,7 +165,7 @@ namespace process::game::systems {
 		DataType win(const std::vector<DataType>& parameters);
 		DataType endStage(const std::vector<DataType>& parameters);
 		
-		//todo: spawn via prototypes
+		//spawning
 		DataType spawn(const std::vector<DataType>& parameters);
 		
 		template <typename T>

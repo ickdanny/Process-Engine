@@ -26,8 +26,6 @@ namespace process::game::systems {
 			return converter.from_bytes(string);
 		}
 		#undef _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
-		
-		const Prototypes prototypes{};
 	}
 	
 	using namespace wasp::ecs;
@@ -42,7 +40,8 @@ namespace process::game::systems {
 	)
 		: globalChannelSetPointer { globalChannelSetPointer }
 		, scriptStoragePointer{ scriptStoragePointer }
-		, spriteStoragePointer{ spriteStoragePointer } {
+		, spriteStoragePointer{ spriteStoragePointer }
+		, prototypes{ *spriteStoragePointer } {
 		
 		//add native vars
 		addNativeVariable("angleEquivalenceEpsilon", 0.05f);
@@ -94,6 +93,9 @@ namespace process::game::systems {
 		addNativeFunction("entitySpeed", std::bind(&ScriptSystem::entitySpeed, this, _1));
 		addNativeFunction("entityAngle", std::bind(&ScriptSystem::entityAngle, this, _1));
 		addNativeFunction("isSpawning", std::bind(&ScriptSystem::isSpawning, this, _1));
+		addNativeFunction("isNotSpawning",
+			std::bind(&ScriptSystem::isNotSpawning, this, _1)
+		);
 		addNativeFunction("playerPower", std::bind(&ScriptSystem::playerPower, this, _1));
 		addNativeFunction("isFocused", std::bind(&ScriptSystem::isFocused, this, _1));
 		addNativeFunction("isXAbove",
@@ -244,12 +246,13 @@ namespace process::game::systems {
 				);
 			}
 			
-			
 			++groupIterator;
 		}
 		
-		//applyAndClear all our queued component orders to the ecs world
+		//apply all our queued component orders to the ecs world
 		componentOrderQueue.applyAndClear(scene.getDataStorage());
+		//spawn in all new entities into ecs world
+		spawnQueue.applyAndClear(scene.getDataStorage());
 		//unload current scene
 		currentScenePointer = nullptr;
 	}
@@ -566,7 +569,9 @@ namespace process::game::systems {
 			throw std::runtime_error{ "native func stallUntil received no params!" };
 		}
 		const DataType& paramData{ parameters.front() };
-		const NativeFunction& paramNativeFunction{ unwrapNativeFunctionFromData(paramData) };
+		const NativeFunction& paramNativeFunction{
+			unwrapNativeFunctionFromData(paramData) }
+		;
 		DataType paramReturn;
 		if(parameters.size() > 1) {
 			//pass all the rest of the parameters except the native function itself
@@ -670,7 +675,9 @@ namespace process::game::systems {
 		return false;
 	}
 	
-	ScriptSystem::DataType ScriptSystem::isSpawning(const std::vector<DataType>& parameters) {
+	ScriptSystem::DataType ScriptSystem::isSpawning(
+		const std::vector<DataType>& parameters
+	) {
 		throwIfNativeFunctionWrongArity(0, parameters, "isSpawning");
 		EntityHandle entityHandle{ makeCurrentEntityHandle() };
 		//since this is the script system, the entity obviously has a script list
@@ -681,6 +688,22 @@ namespace process::game::systems {
 			}
 		}
 		return false;
+	}
+	
+	//copying above to avoid wrapping and unwrapping a DataType
+	ScriptSystem::DataType ScriptSystem::isNotSpawning(
+		const std::vector<DataType>& parameters
+	){
+		throwIfNativeFunctionWrongArity(0, parameters, "isNotSpawning");
+		EntityHandle entityHandle{ makeCurrentEntityHandle() };
+		//since this is the script system, the entity obviously has a script list
+		const auto& scriptList{ getComponent<ScriptList>(entityHandle) };
+		for(const auto& scriptContainer : scriptList){
+			if(ScriptList::containsSpawnString(scriptContainer.name)){
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	ScriptSystem::DataType ScriptSystem::isBossDead(const std::vector<DataType>& parameters) {
@@ -1469,10 +1492,31 @@ namespace process::game::systems {
 		return false;
 	}
 	
-	//string prototypeID, Point pos, PolarVector vel, string scriptID, int depth
+	//string prototypeID, Point pos, PolarVector vel, OPTIONAL string scriptID
 	ScriptSystem::DataType ScriptSystem::spawn(const std::vector<DataType>& parameters) {
-		throwIfNativeFunctionWrongArity(5, parameters, "spawn");
-		//todo: how to actually spawn shit
+		throwIfNativeFunctionArityOutOfRange(3, 4, parameters, "spawn");
+		const std::string& prototypeID{ std::get<std::string>(parameters[0]) };
+		const auto& prototypePointer{ prototypes.get(prototypeID) };
+		
+		const Position& position{ std::get<Point2>(parameters[1]) };
+		const Velocity& velocity{ std::get<PolarVector>(parameters[2]) };
+		
+		if(parameters.size() == 3){
+			spawnQueue.queueSpawn(
+				prototypePointer->addPositionVelocity(position, velocity)
+			);
+		}
+		else {
+			const std::string& scriptID{ std::get<std::string>(parameters[3]) };
+			const auto& scriptPointer{
+				scriptStoragePointer->get(convertToWideString(scriptID))
+			};
+			ScriptList scriptList{ ScriptContainer{ scriptPointer, scriptID }};
+			spawnQueue.queueSpawn(
+				prototypePointer->addPositionVelocityScript(position, velocity, scriptList)
+			);
+		}
+		
 		return false;
 	}
 }

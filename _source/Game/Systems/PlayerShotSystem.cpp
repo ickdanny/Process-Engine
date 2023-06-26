@@ -49,22 +49,21 @@ namespace process::game::systems {
 
 			//if there is no pre-existing spawn, add one
 			if (!isPlayerSpawning) {
-				//todo: player shot programs
-				/*
 				if (playerData.shotType == ShotType::shotA) {
-					spawnProgramList.push_back(
-						{ programsPointer->playerPrograms.shotASpawnProgram }
-					);
+					scriptList.push_back({
+						scriptStoragePointer->get(L"shotA"),
+						std::string{ ScriptList::spawnString } + " shotA"
+					});
 				}
 				else if (playerData.shotType == ShotType::shotB) {
-					spawnProgramList.push_back(
-						{ programsPointer->playerPrograms.shotBSpawnProgram }
-					);
+					scriptList.push_back({
+						scriptStoragePointer->get(L"shotB"),
+						std::string{ ScriptList::spawnString } + " shotB"
+					});
 				}
 				else {
 					throw std::runtime_error("unexpected player shot type!");
 				}
-				 */
 			}
 			++groupIterator;
 		}

@@ -34,6 +34,7 @@ namespace process::game {
 		, playerShotSystem{ &(resourceMasterStoragePointer->scriptStorage) }
 		, playerBombSystem{ &(resourceMasterStoragePointer->scriptStorage) }
 		, continueSystem{ globalChannelSetPointer }
+		, deathHandlerSystem{ resourceMasterStoragePointer->scriptStorage }
 		, overlaySystem{ &(resourceMasterStoragePointer->spriteStorage) }
 		, pauseSystem{ globalChannelSetPointer }
 		, animationSystem{ &(resourceMasterStoragePointer->spriteStorage) }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Game/Systems/EntityBuilder.h"
+#include "SpriteStorage.h"
 
 namespace process::game::systems{
 
@@ -17,9 +18,9 @@ namespace process::game::systems{
 		//fields
 		std::unordered_map<std::string, ComponentTupleSharedPointer> prototypeMap{};
 	public:
-		Prototypes();
+		Prototypes(resources::SpriteStorage& spriteStorage);
 		
-		ComponentTupleSharedPointer get(const std::string& prototypeID);
+		ComponentTupleSharedPointer get(const std::string& prototypeID) const;
 		
 	private:
 		void add(

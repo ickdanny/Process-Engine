@@ -2,6 +2,8 @@
 
 #include "systemInclude.h"
 
+#include "ScriptStorage.h"
+
 namespace process::game::systems {
 
 	class DeathHandlerSystem {
@@ -14,7 +16,7 @@ namespace process::game::systems {
 		ScriptContainer ghostScriptContainer;//uninitialized
 
 	public:
-		DeathHandlerSystem();
+		DeathHandlerSystem(resources::ScriptStorage& scriptStorage);
 
 		void operator()(Scene& scene);
 
