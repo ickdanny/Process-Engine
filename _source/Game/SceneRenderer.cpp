@@ -2,9 +2,12 @@
 
 namespace process::game {
 
-	SceneRenderer::SceneRenderer(window::GraphicsWrapper* graphicsWrapperPointer)
+	SceneRenderer::SceneRenderer(
+		window::GraphicsWrapper* graphicsWrapperPointer,
+		resources::SpriteStorage& spriteStorage
+	)
 		: renderSystem{ graphicsWrapperPointer }
-		, textRenderSystem{ graphicsWrapperPointer }
+		, textRenderSystem{ graphicsWrapperPointer, spriteStorage }
 
 		#ifdef _DEBUG
 		, debugRenderSystem{ graphicsWrapperPointer }

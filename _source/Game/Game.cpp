@@ -17,7 +17,7 @@ namespace process::game {
 			keyInputTablePointer, 
 			&globalChannelSet 
 		}
-		, sceneRenderer{ graphicsWrapperPointer }
+		, sceneRenderer{ graphicsWrapperPointer, resourceMasterStoragePointer->spriteStorage }
 		, settingsPointer{ settingsPointer }
 		, resourceMasterStoragePointer{ resourceMasterStoragePointer }
 		, graphicsWrapperPointer{ graphicsWrapperPointer }

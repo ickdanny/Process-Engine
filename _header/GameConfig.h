@@ -96,5 +96,5 @@ namespace process::game::config {
 	constexpr int pickupDepth{ -3000 };
 	constexpr int playerDepth{ 0 };
 	constexpr int enemyBulletDepth{ 1000 };
-	constexpr int foregroundDepth{ 9000 };
+	constexpr int foregroundDepth{ 5000 };
 }

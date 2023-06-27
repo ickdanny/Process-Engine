@@ -512,6 +512,56 @@ namespace process::window {
 		setVertexBuffer();
 	}
 	
+	void GraphicsWrapper::drawText(
+		const Point2& pos,
+		const std::wstring& text,
+		int rightBound,
+		const graphics::SymbolMap<wchar_t>& symbolMap
+	){
+		if(text.empty()){
+			return;
+		}
+		const int startX{ static_cast<int>(pos.x) };
+		if(startX >= rightBound){
+			wasp::debug::log("trying to draw text but startX >= rightBound, doing nothing");
+			return;
+		}
+		int currentX{ startX };
+		int currentY{ static_cast<int>(pos.y) };
+		int horizontalSpacing = symbolMap.getHorizontalSpacing();
+		int verticalSpacing = symbolMap.getVerticalSpacing();
+		const auto stepCurrentCoordinates{ [&](){
+			currentX += horizontalSpacing;
+			if(currentX >= rightBound){
+				currentX = startX;
+				currentY += verticalSpacing;
+			}
+		}};
+		wchar_t currentChar;//uninitialized
+		Point2 currentPos{};
+		for(int stringPos{ 0 }; stringPos < text.length(); ++stringPos){
+			currentPos.x = static_cast<float>(currentX);
+			currentPos.y = static_cast<float>(currentY);
+			currentChar = text.at(stringPos);
+			switch(currentChar){
+				case L' ':	//space
+					stepCurrentCoordinates();
+					continue;
+				case L'\t':	//tab
+					stepCurrentCoordinates();
+					stepCurrentCoordinates();
+					stepCurrentCoordinates();
+					continue;
+				case L'\n':	//new line
+					currentX = startX;
+					currentY += verticalSpacing;
+				default:	//all other chars
+					stepCurrentCoordinates();
+					drawSprite(currentPos, symbolMap.get(currentChar));
+			}
+		}
+	}
+	
 	void GraphicsWrapper::updatePSTexture(const SpriteDrawInstruction& spriteDrawInstruction) {
 		contextPointer->PSSetShaderResources(
 			0u,

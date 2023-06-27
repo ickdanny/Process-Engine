@@ -1,12 +1,15 @@
 #pragma once
 
 #include "Graphics/ISpriteDrawer.h"
+#include "Graphics/ITextDrawer.h"
 
 #include "windowsInclude.h"
 #include "d3dInclude.h"
 
 namespace process::window {
-	class GraphicsWrapper : public graphics::ISpriteDrawer
+	class GraphicsWrapper
+		: public graphics::ISpriteDrawer
+		, public graphics::ITextDrawer<wchar_t>
 	{
 	private:
 		//typedefs
@@ -64,6 +67,13 @@ namespace process::window {
 			const Rectangle& drawRectangle,
 			const SpriteDrawInstruction& spriteDrawInstruction,
 			Point2 pixelOffset
+		) override;
+		
+		void drawText(
+			const Point2& pos,
+			const std::wstring& text,
+			int rightBound,
+			const graphics::SymbolMap<wchar_t>& symbolMap
 		) override;
 		
 		struct Vertex{

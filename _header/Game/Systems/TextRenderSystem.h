@@ -2,6 +2,7 @@
 
 #include "systemInclude.h"
 #include "Window/GraphicsWrapper.h"
+#include "SpriteStorage.h"
 
 namespace process::game::systems {
 
@@ -11,11 +12,16 @@ namespace process::game::systems {
 		using EntityID = wasp::ecs::entity::EntityID;
 
 		//fields
+		graphics::SymbolMap<wchar_t> symbolMap;
 		window::GraphicsWrapper* graphicsWrapperPointer{};
 
 	public:
-		TextRenderSystem(window::GraphicsWrapper* graphicsWrapperPointer)
-			: graphicsWrapperPointer{ graphicsWrapperPointer } {
+		TextRenderSystem(
+			window::GraphicsWrapper* graphicsWrapperPointer,
+			resources::SpriteStorage& spriteStorage
+		)
+			: graphicsWrapperPointer{ graphicsWrapperPointer }
+			, symbolMap{ loadSymbolMap(spriteStorage) } {
 		}
 
 		//beginDraw and endDraw are called in the RenderScheduler
@@ -26,6 +32,10 @@ namespace process::game::systems {
 		void drawText(
 			const Position& position,
 			const TextInstruction& textInstruction
+		);
+		
+		static graphics::SymbolMap<wchar_t> loadSymbolMap(
+			resources::SpriteStorage& spriteStorage
 		);
 	};
 }

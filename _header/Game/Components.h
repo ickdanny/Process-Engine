@@ -60,7 +60,7 @@ namespace process::game {
 	};
     struct TextInstruction {
         std::wstring text{};
-        std::pair<float, float> bounds{};
+        int rightBound{};
     };
 
     struct RotateSpriteForwardMarker {};

@@ -24,8 +24,10 @@ namespace process::game::resources {
 	{
 	private:
 		using TextureLoader = graphics::SpriteLoader;
+	public:
 		using ResourceType = resource::Resource<WicFrameAndSprite>;
 		using ResourceSharedPointer = std::shared_ptr<ResourceType>;
+	private:
 		using ResourceBase = wasp::resource::ResourceBase;
 		template <typename T>
 		using ComPtr = Microsoft::WRL::ComPtr<T>;

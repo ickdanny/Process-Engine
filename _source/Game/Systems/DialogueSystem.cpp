@@ -3,18 +3,13 @@
 namespace process::game::systems {
 
     namespace {
-        constexpr int charsPerLine{ 31 };
-        constexpr int cooldown{ 2 };
-
         constexpr float portraitY{ 170.0f };
         constexpr float leftX{ 45.0f };
         constexpr float rightX{ 270.0f };
 
         constexpr wasp::math::Point2 textPos{ 85.0f, 170.0f };
 
-        constexpr float imageOpacity{ 1.0f };
-
-        constexpr std::pair<float, float> textBounds{ 150.0f, 50.0f };
+        constexpr int textRightBound{ 150 };
     }
 
 	DialogueSystem::DialogueSystem(
@@ -143,10 +138,7 @@ namespace process::game::systems {
             entityHandle,
             SpriteInstruction{ 
                 spriteStoragePointer->get(id)->sprite,
-				config::foregroundDepth,
-                {},		//offset
-                0.0f,	//rotation
-                imageOpacity
+				config::foregroundDepth
             }
         });
     }
@@ -159,7 +151,7 @@ namespace process::game::systems {
         auto& dataStorage{ scene.getDataStorage() };
         dataStorage.setComponent<TextInstruction>({
             entityHandle,
-            { text, textBounds }
+            { text, textRightBound }
         });
     }
 

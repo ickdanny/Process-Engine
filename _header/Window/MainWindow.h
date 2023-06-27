@@ -28,16 +28,7 @@ namespace process::window {
 			PCWSTR windowName,
 			//graphics fields
 			int graphicsWidth,
-			int graphicsHeight/*,
-                int fillColor,
-                int textColor,
-                wchar_t const* fontName,
-                float fontSize/*,
-                DWRITE_FONT_WEIGHT fontWeight, //todo: not sure if use dwrite
-                DWRITE_FONT_STYLE fontStyle,
-                DWRITE_FONT_STRETCH fontStretch,
-                DWRITE_TEXT_ALIGNMENT textAlignment,
-                DWRITE_PARAGRAPH_ALIGNMENT paragraphAlignment*/
+			int graphicsHeight
 		);
 		
 		LRESULT handleMessage(
@@ -55,6 +46,11 @@ namespace process::window {
 		GraphicsWrapper& getGraphicsWrapper() {
 			return graphicsWrapper;
 		}
+		
+		#pragma warning(suppress : 4068) //suppress unknown pragma
+		#pragma clang diagnostic push
+		#pragma warning(suppress : 4068) //suppress unknown pragma
+		#pragma clang diagnostic ignored "-Wshadow"
 		
 		void setDestroyCallback(const std::function<void()>& destroyCallback) {
 			this->destroyCallback = destroyCallback;
@@ -75,5 +71,8 @@ namespace process::window {
 		void setOutOfFocusCallback(const std::function<void()>& outOfFocusCallback) {
 			this->outOfFocusCallback = outOfFocusCallback;
 		}
+		
+		#pragma warning(suppress : 4068) //suppress unknown pragma
+		#pragma clang diagnostic pop
 	};
 }

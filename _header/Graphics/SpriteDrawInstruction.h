@@ -39,7 +39,7 @@ namespace process::graphics {
 
 	public:
 		//constructor
-		explicit SpriteDrawInstruction(
+		SpriteDrawInstruction(
 			Sprite sprite,
 			int depth,
 			const Vector2& offset = {},

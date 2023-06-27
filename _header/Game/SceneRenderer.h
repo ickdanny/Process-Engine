@@ -20,7 +20,10 @@ namespace process::game {
 
 	public:
 
-		SceneRenderer(window::GraphicsWrapper* graphicsWrapperPointer);
+		SceneRenderer(
+			window::GraphicsWrapper* graphicsWrapperPointer,
+			resources::SpriteStorage& spriteStorage
+		);
 
 		void operator()(Scene& scene);
 	};
