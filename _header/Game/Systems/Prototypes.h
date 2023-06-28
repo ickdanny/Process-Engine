@@ -2,6 +2,7 @@
 
 #include "Game/Systems/EntityBuilder.h"
 #include "SpriteStorage.h"
+#include "ScriptStorage.h"
 
 namespace process::game::systems{
 
@@ -18,7 +19,10 @@ namespace process::game::systems{
 		//fields
 		std::unordered_map<std::string, ComponentTupleSharedPointer> prototypeMap{};
 	public:
-		Prototypes(resources::SpriteStorage& spriteStorage);
+		Prototypes(
+			resources::SpriteStorage& spriteStorage,
+			resources::ScriptStorage& scriptStorage
+		);
 		
 		ComponentTupleSharedPointer get(const std::string& prototypeID) const;
 		

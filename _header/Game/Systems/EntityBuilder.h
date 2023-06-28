@@ -246,6 +246,16 @@ namespace process::game::systems {
 				args...
 			};
 		}
+		
+		template <typename... Ts>
+		static auto makeVisiblePrototype(
+			const Ts&... args
+		) {
+			return ComponentTuple{
+				VisibleMarker{},
+				args...
+			};
+		}
 
 		template <typename... Ts>
 		static auto makeVisibleCollidablePrototype(

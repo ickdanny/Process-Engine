@@ -104,6 +104,7 @@ namespace process::game::systems {
 		DataType setVisible(const std::vector<DataType>& parameters);
 		DataType setSpriteInstruction(const std::vector<DataType>& parameters);
 		DataType setDepth(const std::vector<DataType>& parameters);
+		DataType setRotation(const std::vector<DataType>& parameters);
 		
 		//entity queries
 		DataType angleToPlayer(const std::vector<DataType>& parameters);

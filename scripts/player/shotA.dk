@@ -1,1 +1,131 @@
-print("TO DO shot A");
+let speed = 7.0;
+let focusedRightAngle = 20.0;
+
+func spawnPair(rightAngle){
+    if(isFocused()){
+        spawn(
+            "boomerang",
+            entityPosition(),
+            makePolar(speed, focusedRightAngle),
+            "boomerangCurveRight"
+        );
+        spawn(
+            "boomerang",
+            entityPosition(),
+            makePolar(speed, 180.0 - focusedRightAngle),
+            "boomerangCurveLeft"
+        );
+    }
+    else{
+        spawn(
+            "boomerang",
+            entityPosition(),
+            makePolar(speed, rightAngle),
+            "boomerangCurveRight"
+        );
+        spawn(
+            "boomerang",
+            entityPosition(),
+            makePolar(speed, 180.0 - rightAngle),
+            "boomerangCurveLeft"
+        );
+    }
+}
+
+#bucket funcs
+#make all shot functions last 40 ticks
+
+func func0(){
+    spawnPair(55.0);
+    timer(20);
+    spawnPair(55.0);
+    timer(20);
+}
+func func1(){
+    spawnPair(55.0);
+    timer(12);
+    spawnPair(45.0);
+    timer(12);
+    spawnPair(35.0);
+    timer(16);
+}
+func func2(){
+    spawnPair(55.0);
+    timer(9);
+    spawnPair(45.0);
+    timer(9);
+    spawnPair(35.0);
+    timer(9);
+    spawnPair(45.0);
+    timer(13);
+}
+func func3(){
+    spawnPair(55.0);
+    timer(7);
+    spawnPair(45.0);
+    timer(7);
+    spawnPair(35.0);
+    timer(7);
+    spawnPair(35.0);
+    timer(7);
+    spawnPair(45.0);
+    timer(12);
+}
+func func4(){
+    spawnPair(55.0);
+    timer(6);
+    spawnPair(45.0);
+    timer(6);
+    spawnPair(35.0);
+    timer(6);
+    spawnPair(25.0);
+    timer(6);
+    spawnPair(35.0);
+    timer(6);
+    spawnPair(45.0);
+    timer(10);
+}
+func func5(){
+    spawnPair(55.0);
+    timer(5);
+    spawnPair(45.0);
+    timer(5);
+    spawnPair(35.0);
+    timer(5);
+    spawnPair(25.0);
+    timer(5);
+    spawnPair(25.0);
+    timer(5);
+    spawnPair(35.0);
+    timer(5);
+    spawnPair(45.0);
+    timer(10);
+}
+func func6(){
+    spawnPair(55.0);
+    timer(5);
+    spawnPair(45.0);
+    timer(5);
+    spawnPair(35.0);
+    timer(5);
+    spawnPair(25.0);
+    timer(5);
+    spawnPair(15.0);
+    timer(5);
+    spawnPair(25.0);
+    timer(5);
+    spawnPair(35.0);
+    timer(5);
+    spawnPair(45.0);
+    timer(5);
+}
+
+playerPowerSplit(
+    func0,
+    func1,
+    func2,
+    func3,
+    func4,
+    func5,
+    func6
+);

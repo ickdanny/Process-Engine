@@ -1,2 +1,3 @@
 stallUntil(isNotSpawning());
+print("removing ghost");
 removeEntity();

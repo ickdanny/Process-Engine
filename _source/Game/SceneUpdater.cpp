@@ -8,8 +8,6 @@ namespace process::game {
 		wasp::input::IKeyInputTable* keyInputTablePointer,
 		wasp::channel::ChannelSet* globalChannelSetPointer
 	)
-		//: programs{ &(resourceMasterStoragePointer->bitmapStorage) }
-
 		: initSystem{
 			globalChannelSetPointer, 
 			&(resourceMasterStoragePointer->spriteStorage),
@@ -54,6 +52,7 @@ namespace process::game {
 		scriptSystem(scene);
 		playerMovementSystem(scene);
 		velocitySystem(scene);
+		inboundSystem(scene);
 		collisionDetectorSystem(scene);
 		collisionHandlerSystem(scene);
 		clearSystem(scene);
@@ -71,7 +70,6 @@ namespace process::game {
 		rotateSpriteForwardSystem(scene);
 		spriteSpinSystem(scene);
 		subImageScrollSystem(scene);
-        inboundSystem(scene);
         outboundSystem(scene);
 		gameOverSystem(scene);
 		creditsSystem(scene);

@@ -4,18 +4,18 @@ let power = playerPower();
 if(power < 48){
     if(power < 16){
         if(power < 8){
-            func1();        # 0 - 7
+            func0();        # 0 - 7
         }
         else{
-            func2();        # 8 - 15
+            func1();        # 8 - 15
         }
     }
     else{
         if(power < 32){
-            func3();        # 16-31
+            func2();        # 16-31
         }
         else{
-            func4();        # 32-47
+            func3();        # 32-47
         }
     }
 }

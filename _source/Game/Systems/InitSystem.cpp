@@ -24,12 +24,11 @@ namespace process::game::systems {
 					case 1:
 						return 0;
 					case 2:
-						//return config::maxPower / 2;
-						return 0;
+						return config::maxPower / 2;
 					case 3:
 					case 4:
 					case 5:
-						//return config::maxPower;
+						return config::maxPower;
 						return 0;
 					default:
 						throw std::runtime_error{ "bad stage in getInitPower!" };
@@ -277,9 +276,8 @@ namespace process::game::systems {
 				ScriptList{ {
 					scriptStoragePointer->get(L"shotAPreview"),
 					std::string{ ScriptList::spawnString } + " shotAPreview"
-				} },	//todo: test text
-				TextInstruction{ L"the quick brown fox jumped over the lazy dog THE QUICK BROWN FOX JUMPED OVER THE LAZY DOG :,\"!.?';~", 250 },
-				AnimationList{ 
+				} },
+				AnimationList{
 					components::Animation{ {
 						L"p_idle_1", L"p_idle_2", L"p_idle_3", L"p_idle_4"
 					} },

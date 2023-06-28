@@ -41,7 +41,7 @@ namespace process::game::systems {
 		: globalChannelSetPointer { globalChannelSetPointer }
 		, scriptStoragePointer{ scriptStoragePointer }
 		, spriteStoragePointer{ spriteStoragePointer }
-		, prototypes{ *spriteStoragePointer } {
+		, prototypes{ *spriteStoragePointer, *scriptStoragePointer } {
 		
 		//add native vars
 		addNativeVariable("angleEquivalenceEpsilon", 0.05f);
@@ -79,6 +79,7 @@ namespace process::game::systems {
 			std::bind(&ScriptSystem::setSpriteInstruction, this, _1)
 		);
 		addNativeFunction("setDepth", std::bind(&ScriptSystem::setDepth, this, _1));
+		addNativeFunction("setRotation", std::bind(&ScriptSystem::setRotation, this, _1));
 		
 		//entity queries
 		addNativeFunction("angleToPlayer", std::bind(&ScriptSystem::angleToPlayer, this, _1));
@@ -672,6 +673,23 @@ namespace process::game::systems {
 		}
 		auto& spriteInstruction{ getComponent<SpriteInstruction>(entityHandle) };
 		spriteInstruction.setDepth(depth);
+		return false;
+	}
+	
+	/**
+	 * float rotation
+	 */
+	ScriptSystem::DataType ScriptSystem::setRotation(
+		const std::vector<DataType>& parameters
+	){
+		throwIfNativeFunctionWrongArity(1, parameters, "setRotation");
+		float rotation{ getAsFloat(parameters[0]) };
+		EntityHandle entityHandle{ makeCurrentEntityHandle() };
+		if(!containsComponent<SpriteInstruction>(entityHandle)){
+			throw std::runtime_error{ "native func setRotation no sprite instruction!" };
+		}
+		auto& spriteInstruction{ getComponent<SpriteInstruction>(entityHandle) };
+		spriteInstruction.setRotation(rotation);
 		return false;
 	}
 	

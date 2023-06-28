@@ -13,6 +13,7 @@
 #include "Game/Systems/LoadSystem.h"
 #include "Game/Systems/DialogueSystem.h"
 #include "Game/Systems/VelocitySystem.h"
+#include "Game/Systems/InboundSystem.h"
 #include "Game/Systems/ScriptSystem.h"
 #include "Game/Systems/CollisionDetectorSystem.h"
 #include "Game/Systems/PlayerMovementSystem.h"
@@ -32,7 +33,6 @@
 #include "Game/Systems/RotateSpriteForwardSystem.h"
 #include "Game/Systems/SpriteSpinSystem.h"
 #include "Game/Systems/TileScrollSystem.h"
-#include "Game/Systems/InboundSystem.h"
 #include "Game/Systems/OutboundSystem.h"
 #include "Game/Systems/GameOverSystem.h"
 #include "Game/Systems/CreditsSystem.h"
@@ -55,6 +55,7 @@ namespace process::game {
 		systems::ScriptSystem scriptSystem;						//not initialized!
 		systems::PlayerMovementSystem playerMovementSystem{};
 		systems::VelocitySystem velocitySystem{};
+		systems::InboundSystem inboundSystem{};
 		systems::CollisionDetectorSystem collisionDetectorSystem{};
 		systems::CollisionHandlerSystem collisionHandlerSystem;	//not initialized!
 		systems::ClearSystem clearSystem{};
@@ -72,7 +73,6 @@ namespace process::game {
 		systems::RotateSpriteForwardSystem rotateSpriteForwardSystem{};
 		systems::SpriteSpinSystem spriteSpinSystem{};
 		systems::TileScrollSystem subImageScrollSystem{};
-		systems::InboundSystem inboundSystem{};
 		systems::OutboundSystem outboundSystem{};
 		systems::GameOverSystem gameOverSystem;					//not initialized!
 		systems::CreditsSystem creditsSystem;					//not initialized!
