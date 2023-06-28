@@ -278,7 +278,7 @@ namespace process::game::systems {
 					scriptStoragePointer->get(L"shotAPreview"),
 					std::string{ ScriptList::spawnString } + " shotAPreview"
 				} },	//todo: test text
-				TextInstruction{ L"the quick brown fox jumped over the lazy dog", 250 },
+				TextInstruction{ L"the quick brown fox jumped over the lazy dog THE QUICK BROWN FOX JUMPED OVER THE LAZY DOG :,\"!.?';~", 250 },
 				AnimationList{ 
 					components::Animation{ {
 						L"p_idle_1", L"p_idle_2", L"p_idle_3", L"p_idle_4"

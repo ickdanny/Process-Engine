@@ -3,7 +3,7 @@
 namespace process::game::systems {
 	
 	namespace{
-		constexpr int textHorizontalDistance{ 8 };
+		constexpr int textHorizontalDistance{ 7 };
 		constexpr int textVerticalDistance{ 10 };
 	}
 

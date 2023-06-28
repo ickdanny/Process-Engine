@@ -93,7 +93,13 @@ namespace process::game::resources {
 		const resource::ManifestOrigin& manifestOrigin,
 		const resource::ResourceLoader& resourceLoader
 	) {
-		const std::wstring& fileName{ manifestOrigin.manifestArguments[1] };
+		const std::wstring& id{ manifestOrigin.manifestArguments[1] };
+		if (resourceMap.find(id) != resourceMap.end()) {
+			throw std::runtime_error{ "Error loaded pre-existing id" };
+		}
+		
+		const std::wstring& fileName{ manifestOrigin.manifestArguments[2] };
+		
 		ComPtr<IWICBitmapFrameDecode> wicFrame{
 			spriteLoader.getWicFramePointer(fileName)
 		};
@@ -105,12 +111,7 @@ namespace process::game::resources {
 				devicePointer
 			);
 		}
-
-		const std::wstring& id{ file::getFileName(fileName) };
-		if (resourceMap.find(id) != resourceMap.end()) {
-			throw std::runtime_error{ "Error loaded pre-existing id" };
-		}
-
+		
 		ResourceSharedPointer resourceSharedPointer{
 			std::make_shared<ResourceType>(
 				id,
