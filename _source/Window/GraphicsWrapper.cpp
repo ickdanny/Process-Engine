@@ -616,7 +616,7 @@ namespace process::window {
 			) *
 			//rotate on xy plane
 			DirectX::XMMatrixRotationZ(
-				spriteDrawInstruction.getRotation()
+				spriteDrawInstruction.getRotation().getAngleRadians()
 			) *
 			//aspect correction
 			DirectX::XMMatrixScaling(
