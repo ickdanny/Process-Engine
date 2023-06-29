@@ -149,6 +149,8 @@ namespace process::game::systems {
 		static DataType setY(const std::vector<DataType>& parameters);
 		static DataType setR(const std::vector<DataType>& parameters);
 		static DataType setTheta(const std::vector<DataType>& parameters);
+		static DataType flipX(const std::vector<DataType>& parameters);
+		static DataType flipY(const std::vector<DataType>& parameters);
 		static DataType exponent(const std::vector<DataType>& parameters);
 		static DataType min(const std::vector<DataType>& parameters);
 		static DataType max(const std::vector<DataType>& parameters);

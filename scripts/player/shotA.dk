@@ -1,5 +1,5 @@
 let speed = 7.0;
-let focusedRightAngle = 20.0;
+let focusedRightAngle = 23.0;
 
 func spawnPair(rightAngle){
     if(isFocused()){
@@ -33,91 +33,95 @@ func spawnPair(rightAngle){
 }
 
 #bucket funcs
-#make all shot functions last 40 ticks
+#shot functions last about 30 ticks
 
 func func0(){
     spawnPair(55.0);
-    timer(20);
+    timer(15);
     spawnPair(55.0);
-    timer(20);
+    timer(15);
 }
 func func1(){
     spawnPair(55.0);
-    timer(12);
+    timer(10);
     spawnPair(45.0);
-    timer(12);
+    timer(10);
     spawnPair(35.0);
-    timer(16);
+    timer(10);
 }
 func func2(){
     spawnPair(55.0);
-    timer(9);
+    timer(8);
     spawnPair(45.0);
-    timer(9);
+    timer(8);
     spawnPair(35.0);
-    timer(9);
+    timer(8);
     spawnPair(45.0);
-    timer(13);
+    timer(8);
 }
 func func3(){
     spawnPair(55.0);
-    timer(7);
+    timer(6);
     spawnPair(45.0);
-    timer(7);
+    timer(6);
     spawnPair(35.0);
-    timer(7);
+    timer(6);
     spawnPair(35.0);
-    timer(7);
+    timer(6);
     spawnPair(45.0);
-    timer(12);
+    timer(6);
 }
 func func4(){
     spawnPair(55.0);
-    timer(6);
+    timer(5);
     spawnPair(45.0);
-    timer(6);
+    timer(5);
     spawnPair(35.0);
-    timer(6);
+    timer(5);
     spawnPair(25.0);
-    timer(6);
+    timer(5);
     spawnPair(35.0);
-    timer(6);
+    timer(5);
     spawnPair(45.0);
-    timer(10);
+    timer(5);
 }
 func func5(){
     spawnPair(55.0);
-    timer(5);
+    timer(4);
     spawnPair(45.0);
-    timer(5);
+    timer(4);
     spawnPair(35.0);
-    timer(5);
+    timer(4);
     spawnPair(25.0);
-    timer(5);
+    timer(4);
     spawnPair(25.0);
-    timer(5);
+    timer(4);
     spawnPair(35.0);
-    timer(5);
+    timer(4);
     spawnPair(45.0);
-    timer(10);
+    timer(4);
 }
 func func6(){
     spawnPair(55.0);
-    timer(5);
+    timer(3);
     spawnPair(45.0);
-    timer(5);
+    timer(3);
     spawnPair(35.0);
-    timer(5);
+    timer(3);
     spawnPair(25.0);
-    timer(5);
+    timer(3);
     spawnPair(15.0);
-    timer(5);
+    timer(3);
+    spawnPair(5.0);
+    timer(3);
+    spawnPair(15.0);
+    timer(3);
     spawnPair(25.0);
-    timer(5);
+    timer(3);
     spawnPair(35.0);
-    timer(5);
+    timer(3);
     spawnPair(45.0);
-    timer(5);
+    timer(3);
 }
 
 playerPowerSplit(

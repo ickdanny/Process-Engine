@@ -13,6 +13,13 @@ namespace process::game::systems{
 		constexpr float boomerangHitbox{ 9.0f };
 		constexpr int boomerangDamage{ 10 };
 		constexpr float boomerangOutbound{ -50.0f };
+		constexpr float boomerangSpin{ 4.728172f };
+	}
+	
+	namespace playerB{
+		constexpr float laserHitbox{ 10.0f };
+		constexpr int laserDamage{ 10 };
+		constexpr float laserOutbound{ -20.0f };
 	}
 	
 	using AABB = wasp::math::AABB;
@@ -58,7 +65,23 @@ namespace process::game::systems{
 				spriteStorage.get(L"boomerang")->sprite,
 				config::playerBulletDepth
 			},
-			SpriteSpin{ 10.0f },
+			SpriteSpin{ playerA::boomerangSpin },
+			game::DeathCommand{ game::DeathCommand::Commands::deathSpawn },
+			DeathSpawn{ ScriptList{ {
+				scriptStorage.get(L"projectileExplode"),
+				std::string{ ScriptList::spawnString } + "projectileExplode"
+			} } }
+		).heapClone());
+		add("smallLaser", EntityBuilder::makeVisibleCollidablePrototype(
+			AABB{ playerB::laserHitbox },
+			EnemyCollisions::Source{ components::CollisionCommands::death },
+			Damage{ playerB::laserDamage },
+			Outbound{ playerB::laserOutbound },
+			SpriteInstruction{
+				spriteStorage.get(L"small_laser")->sprite,
+				config::playerBulletDepth
+			},
+			RotateSpriteForwardMarker{},
 			game::DeathCommand{ game::DeathCommand::Commands::deathSpawn },
 			DeathSpawn{ ScriptList{ {
 				scriptStorage.get(L"projectileExplode"),

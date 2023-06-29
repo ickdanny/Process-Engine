@@ -49,6 +49,8 @@ namespace process::game::systems {
 		addNativeVariable("gameOffset", config::gameOffset);
 		addNativeVariable("gameWidth", config::gameWidth);
 		addNativeVariable("gameHeight", config::gameHeight);
+		addNativeVariable("zeroVector", Vector2{ 0.0f, 0.0f });
+		addNativeVariable("zeroPolar", PolarVector{ 0.0f, 0.0f });
 		
 		//add native functions
 		
@@ -162,6 +164,8 @@ namespace process::game::systems {
 		addNativeFunction("setY", setY);
 		addNativeFunction("setR", setR);
 		addNativeFunction("setTheta", setTheta);
+		addNativeFunction("flipX", flipX);
+		addNativeFunction("flipY", flipY);
 		addNativeFunction("pow", exponent);
 		addNativeFunction("min", min);
 		addNativeFunction("max", max);
@@ -1021,6 +1025,58 @@ namespace process::game::systems {
 		const PolarVector& vector{ std::get<PolarVector>(parameters[0]) };
 		float theta{ std::get<float>(parameters[1]) };
 		return PolarVector{ vector.getMagnitude(), theta };
+	}
+	
+	/**
+	 * float angle OR Vector vector OR PolarVector polar
+	 */
+	ScriptSystem::DataType ScriptSystem::flipX(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(1, parameters, "flipX");
+		const auto& data{ parameters[0] };
+		if(std::holds_alternative<float>(data)){
+			return static_cast<float>(Angle{ std::get<float>(data) }.flipX());
+		}
+		else if(std::holds_alternative<Vector2>(data)){
+			Vector2 vector{ std::get<Vector2>(data) };
+			vector.x *= -1;
+			return vector;
+		}
+		else if(std::holds_alternative<PolarVector>(data)){
+			PolarVector polar{ std::get<PolarVector>(data) };
+			polar.setAngle(polar.getAngle().flipX());
+			return polar;
+		}
+		else{
+			throw std::runtime_error{
+				"native func flipX bad type: " + std::to_string(data.index())
+			};
+		}
+	}
+	
+	/**
+	 * float angle OR Vector vector OR PolarVector polar
+	 */
+	ScriptSystem::DataType ScriptSystem::flipY(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(1, parameters, "flipY");
+		const auto& data{ parameters[0] };
+		if(std::holds_alternative<float>(data)){
+			return static_cast<float>(Angle{ std::get<float>(data) }.flipY());
+		}
+		else if(std::holds_alternative<Vector2>(data)){
+			Vector2 vector{ std::get<Vector2>(data) };
+			vector.y *= -1;
+			return vector;
+		}
+		else if(std::holds_alternative<PolarVector>(data)){
+			PolarVector polar{ std::get<PolarVector>(data) };
+			polar.setAngle(polar.getAngle().flipY());
+			return polar;
+		}
+		else{
+			throw std::runtime_error{
+				"native func flipY bad type: " + std::to_string(data.index())
+			};
+		}
 	}
 	
 	/**
