@@ -13,7 +13,11 @@ namespace process::game::systems{
 		constexpr float boomerangHitbox{ 9.0f };
 		constexpr int boomerangDamage{ 10 };
 		constexpr float boomerangOutbound{ -50.0f };
-		constexpr float boomerangSpin{ 4.728172f };
+		constexpr float boomerangSpin{ 21.728172f };
+		
+		constexpr float bombHitbox{ 50.0f };
+		constexpr int bombDamage{ 2 };//damage per tick
+		constexpr float scytheSpin{ 19.4892f };	//todo: reduce sprite spin in script!
 	}
 	
 	namespace playerB{
@@ -56,6 +60,7 @@ namespace process::game::systems{
 				"removeExplode"
 			} }
 		).heapClone());
+		//playerA
 		add("boomerang", EntityBuilder::makeVisibleCollidablePrototype(
 			AABB{ playerA::boomerangHitbox },
 			EnemyCollisions::Source{ components::CollisionCommands::death },
@@ -71,6 +76,17 @@ namespace process::game::systems{
 				scriptStorage.get(L"projectileExplode"),
 				std::string{ ScriptList::spawnString } + "projectileExplode"
 			} } }
+		).heapClone());
+		add("scythe", EntityBuilder::makeVisibleCollidablePrototype(
+			AABB{ playerA::bombHitbox },
+			EnemyCollisions::Source{ components::CollisionCommands::death },
+			BulletCollisions::Source{},
+			Damage{ playerA::bombDamage },
+			SpriteInstruction{
+				spriteStorage.get(L"scythe")->sprite,
+				config::playerBulletDepth - 10
+			},
+			SpriteSpin{ playerA::scytheSpin }
 		).heapClone());
 		add("smallLaser", EntityBuilder::makeVisibleCollidablePrototype(
 			AABB{ playerB::laserHitbox },

@@ -1,1 +1,13 @@
-print("TO DO bomb A");
+let speed = 2.0;
+let symmetry = 8;
+
+let pos = entityPosition();
+
+func velConsumer(velocity){
+    spawn("scythe", pos, velocity, "scytheSpiral");
+}
+
+let angle = random(0.0, 360.0);
+let baseVel = makePolar(speed, angle);
+
+ring(baseVel, symmetry, velConsumer);

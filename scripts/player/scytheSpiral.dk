@@ -1,0 +1,11 @@
+let angleIncrement = 2.0;
+let angleIncrementMulti = 0.995;
+let speedMulti = 0.985;
+
+let time = 95;
+for(let i = 0; i < time; i = i + 1){
+    setAngle(entityAngle() + (angleIncrement = angleIncrement * angleIncrementMulti));
+    setSpeed(entitySpeed() * speedMulti);
+    stall();
+}
+removeEntity(); #todo: explode or smth
