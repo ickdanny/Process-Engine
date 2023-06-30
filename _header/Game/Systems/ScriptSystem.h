@@ -114,6 +114,7 @@ namespace process::game::systems {
 		DataType entityVelocity(const std::vector<DataType>& parameters);
 		DataType entitySpeed(const std::vector<DataType>& parameters);
 		DataType entityAngle(const std::vector<DataType>& parameters);
+		DataType entitySpin(const std::vector<DataType>& parameters);
 		DataType isSpawning(const std::vector<DataType>& parameters);
 		DataType isNotSpawning(const std::vector<DataType>& parameters);
 		DataType playerPower(const std::vector<DataType>& parameters);
@@ -129,6 +130,7 @@ namespace process::game::systems {
 		DataType setVelocity(const std::vector<DataType>& parameters);
 		DataType setSpeed(const std::vector<DataType>& parameters);
 		DataType setAngle(const std::vector<DataType>& parameters);
+		DataType setSpin(const std::vector<DataType>& parameters);
 		DataType die(const std::vector<DataType>& parameters);
 		DataType removeEntity(const std::vector<DataType>& parameters);
 		
@@ -152,6 +154,12 @@ namespace process::game::systems {
 		static DataType flipX(const std::vector<DataType>& parameters);
 		static DataType flipY(const std::vector<DataType>& parameters);
 		static DataType exponent(const std::vector<DataType>& parameters);
+		static DataType sin(const std::vector<DataType>& parameters);
+		static DataType cos(const std::vector<DataType>& parameters);
+		static DataType tan(const std::vector<DataType>& parameters);
+		static DataType arcsin(const std::vector<DataType>& parameters);
+		static DataType arccos(const std::vector<DataType>& parameters);
+		static DataType arctan(const std::vector<DataType>& parameters);
 		static DataType min(const std::vector<DataType>& parameters);
 		static DataType max(const std::vector<DataType>& parameters);
 		static DataType smallerDifference(const std::vector<DataType>& parameters);

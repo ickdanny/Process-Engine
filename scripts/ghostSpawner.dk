@@ -1,3 +1,2 @@
-stallUntil(isNotSpawning());
-print("removing ghost");
+stallUntil(isNotSpawning);
 removeEntity();

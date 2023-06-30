@@ -95,6 +95,7 @@ namespace process::game::systems {
 		);
 		addNativeFunction("entitySpeed", std::bind(&ScriptSystem::entitySpeed, this, _1));
 		addNativeFunction("entityAngle", std::bind(&ScriptSystem::entityAngle, this, _1));
+		addNativeFunction("entitySpin", std::bind(&ScriptSystem::entitySpin, this, _1));
 		addNativeFunction("isSpawning", std::bind(&ScriptSystem::isSpawning, this, _1));
 		addNativeFunction("isNotSpawning",
 			std::bind(&ScriptSystem::isNotSpawning, this, _1)
@@ -144,6 +145,7 @@ namespace process::game::systems {
 		addNativeFunction("setVelocity", std::bind(&ScriptSystem::setVelocity, this, _1));
 		addNativeFunction("setSpeed", std::bind(&ScriptSystem::setSpeed, this, _1));
 		addNativeFunction("setAngle", std::bind(&ScriptSystem::setAngle, this, _1));
+		addNativeFunction("setSpin", std::bind(&ScriptSystem::setSpin, this, _1));
 		addNativeFunction("die", std::bind(&ScriptSystem::die, this, _1));
 		addNativeFunction("removeEntity", std::bind(&ScriptSystem::removeEntity, this, _1));
 		
@@ -167,6 +169,12 @@ namespace process::game::systems {
 		addNativeFunction("flipX", flipX);
 		addNativeFunction("flipY", flipY);
 		addNativeFunction("pow", exponent);
+		addNativeFunction("sin", sin);
+		addNativeFunction("cos", cos);
+		addNativeFunction("tan", tan);
+		addNativeFunction("arcsin", arcsin);
+		addNativeFunction("arccos", arccos);
+		addNativeFunction("arctan", arctan);
 		addNativeFunction("min", min);
 		addNativeFunction("max", max);
 		addNativeFunction("smallerDifference", smallerDifference);
@@ -1088,6 +1096,54 @@ namespace process::game::systems {
 	}
 	
 	/**
+ 	* float radians
+ 	*/
+	ScriptSystem::DataType ScriptSystem::sin(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(1, parameters, "sin");
+		return std::sin(getAsFloat(parameters[0]));
+	}
+	
+	/**
+ 	* float radians
+ 	*/
+	ScriptSystem::DataType ScriptSystem::cos(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(1, parameters, "cos");
+		return std::cos(getAsFloat(parameters[0]));
+	}
+	
+	/**
+ 	* float radians
+ 	*/
+	ScriptSystem::DataType ScriptSystem::tan(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(1, parameters, "tan");
+		return std::tan(getAsFloat(parameters[0]));
+	}
+	
+	/**
+ 	* float f
+ 	*/
+	ScriptSystem::DataType ScriptSystem::arcsin(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(1, parameters, "arcsin");
+		return std::asin(getAsFloat(parameters[0]));
+	}
+	
+	/**
+ 	* float f
+ 	*/
+	ScriptSystem::DataType ScriptSystem::arccos(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(1, parameters, "arccos");
+		return std::acos(getAsFloat(parameters[0]));
+	}
+	
+	/**
+ 	* float f
+ 	*/
+	ScriptSystem::DataType ScriptSystem::arctan(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(1, parameters, "arctan");
+		return std::atan(getAsFloat(parameters[0]));
+	}
+	
+	/**
 	 * float a, float b OR int a, int b
 	 */
 	ScriptSystem::DataType ScriptSystem::min(const std::vector<DataType>& parameters){
@@ -1327,6 +1383,14 @@ namespace process::game::systems {
 		return static_cast<float>(velocity.getAngle());
 	}
 	
+	ScriptSystem::DataType ScriptSystem::entitySpin(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(0, parameters, "entitySpin");
+		SpriteSpin& spriteSpin{
+			currentScenePointer->getDataStorage().getComponent<SpriteSpin>(currentEntityID)
+		};
+		return spriteSpin.spin;
+	}
+	
 	ScriptSystem::DataType ScriptSystem::playerPower(const std::vector<DataType>& parameters){
 		throwIfNativeFunctionWrongArity(0, parameters, "playerPower");
 		const PlayerData& playerData{
@@ -1371,6 +1435,19 @@ namespace process::game::systems {
 			currentScenePointer->getDataStorage().getComponent<Velocity>(currentEntityID)
 		};
 		velocity.setAngle(angle);
+		return false;
+	}
+	
+	/**
+	 * float spin
+	 */
+	ScriptSystem::DataType ScriptSystem::setSpin(const std::vector<DataType>& parameters) {
+		throwIfNativeFunctionWrongArity(1, parameters, "setSpin");
+		float spin{ getAsFloat(parameters[0]) };
+		SpriteSpin& spriteSpin{
+			currentScenePointer->getDataStorage().getComponent<SpriteSpin>(currentEntityID)
+		};
+		spriteSpin.spin = spin;
 		return false;
 	}
 	

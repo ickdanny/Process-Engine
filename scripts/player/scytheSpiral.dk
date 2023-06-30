@@ -1,11 +1,13 @@
-let angleIncrement = 2.0;
-let angleIncrementMulti = 0.995;
-let speedMulti = 0.985;
+let time = 205;
 
-let time = 95;
+let spinMulti = 0.983;
+let timeCoefficient = 1200.0;
+
+setRotation(entityAngle());
+let baseAngle = entityAngle();
 for(let i = 0; i < time; i = i + 1){
-    setAngle(entityAngle() + (angleIncrement = angleIncrement * angleIncrementMulti));
-    setSpeed(entitySpeed() * speedMulti);
+    setAngle(baseAngle - pow(i * timeCoefficient, 0.5));
+    setSpin(entitySpin() * spinMulti);
     stall();
 }
-removeEntity(); #todo: explode or smth
+die();

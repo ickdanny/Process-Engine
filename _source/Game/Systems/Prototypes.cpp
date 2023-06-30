@@ -15,9 +15,10 @@ namespace process::game::systems{
 		constexpr float boomerangOutbound{ -50.0f };
 		constexpr float boomerangSpin{ 21.728172f };
 		
-		constexpr float bombHitbox{ 50.0f };
-		constexpr int bombDamage{ 2 };//damage per tick
-		constexpr float scytheSpin{ 19.4892f };	//todo: reduce sprite spin in script!
+		constexpr float scytheHitbox{ 50.0f };
+		constexpr int scytheDamage{ 1 };//damage per tick
+		constexpr int scytheExplodeDamage{ 60 };
+		constexpr float scytheSpin{ 19.4892f };
 	}
 	
 	namespace playerB{
@@ -78,16 +79,48 @@ namespace process::game::systems{
 			} } }
 		).heapClone());
 		add("scythe", EntityBuilder::makeVisibleCollidablePrototype(
-			AABB{ playerA::bombHitbox },
-			EnemyCollisions::Source{ components::CollisionCommands::death },
+			AABB{ playerA::scytheHitbox },
+			EnemyCollisions::Source{},
 			BulletCollisions::Source{},
-			Damage{ playerA::bombDamage },
+			Damage{ playerA::scytheDamage },
 			SpriteInstruction{
 				spriteStorage.get(L"scythe")->sprite,
 				config::playerBulletDepth - 10
 			},
-			SpriteSpin{ playerA::scytheSpin }
+			SpriteSpin{ playerA::scytheSpin },
+			game::DeathCommand{ game::DeathCommand::Commands::deathSpawn },
+			DeathSpawn{ ScriptList{ {
+				scriptStorage.get(L"scytheExplode"),
+				std::string{ ScriptList::spawnString } + "scytheExplode"
+			} } }
 		).heapClone());
+		add("scytheExplode", EntityBuilder::makeVisiblePrototype(
+			AABB{ playerA::scytheHitbox },
+			EnemyCollisions::Source{},
+			BulletCollisions::Source{},
+			Damage{ playerA::scytheExplodeDamage },
+			SpriteInstruction{
+				spriteStorage.get(L"scytheExplode1")->sprite,
+				config::playerDepth + 1
+			},
+			game::AnimationList{
+				components::Animation {
+					{
+						L"scytheExplode1",
+						L"scytheExplode2",
+						L"scytheExplode3",
+						L"scytheExplode4"
+					},
+					false
+				},
+				3
+			},
+			ScriptList{ {
+				scriptStorage.get(L"removeScytheExplode"),
+				"removeScytheExplode"
+			} }
+		).heapClone());
+		//playerB
 		add("smallLaser", EntityBuilder::makeVisibleCollidablePrototype(
 			AABB{ playerB::laserHitbox },
 			EnemyCollisions::Source{ components::CollisionCommands::death },
