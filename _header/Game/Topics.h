@@ -9,6 +9,7 @@
 #include "Game/Systems/GameCommands.h"
 #include "Game/Systems/PlayerStates.h"
 #include "Game/Components/PlayerData.h"
+#include "Point2.h"
 
 namespace process::game {
 
@@ -104,5 +105,8 @@ namespace process::game {
 
 		//set and cleared by ScriptSystem (stage program)
 		static const Topic<> winFlag;
+		
+		//topics for scripts
+		static const Topic<std::tuple<wasp::math::Point2, std::string>> points;
 	};
 }

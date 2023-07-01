@@ -25,6 +25,9 @@ namespace process::game::systems{
 		constexpr float laserHitbox{ 10.0f };
 		constexpr int laserDamage{ 7 };
 		constexpr float laserOutbound{ -20.0f };
+		
+		constexpr float laserPartHitbox{ 15.0f };
+		constexpr int laserPartDamage{ 2 };//damage per tick
 	}
 	
 	using AABB = wasp::math::AABB;
@@ -127,7 +130,7 @@ namespace process::game::systems{
 			Damage{ playerB::laserDamage },
 			Outbound{ playerB::laserOutbound },
 			SpriteInstruction{
-				spriteStorage.get(L"small_laser")->sprite,
+				spriteStorage.get(L"smallLaser")->sprite,
 				config::playerBulletDepth
 			},
 			RotateSpriteForwardMarker{},
@@ -136,6 +139,54 @@ namespace process::game::systems{
 				scriptStorage.get(L"projectileExplode"),
 				std::string{ ScriptList::spawnString } + "projectileExplode"
 			} } }
+		).heapClone());
+		add("laserBombPart", EntityBuilder::makeVisiblePrototype(
+			AABB{ playerB::laserPartHitbox },
+			EnemyCollisions::Source{},
+			BulletCollisions::Source{},
+			Damage{ playerB::laserPartDamage },
+			SpriteInstruction{
+				spriteStorage.get(L"laserBombPart1")->sprite,
+				config::playerBulletDepth + 10
+			},
+			game::AnimationList{
+				components::Animation {
+					{
+						L"laserBombPart1",
+						L"laserBombPart2",
+						L"laserBombPart3",
+						L"laserBombPart4"
+					},
+					false
+				},
+				5
+			},
+			game::DeathCommand{ game::DeathCommand::Commands::deathSpawn },
+			DeathSpawn{ ScriptList{ {
+				scriptStorage.get(L"laserBombPartExplode"),
+				std::string{ ScriptList::spawnString } + "laserBombPartExplode"
+			} } }
+		).heapClone());
+		add("laserBombPartExplode", EntityBuilder::makeVisiblePrototype(
+			SpriteInstruction{
+				spriteStorage.get(L"laserBombPartExplode1")->sprite,
+				config::playerBulletDepth + 10
+			},
+			game::AnimationList{
+				components::Animation {
+					{
+						L"laserBombPartExplode1",
+						L"laserBombPartExplode2",
+						L"laserBombPartExplode3"
+					},
+					false
+				},
+				4
+			},
+			ScriptList{ {
+				scriptStorage.get(L"removeLaserBombPartExplode"),
+				"removeLaserBombPartExplode"
+			} }
 		).heapClone());
 	}
 	

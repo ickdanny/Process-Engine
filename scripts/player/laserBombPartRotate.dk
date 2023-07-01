@@ -1,0 +1,25 @@
+let lifetime = 205;
+let angularVelocity = 1.0;
+
+let originalPos = entityPosition();
+let currentPos = originalPos;
+let center = readPoint("laserBombPos");
+let dist = pointDist(center, currentPos);
+let currentAngle = pointAngle(center, currentPos);
+
+let offset;
+let nextPos;
+let vel;
+
+for(let t = 0; t < lifetime; t = t + 1){
+    currentAngle = currentAngle + angularVelocity;
+    offset = makePolar(dist, currentAngle);
+    nextPos = center + offset;
+    vel = makePolar(pointDist(currentPos, nextPos), pointAngle(currentPos, nextPos));
+    setVelocity(vel);
+    currentPos = nextPos;
+    setRotation(currentAngle + 90.0);
+    stall();
+}
+
+die();

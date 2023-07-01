@@ -190,6 +190,9 @@ namespace process::game::systems {
 		addNativeFunction("showDialogue", std::bind(&ScriptSystem::showDialogue, this, _1));
 		addNativeFunction("win", std::bind(&ScriptSystem::win, this, _1));
 		addNativeFunction("endStage", std::bind(&ScriptSystem::endStage, this, _1));
+		addNativeFunction("broadcast", std::bind(&ScriptSystem::broadcast, this, _1));
+		addNativeFunction("readPoint", std::bind(&ScriptSystem::readPoint, this, _1));
+		addNativeFunction("killMessage", std::bind(&ScriptSystem::killMessage, this, _1));
 		
 		//spawning
 		addNativeFunction("spawn", std::bind(&ScriptSystem::spawn, this, _1));
@@ -1641,6 +1644,71 @@ namespace process::game::systems {
 			);
 		}
 		return false;
+	}
+	
+	/**
+	 * (Point2 point) and string message
+	 */
+	ScriptSystem::DataType ScriptSystem::broadcast(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(2, parameters, "broadcast");
+		const DataType& data{ parameters[0] };
+		const std::string& message{ std::get<std::string>(parameters[1]) };
+		if(std::holds_alternative<Point2>(data)){
+			const Point2& point{ std::get<Point2>(data) };
+			currentScenePointer->getChannel(SceneTopics::points).addMessage(
+				{ point, message }
+			);
+			return false;
+		}
+		else{
+			throw std::runtime_error{
+				"native func broadcast bad first arg: " + std::to_string(data.index())
+			};
+		}
+	}
+	
+	/**
+	 * string message
+	 */
+	ScriptSystem::DataType ScriptSystem::readPoint(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(1, parameters, "readPoint");
+		const std::string& message{ std::get<std::string>(parameters[0]) };
+		const auto& pointsChannel{ currentScenePointer->getChannel(SceneTopics::points) };
+		for(const auto& tuple : pointsChannel.getMessages()){
+			if(std::get<1>(tuple) == message){
+				return std::get<0>(tuple);
+			}
+		}
+		throw std::runtime_error{
+			"native func readPoint failed to find message " + message
+		};
+	}
+	
+	/**
+	 * TypeVar dummy, string message
+	 */
+	ScriptSystem::DataType ScriptSystem::killMessage(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(2, parameters, "killMessage");
+		const DataType& dummy{ parameters[0] };
+		const std::string& message{ std::get<std::string>(parameters[1]) };
+		if(std::holds_alternative<Point2>(dummy)){
+			auto& pointsChannel{ currentScenePointer->getChannel(SceneTopics::points) };
+			auto& messages{ pointsChannel.getMessages() };
+			messages.erase(
+				std::remove_if(
+					messages.begin(),
+					messages.end(),
+					[&](const auto& tuple) { return std::get<1>(tuple) == message; }
+				),
+				messages.end()
+			);
+			return false;
+		}
+		else{
+			throw std::runtime_error{
+				"native func killMessage bad dummy arg: " + std::to_string(dummy.index())
+			};
+		}
 	}
 	
 	//string prototypeID, Point pos, PolarVector vel, OPTIONAL string scriptID

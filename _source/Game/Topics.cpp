@@ -35,4 +35,5 @@ namespace process::game {
 	const Topic<> SceneTopics::clearFlag{};
 	const Topic<> SceneTopics::pauseFlag{};
 	const Topic<> SceneTopics::winFlag{};
+	const Topic<std::tuple<wasp::math::Point2, std::string>> SceneTopics::points{};
 }

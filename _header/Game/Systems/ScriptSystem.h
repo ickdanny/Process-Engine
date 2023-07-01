@@ -175,6 +175,9 @@ namespace process::game::systems {
 		DataType showDialogue(const std::vector<DataType>& parameters);
 		DataType win(const std::vector<DataType>& parameters);
 		DataType endStage(const std::vector<DataType>& parameters);
+		DataType broadcast(const std::vector<DataType>& parameters);
+		DataType readPoint(const std::vector<DataType>& parameters);
+		DataType killMessage(const std::vector<DataType>& parameters);
 		
 		//spawning
 		DataType spawn(const std::vector<DataType>& parameters);

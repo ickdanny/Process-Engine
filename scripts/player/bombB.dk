@@ -1,1 +1,21 @@
-print("TO DO bomb B");
+let symmetry = 3;
+let colIncrement = 10.0;
+let colCount = 20;
+
+let entityPos = entityPosition();
+
+func spawnLaserBombPart(offset){
+    let spawnPos = entityPos + offset;
+    spawn("laserBombPart", spawnPos, zeroPolar, "laserBombPartRotate");
+}
+
+func spawnColumn(offset){
+    column(offset, colCount, colIncrement, spawnLaserBombPart);
+}
+
+let baseOffset = makePolar(colIncrement, 90.0);
+
+ring(baseOffset, symmetry, spawnColumn);
+
+broadcast(entityPos, "laserBombPos");
+#killed by the explode

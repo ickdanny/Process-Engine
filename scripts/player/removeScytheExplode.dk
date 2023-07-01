@@ -1,4 +1,4 @@
 stall();
 removeCollidable();
-timer(20);
+timer(11);
 removeEntity();
