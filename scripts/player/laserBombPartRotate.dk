@@ -1,5 +1,5 @@
 let lifetime = 205;
-let angularVelocity = 1.0;
+let angularVelocity = 240.0 / (lifetime + 1);
 
 let originalPos = entityPosition();
 let currentPos = originalPos;

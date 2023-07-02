@@ -26,8 +26,10 @@ namespace process::game::systems{
 		constexpr int laserDamage{ 7 };
 		constexpr float laserOutbound{ -20.0f };
 		
-		constexpr float laserPartHitbox{ 15.0f };
-		constexpr int laserPartDamage{ 2 };//damage per tick
+		constexpr float laserPartHitbox{ 40.0f };
+		constexpr int laserPartDamage{ 1 };//damage per tick
+		constexpr float haloHitbox{ 50.0f };
+		constexpr int haloDamage{ 1 };//damage per tick
 	}
 	
 	using AABB = wasp::math::AABB;
@@ -186,6 +188,54 @@ namespace process::game::systems{
 			ScriptList{ {
 				scriptStorage.get(L"removeLaserBombPartExplode"),
 				"removeLaserBombPartExplode"
+			} }
+		).heapClone());
+		add("halo", EntityBuilder::makeVisiblePrototype(
+			AABB{ playerB::haloHitbox },
+			EnemyCollisions::Source{},
+			BulletCollisions::Source{},
+			Damage{ playerB::haloDamage },
+			SpriteInstruction{
+				spriteStorage.get(L"halo1")->sprite,
+				config::playerBulletDepth + 11
+			},
+			SpriteSpin{ 240.0f / 205.0f },
+			game::AnimationList{
+				components::Animation {
+					{
+						L"halo1",
+						L"halo2",
+						L"halo3",
+					},
+					false
+				},
+				5
+			},
+			game::DeathCommand{ game::DeathCommand::Commands::deathSpawn },
+			DeathSpawn{ ScriptList{ {
+				scriptStorage.get(L"haloExplode"),
+				std::string{ ScriptList::spawnString } + "haloExplode"
+			} } }
+		).heapClone());
+		add("haloExplode", EntityBuilder::makeVisiblePrototype(
+			SpriteInstruction{
+				spriteStorage.get(L"haloExplode1")->sprite,
+				config::playerBulletDepth + 11
+			},
+			game::AnimationList{
+				components::Animation {
+					{
+						L"haloExplode1",
+						L"haloExplode2",
+						L"haloExplode3"
+					},
+					false
+				},
+				4
+			},
+			ScriptList{ {
+				scriptStorage.get(L"removeHaloExplode"),
+				"removeHaloExplode"
 			} }
 		).heapClone());
 	}
