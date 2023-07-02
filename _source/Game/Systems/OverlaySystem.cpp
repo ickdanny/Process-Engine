@@ -17,7 +17,7 @@ namespace process::game::systems {
         constexpr Point2 lifeInitPos{ initX, initY };
         constexpr Point2 bombInitPos{ initX, initY + yOffset };
         constexpr Point2 powerMeterPos{
-            initX - 5.0f,
+            initX + 37.0f,
             bombInitPos.y + yOffset
         };
     }
@@ -239,10 +239,12 @@ namespace process::game::systems {
 		};
         subImage.width = static_cast<float>(currentPower);
 
+		/*
         //update our position
         auto& position{
 			dataStorage.getComponent<Position>(powerMeterHandle)
 		};
         position.x = powerMeterPos.x + static_cast<float>(currentPower) / 2.0f;
+        */
     }
 }

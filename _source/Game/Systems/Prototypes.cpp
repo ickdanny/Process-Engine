@@ -32,19 +32,18 @@ namespace process::game::systems{
 		constexpr int haloDamage{ 1 };//damage per tick
 	}
 	
+	namespace enemy{
+		constexpr int spawnHealth{ 32000 };//set health in each script
+		constexpr float outbound{ -30.0f };
+		constexpr float machineHitbox{ 13.0f };
+	}
+	
 	using AABB = wasp::math::AABB;
 	
 	Prototypes::Prototypes(
 		resources::SpriteStorage& spriteStorage,
 		resources::ScriptStorage& scriptStorage
 	){
-		add("test", EntityBuilder::makeVisibleCollidablePrototype(
-			AABB{ 0.0f },
-			SpriteInstruction{
-				spriteStorage.get(L"life")->sprite,
-				config::playerDepth
-			}
-		).heapClone());
 		add("projectileExplode", EntityBuilder::makeVisiblePrototype(
 			SpriteInstruction{
 				spriteStorage.get(L"explode_1")->sprite,
@@ -66,7 +65,8 @@ namespace process::game::systems{
 				"removeExplode"
 			} }
 		).heapClone());
-		//playerA
+		
+		//PLAYER A
 		add("boomerang", EntityBuilder::makeVisibleCollidablePrototype(
 			AABB{ playerA::boomerangHitbox },
 			EnemyCollisions::Source{ components::CollisionCommands::death },
@@ -125,7 +125,8 @@ namespace process::game::systems{
 				"removeScytheExplode"
 			} }
 		).heapClone());
-		//playerB
+		
+		//PLAYER B
 		add("smallLaser", EntityBuilder::makeVisibleCollidablePrototype(
 			AABB{ playerB::laserHitbox },
 			EnemyCollisions::Source{ components::CollisionCommands::death },
@@ -237,6 +238,22 @@ namespace process::game::systems{
 				scriptStorage.get(L"removeHaloExplode"),
 				"removeHaloExplode"
 			} }
+		).heapClone());
+		
+		//MOBS
+		add("machineOrange", EntityBuilder::makeVisibleCollidablePrototype(
+			AABB{ enemy::machineHitbox },
+			PlayerCollisions::Source{},
+			EnemyCollisions::Target{ components::CollisionCommands::damage },
+			SpriteInstruction{
+				spriteStorage.get(L"machineOrange")->sprite,
+				config::enemyDepth
+			},
+			RotateSpriteForwardMarker{},
+			Health{ enemy::spawnHealth },
+			Outbound{ enemy::outbound },
+			DeathCommand{ DeathCommand::Commands::deathSpawn },
+			DeathSpawn{}//todo: script needs to be able to set death spawn
 		).heapClone());
 	}
 	
