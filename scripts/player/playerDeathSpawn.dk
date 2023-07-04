@@ -1,1 +1,30 @@
-print("TO DO player death spawn");
+clearBullets();
+
+let pickupInbound = 15.0;
+let yHigh = 50.0;
+
+let position = entityPosition();
+
+func randomPoint(){
+    let x = random(pickupInbound, gameWidth - pickupInbound);
+    let y = random(pickupInbound, yHigh);
+    let point = makePoint(x, y);
+    return point + gameOffset;
+}
+
+let velocityScale = 1.0 / 50.0;
+
+func randomVelocity(){
+    let targetPoint = randomPoint();
+    let velocityToPoint = makePolar(
+        pointDist(position, targetPoint),
+        pointAngle(position, targetPoint)
+    );
+    return velocityToPoint * velocityScale;
+}
+
+spawn("powerLarge", position, randomVelocity(), "playerDeathPickupFall");
+
+for(let i = 0; i < 2; i = i + 1){
+    spawn("powerSmall", position, randomVelocity(), "playerDeathPickupFall");
+}

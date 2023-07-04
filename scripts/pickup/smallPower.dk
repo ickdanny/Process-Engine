@@ -1,0 +1,1 @@
+spawn("powerSmall", entityPosition(), makePolar(initPickupSpeed(), 90.0), "pickupFall");

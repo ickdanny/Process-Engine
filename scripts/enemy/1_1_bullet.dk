@@ -1,0 +1,10 @@
+let initWaitTime = 5;
+let turnTime = 40;
+let angleOffset = 80.0;
+
+timer(initWaitTime);
+
+if(getX(toVector(entityVelocity())) > 0.0){
+    angleOffset = -angleOffset;
+}
+shiftAnglePeriod(entityAngle() + angleOffset, turnTime);

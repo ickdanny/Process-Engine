@@ -1,13 +1,9 @@
 #include "Prototypes.h"
 
+#include "StringUtil.h"
+
 namespace process::game::systems{
-	namespace enemyProjectiles{
-		constexpr float smallHitbox{ 3.0f };
-		constexpr float mediumHitbox{ 6.15f };
-		constexpr float largeHitbox{ 10.0f };
-		constexpr float sharpHitbox{ 3.75f };
-		constexpr float outbound{ -21.0f };
-	}
+	
 	
 	namespace playerA{
 		constexpr float boomerangHitbox{ 9.0f };
@@ -15,7 +11,7 @@ namespace process::game::systems{
 		constexpr float boomerangOutbound{ -50.0f };
 		constexpr float boomerangSpin{ 21.728172f };
 		
-		constexpr float scytheHitbox{ 50.0f };
+		constexpr float scytheHitbox{ 35.0f };
 		constexpr int scytheDamage{ 1 };//damage per tick
 		constexpr int scytheExplodeDamage{ 60 };
 		constexpr float scytheSpin{ 19.4892f };
@@ -26,10 +22,16 @@ namespace process::game::systems{
 		constexpr int laserDamage{ 7 };
 		constexpr float laserOutbound{ -20.0f };
 		
-		constexpr float laserPartHitbox{ 40.0f };
+		constexpr float laserPartHitbox{ 15.0f };
 		constexpr int laserPartDamage{ 1 };//damage per tick
-		constexpr float haloHitbox{ 50.0f };
+		constexpr float haloHitbox{ 20.0f };
 		constexpr int haloDamage{ 1 };//damage per tick
+	}
+	
+	namespace pickup{
+		constexpr float smallHitbox{ 8.0f };
+		constexpr float largeHitbox{ 12.0f };
+		constexpr float outbound{ -100.0f };
 	}
 	
 	namespace enemy{
@@ -38,34 +40,51 @@ namespace process::game::systems{
 		constexpr float machineHitbox{ 13.0f };
 	}
 	
+	namespace enemyProjectile{
+		constexpr float smallHitbox{ 3.0f };
+		constexpr float mediumHitbox{ 4.0f };
+		constexpr float largeHitbox{ 10.0f };
+		constexpr float sharpHitbox{ 3.75f };
+		constexpr float outbound{ -21.0f };
+	}
+	
 	using AABB = wasp::math::AABB;
 	
 	Prototypes::Prototypes(
-		resources::SpriteStorage& spriteStorage,
-		resources::ScriptStorage& scriptStorage
+		resources::ScriptStorage& scriptStorage,
+		resources::SpriteStorage& spriteStorage
 	){
 		add("projectileExplode", EntityBuilder::makeVisiblePrototype(
 			SpriteInstruction{
-				spriteStorage.get(L"explode_1")->sprite,
+				spriteStorage.get(L"projectileExplode1")->sprite,
 				config::playerBulletDepth - 1
 			},
 			game::AnimationList{
 				components::Animation {
 					{
-						L"explode_1",
-						L"explode_2",
-						L"explode_3"
+						L"projectileExplode1",
+						L"projectileExplode2",
+						L"projectileExplode3"
 					},
 					false
 				},
-				6
+				4
 			},
 			ScriptList{ {
-				scriptStorage.get(L"removeExplode"),
-				"removeExplode"
+				scriptStorage.get(L"removeProjectileExplode"),
+				"removeProjectileExplode"
 			} }
 		).heapClone());
 		
+		addPlayerPrototypes(scriptStorage, spriteStorage);
+		addPickupPrototypes(scriptStorage, spriteStorage);
+		addEnemyPrototypes(scriptStorage, spriteStorage);
+	}
+	
+	void Prototypes::addPlayerPrototypes(
+		resources::ScriptStorage& scriptStorage,
+		resources::SpriteStorage& spriteStorage
+	){
 		//PLAYER A
 		add("boomerang", EntityBuilder::makeVisibleCollidablePrototype(
 			AABB{ playerA::boomerangHitbox },
@@ -99,7 +118,7 @@ namespace process::game::systems{
 				std::string{ ScriptList::spawnString } + "scytheExplode"
 			} } }
 		).heapClone());
-		add("scytheExplode", EntityBuilder::makeVisiblePrototype(
+		add("scytheExplode", EntityBuilder::makeVisibleCollidablePrototype(
 			AABB{ playerA::scytheHitbox },
 			EnemyCollisions::Source{},
 			BulletCollisions::Source{},
@@ -144,7 +163,7 @@ namespace process::game::systems{
 			} } }
 		).heapClone());
 		add("laserBombPart", EntityBuilder::makeVisiblePrototype(
-			AABB{ playerB::laserPartHitbox },
+			Hitbox{ playerB::laserPartHitbox },
 			EnemyCollisions::Source{},
 			BulletCollisions::Source{},
 			Damage{ playerB::laserPartDamage },
@@ -192,7 +211,7 @@ namespace process::game::systems{
 			} }
 		).heapClone());
 		add("halo", EntityBuilder::makeVisiblePrototype(
-			AABB{ playerB::haloHitbox },
+			Hitbox{ playerB::haloHitbox },
 			EnemyCollisions::Source{},
 			BulletCollisions::Source{},
 			Damage{ playerB::haloDamage },
@@ -239,8 +258,107 @@ namespace process::game::systems{
 				"removeHaloExplode"
 			} }
 		).heapClone());
+	}
+	
+	void Prototypes::addPickupPrototypes(
+		resources::ScriptStorage& scriptStorage,
+		resources::SpriteStorage& spriteStorage
+	){
+		add("powerSmall", EntityBuilder::makeVisibleCollidablePrototype(
+			AABB{ pickup::smallHitbox },
+			PickupCollisions::Source{ components::CollisionCommands::pickup },
+			PickupType{ wasp::game::components::PickupType::Types::powerSmall },
+			Outbound{ pickup::outbound },
+			SpriteInstruction{
+				spriteStorage.get(L"pickupPowerSmall")->sprite,
+				config::pickupDepth
+			}
+		).heapClone());
+		add("powerLarge", EntityBuilder::makeVisibleCollidablePrototype(
+			AABB{ pickup::largeHitbox },
+			PickupCollisions::Source{ components::CollisionCommands::pickup },
+			PickupType{ wasp::game::components::PickupType::Types::powerLarge },
+			Outbound{ pickup::outbound },
+			SpriteInstruction{
+				spriteStorage.get(L"pickupPowerLarge")->sprite,
+				config::pickupDepth + 1
+			}
+		).heapClone());
+	}
+	
+	void Prototypes::addEnemyPrototypes(
+		resources::ScriptStorage& scriptStorage,
+		resources::SpriteStorage& spriteStorage
+	){
+		//PROJECTILES
+		#define addMedium(color) \
+			addEnemyProjectile( \
+				scriptStorage, \
+				spriteStorage, \
+				"medium", \
+				enemyProjectile::mediumHitbox, \
+				color \
+            )
+		addMedium("Black");
+		addMedium("DBlue");
+		addMedium("Blue");
+		addMedium("LBlue");
+		addMedium("Clear");
+		addMedium("DGray");
+		addMedium("LGray");
+		addMedium("DGreen");
+		addMedium("LGreen");
+		addMedium("Orange");
+		addMedium("DPurple");
+		addMedium("LPurple");
+		addMedium("DRed");
+		addMedium("LRed");
+		addMedium("Yellow");
+		#undef addMedium
 		
 		//MOBS
+		add("enemyExplode", EntityBuilder::makeVisiblePrototype(
+			SpriteInstruction{
+				spriteStorage.get(L"enemyExplode1")->sprite,
+				config::enemyDepth - 100
+			},
+			game::AnimationList{
+				components::Animation {
+					{
+						L"enemyExplode1",
+						L"enemyExplode2",
+						L"enemyExplode3"
+					},
+					false
+				},
+				4
+			},
+			ScriptList{ {
+				scriptStorage.get(L"removeEnemyExplode"),
+				"removeEnemyExplode"
+			} }
+		).heapClone());
+		add("bossExplode", EntityBuilder::makeVisiblePrototype(
+			SpriteInstruction{
+				spriteStorage.get(L"bossExplode1")->sprite,
+				config::enemyDepth - 100
+			},
+			game::AnimationList{
+				components::Animation {
+					{
+						L"bossExplode1",
+						L"bossExplode2",
+						L"bossExplode3"
+					},
+					false
+				},
+				4
+			},
+			ScriptList{ {
+				scriptStorage.get(L"removeBossExplode"),
+				"removeBossExplode"
+			} }
+		).heapClone());
 		add("machineOrange", EntityBuilder::makeVisibleCollidablePrototype(
 			AABB{ enemy::machineHitbox },
 			PlayerCollisions::Source{},
@@ -253,7 +371,10 @@ namespace process::game::systems{
 			Health{ enemy::spawnHealth },
 			Outbound{ enemy::outbound },
 			DeathCommand{ DeathCommand::Commands::deathSpawn },
-			DeathSpawn{}//todo: script needs to be able to set death spawn
+			DeathSpawn{ ScriptList{ {
+				scriptStorage.get(L"enemyExplode"),
+				std::string{ ScriptList::spawnString } + "enemyExplode"
+			} } }
 		).heapClone());
 	}
 	
@@ -269,6 +390,31 @@ namespace process::game::systems{
 		}
 	}
 	
+	void Prototypes::addEnemyProjectile(
+		resources::ScriptStorage& scriptStorage,
+		resources::SpriteStorage& spriteStorage,
+		const std::string& type,
+		float hitbox,
+		const std::string& color
+	){
+		add(type + color, EntityBuilder::makeVisibleCollidablePrototype(
+			AABB{ hitbox },
+			PlayerCollisions::Source{ components::CollisionCommands::death },
+			BulletCollisions::Target{ components::CollisionCommands::death },
+			ClearMarker{},
+			Damage{ 1 },
+			SpriteInstruction{
+				spriteStorage.get(stringUtil::convertToWideString(type + color))->sprite,
+				config::enemyBulletDepth
+			},
+			Outbound{ enemyProjectile::outbound },
+			DeathCommand{ DeathCommand::Commands::deathSpawn },
+			DeathSpawn{ ScriptList{ {
+				scriptStorage.get(L"projectileExplode"),
+				std::string{ ScriptList::spawnString } + "projectileExplode"
+			} } }
+		).heapClone());
+	}
 	
 	void Prototypes::add(
 		const std::string& prototypeID,

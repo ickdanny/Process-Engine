@@ -3,7 +3,7 @@
 namespace process::game::systems {
 
 	namespace {
-		constexpr int waitTime{ 55 };
+		constexpr int waitTime{ 75 };
 	}
 
 	LoadSystem::LoadSystem(wasp::channel::ChannelSet* globalChannelSetPointer)

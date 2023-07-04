@@ -1,0 +1,16 @@
+let health = 1;
+let initWaitTime = 20;
+let slowTime = 40;
+let backSpeed = -3.0;
+let finalSpeed = 3.0;
+let speedTime = 70;
+
+setHealth(health);
+addDeathSpawn("smallPower3");
+
+timer(initWaitTime);
+
+shiftSpeedPeriod(0.0, slowTime);
+addSpawn("1_1_shot");
+setSpeed(backSpeed);
+shiftSpeedPeriod(finalSpeed, speedTime);

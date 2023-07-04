@@ -1,35 +1,15 @@
 #include "Game/Systems/ScriptSystem.h"
 
 #include "Prototypes.h"
-
-#include <locale>
-#include <codecvt>
+#include "StringUtil.h"
 
 #include "Logging.h"
 
 namespace process::game::systems {
 	
-	namespace{
-		#define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
-		std::string convertFromWideString(const std::wstring& wideString){
-			//setup converter
-			using convert_type = std::codecvt_utf8<wchar_t>;
-			std::wstring_convert<convert_type, wchar_t> converter{};
-
-			return converter.to_bytes( wideString );
-		}
-		
-		std::wstring convertToWideString(const std::string& string){
-			using convert_type = std::codecvt_utf8<wchar_t>;
-			std::wstring_convert<convert_type, wchar_t> converter{};
-			
-			return converter.from_bytes(string);
-		}
-		#undef _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
-	}
-	
 	using namespace wasp::ecs;
 	using namespace wasp::ecs::entity;
+	using namespace stringUtil;
 	using namespace std::placeholders;	//for binding with _1
 	using ResourceSharedPointer = std::shared_ptr<resources::ScriptStorage::ResourceType>;
 	
@@ -41,7 +21,7 @@ namespace process::game::systems {
 		: globalChannelSetPointer { globalChannelSetPointer }
 		, scriptStoragePointer{ scriptStoragePointer }
 		, spriteStoragePointer{ spriteStoragePointer }
-		, prototypes{ *spriteStoragePointer, *scriptStoragePointer } {
+		, prototypes{ *scriptStoragePointer, *spriteStoragePointer } {
 		
 		//add native vars
 		addNativeVariable("angleEquivalenceEpsilon", 0.05f);
@@ -51,6 +31,7 @@ namespace process::game::systems {
 		addNativeVariable("gameHeight", config::gameHeight);
 		addNativeVariable("zeroVector", Vector2{ 0.0f, 0.0f });
 		addNativeVariable("zeroPolar", PolarVector{ 0.0f, 0.0f });
+		addNativeVariable("enemySpawnDist", 20.0f);
 		
 		//add native functions
 		
@@ -58,6 +39,7 @@ namespace process::game::systems {
 		addNativeFunction(darkness::reservedFunctionNames::unaryMinus, nativeUnaryMinus);
 		addNativeFunction(darkness::reservedFunctionNames::binaryPlus, nativeBinaryPlus);
 		addNativeFunction(darkness::reservedFunctionNames::binaryMinus, nativeBinaryMinus);
+		addNativeFunction(darkness::reservedFunctionNames::binaryStar, nativeBinaryStar);
 		
 		//utility functions
 		addNativeFunction("error", throwError);
@@ -151,6 +133,7 @@ namespace process::game::systems {
 		
 		//multi-scripting
 		addNativeFunction("addSpawn", std::bind(&ScriptSystem::addSpawn, this, _1));
+		addNativeFunction("addDeathSpawn", std::bind(&ScriptSystem::addDeathSpawn, this, _1));
 		addNativeFunction("clearSpawns", std::bind(&ScriptSystem::flagClearSpawns, this, _1));
 		addNativeFunction("addScript", std::bind(&ScriptSystem::addScript, this, _1));
 		
@@ -158,6 +141,7 @@ namespace process::game::systems {
 		addNativeFunction("makePoint", makePoint);
 		addNativeFunction("makeVector", makeVector);
 		addNativeFunction("makePolar", makePolar);
+		addNativeFunction("toVector", toVector);
 		addNativeFunction("getX", getX);
 		addNativeFunction("getY", getY);
 		addNativeFunction("getR", getR);
@@ -485,6 +469,41 @@ namespace process::game::systems {
 		}
 	}
 	
+	ScriptSystem::DataType ScriptSystem::nativeBinaryStar(
+		const std::vector<DataType>& parameters
+	){
+		throwIfNativeFunctionWrongArity(2, parameters, "native binary star");
+		const DataType& leftData{ parameters[0] };
+		const DataType& rightData{ parameters[1] };
+		if(std::holds_alternative<Vector2>(leftData)){
+			const Vector2& left{ std::get<Vector2>(leftData) };
+			if(std::holds_alternative<int>(rightData)
+			    || std::holds_alternative<float>(rightData))
+			{
+				float right{ getAsFloat(rightData) };
+				return left * right;
+			}
+			else{
+				throw std::runtime_error{ "native binary star bad right type for vector!" };
+			}
+		}
+		else if(std::holds_alternative<PolarVector>(leftData)){
+			const PolarVector& left{ std::get<PolarVector>(leftData) };
+			if(std::holds_alternative<int>(rightData)
+				|| std::holds_alternative<float>(rightData))
+			{
+				float right{ getAsFloat(rightData) };
+				return PolarVector{ left.getMagnitude() * right, left.getAngle() };
+			}
+			else{
+				throw std::runtime_error{ "native binary star bad right type for polar!" };
+			}
+		}
+		else{
+			throw std::runtime_error{ "native binary star bad left type!" };
+		}
+	}
+	
 	/**
 	 * any... toPrint
 	 */
@@ -777,7 +796,9 @@ namespace process::game::systems {
 		return false;
 	}
 	
-	ScriptSystem::DataType ScriptSystem::getDifficulty(const std::vector<DataType>& parameters){
+	ScriptSystem::DataType ScriptSystem::getDifficulty(
+		const std::vector<DataType>& parameters
+	){
 		throwIfNativeFunctionWrongArity(0, parameters, "getDifficulty");
 		auto& gameStateChannel{ globalChannelSetPointer->getChannel(GlobalTopics::gameState) };
 		if(gameStateChannel.isEmpty()){
@@ -791,7 +812,9 @@ namespace process::game::systems {
 	) {
 		throwIfNativeFunctionWrongArity(0, parameters, "setCollidable");
 		EntityHandle entityHandle{ makeCurrentEntityHandle() };
-		componentOrderQueue.queueSetComponent<CollidableMarker>(entityHandle, {});
+		componentOrderQueue.queueSetComponent<CollidableMarker>(
+			entityHandle, CollidableMarker{}
+		);
 		return false;
 	}
 	
@@ -828,6 +851,38 @@ namespace process::game::systems {
 				scriptPointer,
 				std::string { ScriptList::spawnString } + " " + spawnID
 		});
+		return false;
+	}
+	
+	/**
+	 * string spawnName
+	 */
+	ScriptSystem::DataType ScriptSystem::addDeathSpawn(
+		const std::vector<DataType>& parameters
+	) {
+		throwIfNativeFunctionWrongArity(1, parameters, "addDeathSpawn");
+		const std::string& spawnID{ std::get<std::string>(parameters[0]) };
+		const auto& scriptPointer{ scriptStoragePointer->get(convertToWideString(spawnID)) };
+		auto& dataStorage{ currentScenePointer->getDataStorage() };
+		const auto& currentEntityHandle{ dataStorage.makeHandle(currentEntityID) };
+		if(dataStorage.containsComponent<DeathSpawn>(currentEntityHandle)){
+			DeathSpawn& deathSpawn{
+				dataStorage.getComponent<DeathSpawn>(currentEntityHandle)
+			};
+			deathSpawn.scriptList.push_back({
+				scriptPointer,
+				std::string { ScriptList::spawnString } + " " + spawnID
+			});
+		}
+		else{
+			componentOrderQueue.queueSetComponent(
+				currentEntityHandle,
+				DeathSpawn{ { {
+					scriptPointer,
+					std::string { ScriptList::spawnString } + " " + spawnID
+				} }	}
+			);
+		}
 		return false;
 	}
 	
@@ -934,6 +989,14 @@ namespace process::game::systems {
 			getAsFloat(parameters[0]),
 		    getAsFloat(parameters[1])
 		};
+	}
+	
+	/**
+	 * Polar polar
+	 */
+	ScriptSystem::DataType ScriptSystem::toVector(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(1, parameters, "toVector");
+		return static_cast<Vector2>(std::get<PolarVector>(parameters[0]));
 	}
 	
 	/**

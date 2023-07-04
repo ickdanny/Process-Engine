@@ -27,9 +27,9 @@ namespace process::game::systems {
 			static const Topic<Group*> sourceGroupPointerStorageTopic{};
 			auto sourceGroupPointer{
 				getGroupPointer<
-					Position, 
-					Hitbox, 
-					CollidableMarker, 
+					Position,
+					Hitbox,
+					CollidableMarker,
 					typename CollisionType::Source
 				>(
 					scene,

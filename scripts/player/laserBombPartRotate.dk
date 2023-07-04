@@ -1,3 +1,5 @@
+addScript("laserBombPartCollidable");
+
 let lifetime = 205;
 let angularVelocity = 240.0 / (lifetime + 1);
 

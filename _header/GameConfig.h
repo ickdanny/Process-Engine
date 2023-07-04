@@ -48,16 +48,7 @@ namespace process::game::config {
 	constexpr int continueLives{ 2 };
 	constexpr int respawnBombs{ 2 };
 	
-	constexpr int playerShotMaxTick{ 40 };
-	
 	//pickups
-	constexpr float pickupFinalSpeed{ -1.7f };
-	
-	constexpr float smallPickupHitbox{ 8.0f };
-	constexpr float largePickupHitbox{ 12.0f };
-	
-	constexpr float pickupOutbound{ -100.0f };
-	
 	constexpr int smallPowerGain{ 1 };
 	constexpr int largePowerGain{ 5 };
 	

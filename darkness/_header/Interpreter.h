@@ -2351,6 +2351,9 @@ namespace darkness{
 			const DataType& functionWrapperData,
 			const UserFunctionWrapper& userFunctionWrapper
 		){
+			if(userFunctionWrapper.paramNames.size() != data.args.size()){
+				throwError("user function bad arity");
+			}
 			//create a new environment for the function
 			pushEmptyEnvironment();
 			//evaluate args and store in the function environment; each arg may stall

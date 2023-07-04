@@ -86,6 +86,7 @@ namespace process::game::systems {
 		static DataType nativeUnaryMinus(const std::vector<DataType>& parameters);
 		static DataType nativeBinaryPlus(const std::vector<DataType>& parameters);
 		static DataType nativeBinaryMinus(const std::vector<DataType>& parameters);
+		static DataType nativeBinaryStar(const std::vector<DataType>& parameters);
 		
 		//utility functions
 		static DataType throwError(const std::vector<DataType>& parameters);
@@ -136,6 +137,7 @@ namespace process::game::systems {
 		
 		//multi-scripting
 		DataType addSpawn(const std::vector<DataType>& parameters);
+		DataType addDeathSpawn(const std::vector<DataType>& parameters);
 		DataType flagClearSpawns(const std::vector<DataType>& parameters);
 		DataType addScript(const std::vector<DataType>& parameters);
 		
@@ -143,6 +145,7 @@ namespace process::game::systems {
 		static DataType makePoint(const std::vector<DataType>& parameters);
 		static DataType makeVector(const std::vector<DataType>& parameters);
 		static DataType makePolar(const std::vector<DataType>& parameters);
+		static DataType toVector(const std::vector<DataType>& parameters);
 		static DataType getX(const std::vector<DataType>& parameters);
 		static DataType getY(const std::vector<DataType>& parameters);
 		static DataType getR(const std::vector<DataType>& parameters);

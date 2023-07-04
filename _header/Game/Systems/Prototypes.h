@@ -20,13 +20,36 @@ namespace process::game::systems{
 		std::unordered_map<std::string, ComponentTupleSharedPointer> prototypeMap{};
 	public:
 		Prototypes(
-			resources::SpriteStorage& spriteStorage,
-			resources::ScriptStorage& scriptStorage
+			resources::ScriptStorage& scriptStorage,
+			resources::SpriteStorage& spriteStorage
 		);
 		
 		ComponentTupleSharedPointer get(const std::string& prototypeID) const;
 		
 	private:
+		void addPlayerPrototypes(
+			resources::ScriptStorage& scriptStorage,
+			resources::SpriteStorage& spriteStorage
+		);
+		
+		void addPickupPrototypes(
+			resources::ScriptStorage& scriptStorage,
+			resources::SpriteStorage& spriteStorage
+		);
+		
+		void addEnemyPrototypes(
+			resources::ScriptStorage& scriptStorage,
+			resources::SpriteStorage& spriteStorage
+		);
+		
+		void addEnemyProjectile(
+			resources::ScriptStorage& scriptStorage,
+			resources::SpriteStorage& spriteStorage,
+			const std::string& type,
+			float hitbox,
+			const std::string& color
+		);
+		
 		void add(
 			const std::string& prototypeID,
 			const ComponentTupleSharedPointer& prototypePointer
