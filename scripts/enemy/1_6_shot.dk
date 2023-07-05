@@ -1,0 +1,22 @@
+let timeBetweenShots = diff(120, 60, 30, 20);
+let speed = diff(1.8, 2.0, 2.4, 3.3);
+let bulletOffset = 6.5;
+
+timer(random(0, timeBetweenShots));
+
+let basePos;
+func spawnBullet(velocity){
+    let offsetVector = makePolar(getR(velocity), getTheta(velocity) + 90.0);
+    spawn("smallLRed", basePos + offsetVector, velocity);
+    spawn("smallLRed", basePos - offsetVector, velocity);
+}
+
+let xOffset = getX(gameOffset);
+func isInBounds(x){
+    return x > xOffset & x < gameWidth + xOffset;
+}
+
+while(isInBounds(getX(basePos = entityPosition()))){
+    spawnBullet(makePolar(speed, angleToPlayer()));
+    timer(timeBetweenShots);
+}

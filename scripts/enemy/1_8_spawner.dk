@@ -1,0 +1,22 @@
+let distBetween = 42.2 - 18.4;
+let dist = (gameWidth - distBetween) / 2.0;
+let timeBetweenSpawns = 21;
+let numSpawns = 5;
+let speed = 1.856;
+
+let positionRight = getTopSpawnRight(dist);
+let positionLeft = getTopSpawnLeft(dist);
+let velocity = makePolar(speed, -90.0);
+
+func spawnLeftTurn(position, velocity){
+    spawn("machineOrange", position, velocity, "1_6_enemyLeft");
+}
+func spawnRightTurn(position, velocity){
+    spawn("machineOrange", position, velocity, "1_6_enemyRight");
+}
+
+for(let i = 0; i < numSpawns; i = i + 1){
+    spawnRightTurn(positionRight, velocity);
+    spawnLeftTurn(positionLeft, velocity);
+    timer(timeBetweenSpawns);
+}

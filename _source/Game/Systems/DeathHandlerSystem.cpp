@@ -118,7 +118,7 @@ namespace process::game::systems {
 			DeathSpawn& deathSpawn{
 				dataStorage.getComponent<DeathSpawn>(entityHandle)
 			};
-			auto scriptList{ std::move(deathSpawn.scriptList) };
+			auto scriptList{ deathSpawn.scriptList };
 			scriptList.push_back(ghostScriptContainer);
 			//add a ghost with the death spawn program list and possibly position
 			if (dataStorage.containsComponent<Position>(entityHandle)) {

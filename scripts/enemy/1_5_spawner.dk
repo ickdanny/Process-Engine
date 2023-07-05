@@ -1,0 +1,5 @@
+let pos = getTopSpawnLeft(33.0);
+let initSpeed = 1.2;
+let initVel = makePolar(initSpeed, -90.0);
+
+spawn("machine2Orange", pos, initVel, "1_3_enemy");

@@ -29,9 +29,12 @@ namespace process::game::systems {
 		addNativeVariable("gameOffset", config::gameOffset);
 		addNativeVariable("gameWidth", config::gameWidth);
 		addNativeVariable("gameHeight", config::gameHeight);
+		addNativeVariable("zeroPoint", Point2{ 0.0f, 0.0f });
 		addNativeVariable("zeroVector", Vector2{ 0.0f, 0.0f });
 		addNativeVariable("zeroPolar", PolarVector{ 0.0f, 0.0f });
 		addNativeVariable("enemySpawnDist", 20.0f);
+		addNativeVariable("pi", wasp::math::pi);
+		addNativeVariable("phi", wasp::math::phi);
 		
 		//add native functions
 		

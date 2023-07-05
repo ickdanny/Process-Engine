@@ -1,6 +1,5 @@
 let center = readPoint("laserBombPos");
 setRotation(pointAngle(center, entityPosition()) + 90.0);
 stall();
-killMessage(center, "laserBombPos");
 timer(11);
 removeEntity();

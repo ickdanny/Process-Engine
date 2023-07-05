@@ -1,0 +1,8 @@
+let initWaitTime = 11;
+let slowTime = 29;
+let slowestSpeed = 0.1;
+
+timer(initWaitTime);
+shiftSpeedPeriod(slowestSpeed, slowTime);
+addDeathSpawn("1_2_bulletExplode");
+die();

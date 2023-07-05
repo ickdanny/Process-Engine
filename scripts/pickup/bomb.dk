@@ -1,0 +1,1 @@
+spawn("bomb", entityPosition(), makePolar(initPickupSpeed(), 90.0), "pickupFall");

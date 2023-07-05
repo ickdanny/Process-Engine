@@ -1,0 +1,11 @@
+let health = 1;
+let timeBeforeTurn = 33;
+let turnTime = 33;
+
+setHealth(health);
+addDeathSpawn("smallPower3");
+addSpawn("1_6_shot");
+
+timer(timeBeforeTurn);
+
+shiftAnglePeriod(0.0, turnTime);

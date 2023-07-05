@@ -928,15 +928,18 @@ namespace process::game::systems {
 		attachButtonsVertical(dataStorage, buttonHandles);
 		setInitSelectedElement(scene, buttonHandles[0]);
 
+		//receive the player data from ContinueSystem
 		auto& playerDataChannel{
 			globalChannelSetPointer->getChannel(GlobalTopics::playerData)
 		};
 		if (!playerDataChannel.hasMessages()) {
 			throw std::runtime_error{ "no player data for init continue scene!" };
 		}
+		const auto playerData{ playerDataChannel.getMessages()[0] };
+		playerDataChannel.clear();
 		constexpr float iconY{ 80.0f };
 		constexpr float xShift{ 15.0f };
-		switch (playerDataChannel.getMessages()[0].continues) {
+		switch (playerData.continues) {
 			case 2:
 				addBackground(
 					dataStorage,

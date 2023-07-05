@@ -90,7 +90,7 @@ namespace process::game::systems {
 		//pause the game
 		scene.getChannel(SceneTopics::pauseFlag).addMessage();
 
-		//send player data to global
+		//send player data to global for init system to create continue menu
 		auto& dataStorage{ scene.getDataStorage() };
 		PlayerData& playerData{
 			dataStorage.getComponent<PlayerData>(playerHandle)

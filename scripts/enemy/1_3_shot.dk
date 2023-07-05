@@ -1,0 +1,20 @@
+let maxTime = 170;
+let symmetry = diff(4, 8, 10, 12);
+let tick = diff(20, 15, 10, 7);
+let angleOffset = (360.0 / symmetry) * phi;
+let speed = 2.27;
+
+let position = entityPosition();
+func spawnBullet(velocity){
+    spawn("smallLRed", position, velocity);
+}
+
+let angle = angleToPlayer();
+if(angle < 90.0 | angle > 270.0){
+    angleOffset = -angleOffset;
+}
+for(let t = 0; t < maxTime; t = t + tick){
+    ring(makePolar(speed, angle), symmetry, spawnBullet);
+    angle = angle + angleOffset;
+    timer(tick);
+}
