@@ -1,4 +1,4 @@
-let timeBetweenShots = diff(120, 60, 30, 20);
+let timeBetweenShots = diff(100, 50, 25, 10);
 let speed = diff(1.8, 2.0, 2.4, 3.3);
 let bulletOffset = 6.5;
 

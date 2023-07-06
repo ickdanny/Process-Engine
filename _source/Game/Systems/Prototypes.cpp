@@ -7,7 +7,7 @@ namespace process::game::systems{
 	
 	namespace playerA{
 		constexpr float boomerangHitbox{ 9.0f };
-		constexpr int boomerangDamage{ 10 };
+		constexpr int boomerangDamage{ 8 };
 		constexpr float boomerangOutbound{ -50.0f };
 		constexpr float boomerangSpin{ 21.728172f };
 		
@@ -37,8 +37,8 @@ namespace process::game::systems{
 	namespace enemy{
 		constexpr int spawnHealth{ 32000 };//set health in each script
 		constexpr float outbound{ -30.0f };
-		constexpr float machineHitbox{ 13.0f };
-		constexpr float machine2Hitbox{ 12.0f };
+		constexpr float machineHitbox{ 12.0f };
+		constexpr float machine2Hitbox{ 11.0f };
 	}
 	
 	namespace enemyProjectile{
@@ -441,6 +441,23 @@ namespace process::game::systems{
 				},
 				3
 			},
+			Health{ enemy::spawnHealth },
+			Outbound{ enemy::outbound },
+			DeathCommand{ DeathCommand::Commands::deathSpawn },
+			DeathSpawn{ ScriptList{ {
+				scriptStorage.get(L"enemyExplode"),
+				std::string{ ScriptList::spawnString } + "enemyExplode"
+			} } }
+		).heapClone());
+		add("machineRed", EntityBuilder::makeVisibleCollidablePrototype(
+			AABB{ enemy::machineHitbox },
+			PlayerCollisions::Source{},
+			EnemyCollisions::Target{ components::CollisionCommands::damage },
+			SpriteInstruction{
+				spriteStorage.get(L"machineRed")->sprite,
+				config::enemyDepth
+			},
+			RotateSpriteForwardMarker{},
 			Health{ enemy::spawnHealth },
 			Outbound{ enemy::outbound },
 			DeathCommand{ DeathCommand::Commands::deathSpawn },

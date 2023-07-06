@@ -182,6 +182,18 @@ int WINAPI WinMain(HINSTANCE instanceHandle, HINSTANCE, PSTR, int windowShowMode
 		throw;
 	}
 	#else
+	catch( std::exception& exception ) {
+		std::ofstream outStream { "errorMsg.txt" };
+		outStream << exception.what();
+		Sleep(100);
+		std::exit(3);
+	}
+	catch( std::string& str ) {
+		std::ofstream outStream { "errorMsg.txt" };
+		outStream << str;
+		Sleep(100);
+		std::exit(2);
+	}
 	catch (...) {
 		std::exit(1);
 	}

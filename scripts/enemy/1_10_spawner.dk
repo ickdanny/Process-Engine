@@ -1,0 +1,31 @@
+func spawnMachine(pos, vel){
+    spawn("machineRed", pos, vel, "1_10_enemy");
+}
+
+let timeBetweenSpawns = 30;
+let numPairs1 = 3;
+let numPairs2 = 3;
+let distBetweenSpawns = 20.0;
+let initSpeed = 2.0;
+let rightAngle = -160.0;
+let rightVelocity = makePolar(initSpeed, rightAngle);
+let leftVelocity = flipY(rightVelocity);
+
+let spawnPos;
+for(let i = 0; i < numPairs1; i = i + 1){
+    spawnPos = getRightSpawn(distBetweenSpawns * i);
+    spawnMachine(spawnPos, rightVelocity);
+    timer(timeBetweenSpawns);
+    spawnPos = getLeftSpawn(distBetweenSpawns * i);
+    spawnMachine(spawnPos, leftVelocity);
+    timer(timeBetweenSpawns);
+}
+
+for(let i = 0; i < numPairs2; i = i + 1){
+    spawnPos = getRightSpawn(distBetweenSpawns * i);
+    spawnMachine(spawnPos, rightVelocity);
+    timer(timeBetweenSpawns);
+    spawnPos = getLeftSpawn(distBetweenSpawns * i);
+    spawnMachine(spawnPos, leftVelocity);
+    timer(timeBetweenSpawns);
+}

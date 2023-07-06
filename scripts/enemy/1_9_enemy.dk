@@ -1,0 +1,18 @@
+let health = 81;
+let initWaitTime = 25;
+let slowTime = 30;
+let postShotTime = 25;
+let finalSpeed = 2.5;
+let speedTime = 80;
+
+setHealth(health);
+addDeathSpawn("1_3_revenge");
+addDeathSpawn("smallPower");
+
+timer(initWaitTime);
+shiftSpeedPeriod(0.0, slowTime);
+addSpawn("1_9_shot");
+stall();
+stallUntil(isNotSpawning);
+timer(postShotTime);
+shiftVelocityPeriod(finalSpeed, angleToPlayer(), speedTime);
