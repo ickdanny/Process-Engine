@@ -318,7 +318,8 @@ namespace process::game::systems{
 				spriteStorage, \
 				"medium", \
 				enemyProjectile::mediumHitbox, \
-				color \
+				color, \
+				1 \
             )
 		addMedium("Black");
 		addMedium("DBlue");
@@ -343,7 +344,8 @@ namespace process::game::systems{
 				spriteStorage, \
 				"small", \
 				enemyProjectile::smallHitbox, \
-				color \
+				color, \
+                2 \
             )
 		addSmall("Black");
 		addSmall("DBlue");
@@ -466,6 +468,33 @@ namespace process::game::systems{
 				std::string{ ScriptList::spawnString } + "enemyExplode"
 			} } }
 		).heapClone());
+		add("machine2Red", EntityBuilder::makeVisibleCollidablePrototype(
+			AABB{ enemy::machine2Hitbox },
+			PlayerCollisions::Source{},
+			EnemyCollisions::Target{ components::CollisionCommands::damage },
+			SpriteInstruction{
+				spriteStorage.get(L"machine2Red1")->sprite,
+				config::enemyDepth + 1
+			},
+			game::AnimationList{
+				components::Animation {
+					{
+						L"machine2Red1",
+						L"machine2Red2",
+						L"machine2Red3"
+					},
+					true
+				},
+				3
+			},
+			Health{ enemy::spawnHealth },
+			Outbound{ enemy::outbound },
+			DeathCommand{ DeathCommand::Commands::deathSpawn },
+			DeathSpawn{ ScriptList{ {
+				scriptStorage.get(L"enemyExplode"),
+				std::string{ ScriptList::spawnString } + "enemyExplode"
+			} } }
+		).heapClone());
 	}
 	
 	Prototypes::ComponentTupleSharedPointer Prototypes::get(
@@ -485,7 +514,8 @@ namespace process::game::systems{
 		resources::SpriteStorage& spriteStorage,
 		const std::string& type,
 		float hitbox,
-		const std::string& color
+		const std::string& color,
+		int relativeDepth
 	){
 		add(type + color, EntityBuilder::makeVisibleCollidablePrototype(
 			AABB{ hitbox },
@@ -495,7 +525,7 @@ namespace process::game::systems{
 			Damage{ 1 },
 			SpriteInstruction{
 				spriteStorage.get(stringUtil::convertToWideString(type + color))->sprite,
-				config::enemyBulletDepth
+				config::enemyBulletDepth + relativeDepth
 			},
 			Outbound{ enemyProjectile::outbound },
 			DeathCommand{ DeathCommand::Commands::deathSpawn },

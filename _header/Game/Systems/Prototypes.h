@@ -47,7 +47,8 @@ namespace process::game::systems{
 			resources::SpriteStorage& spriteStorage,
 			const std::string& type,
 			float hitbox,
-			const std::string& color
+			const std::string& color,
+			int relativeDepth
 		);
 		
 		void add(

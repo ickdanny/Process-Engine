@@ -1,0 +1,18 @@
+let health = 450;
+let initWaitTime = 25;
+let slowTime = 30;
+let postShotTime = 25;
+let finalSpeed = 2.5;
+let speedTime = 80;
+
+setHealth(health);
+addDeathSpawn("1_11_revenge");
+addDeathSpawn("bomb");
+
+timer(initWaitTime);
+shiftSpeedPeriod(0.0, slowTime);
+addSpawn("1_11_shot");
+stall();
+stallUntil(isNotSpawning);
+timer(postShotTime);
+shiftVelocityPeriod(finalSpeed, angleToPlayer(), speedTime);

@@ -18,6 +18,8 @@ timer(205);
 addSpawn("1_9_spawner"); # wave 9  = two spiky robots at both sides
 timer(150);
 addSpawn("1_10_spawner");# wave 10 = red robots alternating sides
+timer(380);
+addSpawn("1_11_spawner");# wave 11 = red spiky robot in center, dropping bomb
 
 stall();
 stallUntil(isNotSpawning);

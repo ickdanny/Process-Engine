@@ -1,0 +1,13 @@
+let speed = diff(1.8, 2.0, 2.1, 2.2);
+let symmetry = 3;
+let bulletOffset = 6.5;
+let position = entityPosition();
+
+func spawnBullets(velocity){
+    let offsetVector = makePolar(getR(velocity), getTheta(velocity) + 90.0);
+    spawn("smallLRed", position + offsetVector, velocity);
+    spawn("smallLRed", position - offsetVector, velocity);
+}
+
+let angle = random(0.0, 360.0);
+ring(makePolar(speed, angle), symmetry, spawnBullets);

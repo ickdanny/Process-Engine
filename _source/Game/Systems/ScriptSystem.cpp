@@ -312,7 +312,7 @@ namespace process::game::systems {
 			//load the current script container
 			currentScriptContainerPointer = &scriptContainer;
 			if(!scriptContainer.scriptPointer){
-				throw std::runtime_error{ "bad script pointer!" };
+				throw std::runtime_error{ "bad script pointer! " + scriptContainer.name };
 			}
 			//if the script is not stalled, run the script
 			if(!scriptContainer.state.stalled){

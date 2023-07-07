@@ -5,7 +5,7 @@ let bulletOffset = 6.5;
 timer(random(0, timeBetweenShots));
 
 let basePos;
-func spawnBullet(velocity){
+func spawnBullets(velocity){
     let offsetVector = makePolar(getR(velocity), getTheta(velocity) + 90.0);
     spawn("smallLRed", basePos + offsetVector, velocity);
     spawn("smallLRed", basePos - offsetVector, velocity);
@@ -17,6 +17,6 @@ func isInBounds(x){
 }
 
 while(isInBounds(getX(basePos = entityPosition()))){
-    spawnBullet(makePolar(speed, angleToPlayer()));
+    spawnBullets(makePolar(speed, angleToPlayer()));
     timer(timeBetweenShots);
 }
