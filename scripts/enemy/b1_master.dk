@@ -1,0 +1,14 @@
+gotoDecelerating(bossMidpoint, 1.9);
+clearBullets();
+showDialogue("1_1");
+
+stallUntil(isDialogueOver);
+setCollidable();
+
+addSpawn("b1_1_attack");
+stallUntil(isBossDead);
+
+print("broadcasting win");
+win();
+spawn("bossExplode", entityPosition(), zeroPolar);
+removeEntity();

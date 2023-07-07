@@ -1,7 +1,7 @@
-let maxTime = 300;
+let maxTime = 270;
 let tick = diff(16, 13, 10, 8);
 let symmetry = diff(2, 3, 3, 4);
-let speed = 1.48;
+let speed = 1.28;
 let baseAngle1 = random(0.0, 360.0);
 let baseAngle2 = random(0.0, 360.0);
 let angleOffset1 = (120.0 / symmetry) * phi;

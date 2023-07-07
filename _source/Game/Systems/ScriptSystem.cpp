@@ -7,6 +7,15 @@
 
 namespace process::game::systems {
 	
+	namespace{
+		constexpr float bossY{ 60.0f };
+		constexpr float bossInbound{ 30.0f };
+		constexpr float bossXLow{ bossInbound + config::gameOffset.x };
+		constexpr float bossXHigh{ config::gameWidth - bossInbound + config::gameOffset.x };
+		constexpr float bossYLow{ bossInbound + config::gameOffset.y };
+		constexpr float bossYHigh{ (config::gameHeight * 0.28f) + config::gameOffset.y };
+	}
+	
 	using namespace wasp::ecs;
 	using namespace wasp::ecs::entity;
 	using namespace stringUtil;
@@ -33,6 +42,14 @@ namespace process::game::systems {
 		addNativeVariable("zeroVector", Vector2{ 0.0f, 0.0f });
 		addNativeVariable("zeroPolar", PolarVector{ 0.0f, 0.0f });
 		addNativeVariable("enemySpawnDist", 20.0f);
+		addNativeVariable("bossMidpoint",
+			Point2{ (config::gameWidth / 2.0f) + config::gameOffset.x, bossY }
+		);
+		addNativeVariable("bossXLow", bossXLow);
+		addNativeVariable("bossXHigh", bossXHigh);
+		addNativeVariable("bossYLow", bossYLow);
+		addNativeVariable("bossYHigh", bossYHigh);
+		addNativeVariable("timeBeforePostDialogue", 80);
 		addNativeVariable("pi", wasp::math::pi);
 		addNativeVariable("phi", wasp::math::phi);
 		

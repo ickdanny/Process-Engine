@@ -9,7 +9,7 @@ namespace process::game::systems {
 
         constexpr wasp::math::Point2 textPos{ 85.0f, 170.0f };
 
-        constexpr int textRightBound{ 150 };
+        constexpr int textRightBound{ 250 };
     }
 
 	DialogueSystem::DialogueSystem(

@@ -39,6 +39,7 @@ namespace process::game::systems{
 		constexpr float outbound{ -30.0f };
 		constexpr float machineHitbox{ 12.0f };
 		constexpr float machine2Hitbox{ 11.0f };
+		constexpr float bossHitbox{ 13.0f };
 	}
 	
 	namespace enemyProjectile{
@@ -58,7 +59,7 @@ namespace process::game::systems{
 		add("projectileExplode", EntityBuilder::makeVisiblePrototype(
 			SpriteInstruction{
 				spriteStorage.get(L"projectileExplode1")->sprite,
-				config::playerBulletDepth - 1
+				config::effectDepth
 			},
 			game::AnimationList{
 				components::Animation {
@@ -368,7 +369,7 @@ namespace process::game::systems{
 		add("enemyExplode", EntityBuilder::makeVisiblePrototype(
 			SpriteInstruction{
 				spriteStorage.get(L"enemyExplode1")->sprite,
-				config::enemyDepth - 100
+				config::effectDepth
 			},
 			game::AnimationList{
 				components::Animation {
@@ -389,7 +390,7 @@ namespace process::game::systems{
 		add("bossExplode", EntityBuilder::makeVisiblePrototype(
 			SpriteInstruction{
 				spriteStorage.get(L"bossExplode1")->sprite,
-				config::enemyDepth - 100
+				config::effectDepth + 1
 			},
 			game::AnimationList{
 				components::Animation {
@@ -493,6 +494,34 @@ namespace process::game::systems{
 			DeathSpawn{ ScriptList{ {
 				scriptStorage.get(L"enemyExplode"),
 				std::string{ ScriptList::spawnString } + "enemyExplode"
+			} } }
+		).heapClone());
+		
+		//bosses
+		add("boss1", EntityBuilder::makeVisiblePrototype(
+			Hitbox{ enemy::bossHitbox },
+			PlayerCollisions::Source{},
+			EnemyCollisions::Target{ components::CollisionCommands::damage },
+			SpriteInstruction{
+				spriteStorage.get(L"machine2Red1")->sprite,
+				config::enemyDepth + 100
+			},
+			game::AnimationList{
+				components::Animation {
+					{
+						L"machine2Red1",
+						L"machine2Red2",
+						L"machine2Red3"
+					},
+					true
+				},
+				3
+			},
+			Health{ enemy::spawnHealth },
+			DeathCommand{ DeathCommand::Commands::bossDeath },
+			DeathSpawn{ ScriptList{ {
+				scriptStorage.get(L"clearBullets"),
+				"clearBullets"
 			} } }
 		).heapClone());
 	}

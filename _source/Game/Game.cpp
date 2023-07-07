@@ -61,10 +61,9 @@ namespace process::game {
 		};
 		if (sceneExitToChannel.hasMessages()) {
 			auto& sceneExitToMessages{ sceneExitToChannel.getMessages() };
-			if (sceneExitToMessages.size() > 1) {
-				throw std::runtime_error{ "trying to exit to 2 scenes at once!" };
+			for(const auto& message : sceneExitToMessages){
+				sceneList.popBackTo(message);
 			}
-			sceneList.popBackTo(sceneExitToMessages[0]);
 			sceneExitToChannel.clear();
 		}
 

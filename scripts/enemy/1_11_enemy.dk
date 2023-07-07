@@ -1,8 +1,9 @@
-let health = 450;
+let health = 420;
 let initWaitTime = 25;
 let slowTime = 30;
+let standStillTime = 30;
 let postShotTime = 25;
-let finalSpeed = 2.5;
+let finalSpeed = 1.5;
 let speedTime = 80;
 
 setHealth(health);
@@ -11,6 +12,7 @@ addDeathSpawn("bomb");
 
 timer(initWaitTime);
 shiftSpeedPeriod(0.0, slowTime);
+timer(standStillTime);
 addSpawn("1_11_shot");
 stall();
 stallUntil(isNotSpawning);

@@ -1,0 +1,19 @@
+let health = 30;
+let initWaitTime = 10;
+let slowTime = 30;
+let backSpeed = -2.5;
+let finalSpeed = 3.0;
+let speedTime = 70;
+
+setHealth(health);
+addDeathSpawn("smallPower3");
+
+timer(initWaitTime);
+
+shiftSpeedPeriod(0.0, slowTime);
+addSpawn("1_12_shot");
+setSpeed(backSpeed);
+
+let finalAngle = angleToPlayer();
+
+shiftVelocityTurnPeriod(finalSpeed, finalAngle, speedTime);

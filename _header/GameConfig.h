@@ -52,33 +52,6 @@ namespace process::game::config {
 	constexpr int smallPowerGain{ 1 };
 	constexpr int largePowerGain{ 5 };
 	
-	//enemies
-	constexpr float spawnOut{ 20.0f };
-	constexpr float topOut{ -spawnOut + config::gameOffset.y };
-	constexpr float leftOut{ -spawnOut + config::gameOffset.x };
-	constexpr float rightOut{ config::gameWidth + spawnOut + config::gameOffset.x };
-	
-	//bosses
-	constexpr float bossY{ 60.0f };
-	constexpr wasp::math::Point2 bossMidpoint{
-		(config::gameWidth / 2.0f) + config::gameOffset.x, bossY
-	};
-	constexpr float bossSpeed{ 1.5f };
-	
-	constexpr float bossInbound{ 30.0f };
-	constexpr float bossMaxY{ (config::gameHeight * 0.28f) + config::gameOffset.y };
-	constexpr wasp::math::AABB bossBounds{
-		bossInbound + config::gameOffset.x,
-		config::gameWidth - bossInbound + config::gameOffset.x,
-		bossInbound + config::gameOffset.x,
-		bossMaxY
-	};
-	constexpr float bossGotoRadiusMin{ 30.0f };
-	constexpr float bossGotoRadiusMax{ 60.0f };
-	constexpr float bossGotoSpeed{ 1.0f };
-	
-	constexpr float bossHitbox{ 13.0f };
-	
 	//graphics
 	constexpr int backgroundDepth{ -9000 };
 	constexpr int effectDepth{ -6000 };

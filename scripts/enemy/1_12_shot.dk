@@ -1,0 +1,3 @@
+let speed = 1.9;
+
+spawn("mediumLPurple", entityPosition(), makePolar(speed, -90.0), "1_12_bullet");

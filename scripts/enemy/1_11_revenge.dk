@@ -1,4 +1,4 @@
-let speed = 1.9;
+let speed = 1.6;
 let symmetry = diff(4, 8, 12, 16);
 
 let position = entityPosition();

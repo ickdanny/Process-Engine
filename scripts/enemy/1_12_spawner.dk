@@ -1,0 +1,16 @@
+let numSpawns = 8;
+let dist = gameWidth / (numSpawns + 1.0);
+let timeBetweenSpawns = 58;
+let speed = 1.8;
+let velocity = makePolar(speed, -90.0);
+
+func spawnEnemy(position){
+    spawn("machineRed", position, velocity, "1_12_enemy");
+}
+
+let spawnPos;
+for(let i = 1; i <= numSpawns; i = i + 1){
+    spawnPos = getTopSpawnLeft(dist * i);
+    spawnEnemy(spawnPos);
+    timer(timeBetweenSpawns);
+}
