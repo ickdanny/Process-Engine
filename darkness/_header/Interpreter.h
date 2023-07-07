@@ -1,11 +1,12 @@
-#pragma once
-
 #include "Ast.h"
+#pragma once
 
 #include <stdexcept>
 #include <functional>
 #include <any>
 #include <utility>
+
+#include "Logging.h"
 
 namespace darkness{
 	
@@ -87,7 +88,6 @@ namespace darkness{
 		>;
 		using NativeFunction = std::function<DataType(const std::vector<DataType>&)>;
 		
-		struct StallFlag{};
 		struct StallNodeInfo{
 			AstType type{};
 			int index{};
@@ -141,6 +141,7 @@ namespace darkness{
 		std::vector<StallNodeInfo> stallInfoStack{};
 		std::vector<DataType> stallDataStack{};
 		StallingNativeFunctionCall stallingNativeFunctionCall{};
+		bool isStalled{ false };
 		DataType stallReturn{ false };
 		
 	public:
@@ -214,17 +215,15 @@ namespace darkness{
 		ScriptExecutionState runScript(const AstNode& script){
 			throwIfNotType(script, AstType::script, "trying to run not script!");
 			resetState();
-			int currentIndex{ 0 };
+			
 			const auto& statements{ std::get<AstStmtBlockData>(script.dataVariant).statements };
-			try{
-				for(; currentIndex < statements.size(); ++currentIndex){
-					runStatement(statements[currentIndex]);
+			for(int currentIndex{ 0 }; currentIndex < statements.size(); ++currentIndex){
+				runStatement(statements[currentIndex]);
+				if(isStalled){
+					//stalled on a native function! vomit onto the stack and exit
+					pushStallNodeInfo({ AstType::script, currentIndex });
+					return packageState();
 				}
-			}
-			catch(const StallFlag&){
-				//stalled on a native function! vomit onto the stack and exit
-				pushStallNodeInfo({ AstType::script, currentIndex });
-				return packageState();
 			}
 			return ScriptExecutionState{};
 		}
@@ -244,35 +243,44 @@ namespace darkness{
 			if(stallingNativeFunctionCall.stallingNativeFunction == nullptr){
 				throwError("trying to resume a script but was not stalled!");
 			}
+			
 			//try rerunning the stalled native function
-			try{
-				stallReturn = stallingNativeFunctionCall.run();
-			}
-			catch(const StallFlag&){
+			stallReturn = stallingNativeFunctionCall.run();
+			if(isStalled){
 				//stalled again on the same native function! exit prematurely
 				return packageState();
 			}
+			
 			//successfully ran - reset stalling native function call to nothing
 			stallingNativeFunctionCall = {};
+			
 			//get the stall info
 			const StallNodeInfo& stallNodeInfo{ popLastStallNodeInfo() };
 			throwIfNotType(stallNodeInfo, AstType::script, "bad stall type: not script!");
+			
 			//resume running the script
 			int currentIndex{ stallNodeInfo.index };
-			const auto& statements{ std::get<AstStmtBlockData>(script.dataVariant).statements };
-			try{
-				//resume the stalled statement
-				resumeStatement(statements[currentIndex]);
-				++currentIndex;
-				//run the rest of the statements like normal
-				for(; currentIndex < statements.size(); ++currentIndex){
-					runStatement(statements[currentIndex]);
-				}
-			}
-			catch(const StallFlag&){
+			const auto& statements{
+				std::get<AstStmtBlockData>(script.dataVariant).statements
+			};
+			
+			//resume the stalled statement
+			resumeStatement(statements[currentIndex]);
+			if(isStalled){
 				//stalled on a different native function! vomit onto the stack and exit
 				pushStallNodeInfo({ AstType::script, currentIndex });
 				return packageState();
+			}
+			++currentIndex;
+			
+			//run the rest of the statements like normal
+			for(; currentIndex < statements.size(); ++currentIndex){
+				runStatement(statements[currentIndex]);
+				if(isStalled){
+					//stalled on a different native function! stack and exit
+					pushStallNodeInfo({ AstType::script, currentIndex });
+					return packageState();
+				}
 			}
 			return ScriptExecutionState{};
 		 }
@@ -368,6 +376,9 @@ namespace darkness{
 			DataType initData;	//uninitialized!
 			if(initializer){
 				initData = runExpression(*initializer);
+				if(isStalled){
+					return;
+				}
 			}
 			else{
 				initData = DataType{ false };
@@ -388,6 +399,9 @@ namespace darkness{
 			DataType initData;	//uninitialized!
 			if(initializer){
 				initData = resumeExpression(*initializer);
+				if(isStalled){
+					return;
+				}
 			}
 			else{
 				throwError("somehow resumed var declare with no initializer");
@@ -419,33 +433,26 @@ namespace darkness{
 		void runIf(const AstNode& ifStatement){
 			throwIfNotType(ifStatement, AstType::stmtIf, "not an if statement!");
 			const auto& data{ std::get<AstStmtIfData>(ifStatement.dataVariant) };
-			DataType conditionValue;//uninitialized!
-			try {
-				conditionValue = runExpression(*data.condition);
-			}
-			catch(const StallFlag&){
+			DataType conditionValue { runExpression(*data.condition) };
+			if(isStalled){
 				pushStallNodeInfo({ AstType::stmtIf, StallNodeInfo::ifCondition });
-				throw;
+				return;
 			}
 			if( conditionValue.index() != boolIndex ) {
 				throwError("if statement condition was not bool!");
 			}
 			if( std::get<bool>(conditionValue) ) {
-				try {
-					runStatement(*data.trueBranch);
-				}
-				catch(const StallFlag&){
+				runStatement(*data.trueBranch);
+				if(isStalled){
 					pushStallNodeInfo({ AstType::stmtIf, StallNodeInfo::ifTrue });
-					throw;
+					return;
 				}
 			}
 			else if( data.falseBranch ) {
-				try {
-					runStatement(*data.falseBranch);
-				}
-				catch(const StallFlag&){
+				runStatement(*data.falseBranch);
+				if(isStalled){
 					pushStallNodeInfo({ AstType::stmtIf, StallNodeInfo::ifFalse });
-					throw;
+					return;
 				}
 			}
 		}
@@ -464,12 +471,10 @@ namespace darkness{
 				//case 1: resume the true branch
 				case StallNodeInfo::ifTrue: {
 					//it is possible that we stall again on the true branch.
-					try {
-						resumeStatement(*data.trueBranch);
-					}
-					catch(const StallFlag&){
+					resumeStatement(*data.trueBranch);
+					if(isStalled){
 						pushStallNodeInfo({ AstType::stmtIf, StallNodeInfo::ifTrue });
-						throw;
+						return;
 					}
 					break;
 				}
@@ -479,46 +484,37 @@ namespace darkness{
 						throwError("trying to resume false branch but doesn't exist!");
 					}
 					//it is possible that we stall again on the false branch
-					try {
-						resumeStatement(*data.falseBranch);
-					}
-					catch(const StallFlag&){
+					resumeStatement(*data.falseBranch);
+					if(isStalled){
 						pushStallNodeInfo({ AstType::stmtIf, StallNodeInfo::ifFalse });
-						throw;
+						return;
 					}
 					break;
 				}
 				//case 3: try to evaluate the condition again
 				case StallNodeInfo::ifCondition: {
-					DataType conditionValue;//uninitialized!
+					DataType conditionValue{ resumeExpression(*data.condition) };
 					//it is possible that we stall again on the condition
-					try {
-						conditionValue = resumeExpression(*data.condition);
-					}
-					catch(const StallFlag&){
+					if(isStalled){
 						pushStallNodeInfo({ AstType::stmtIf, StallNodeInfo::ifCondition });
-						throw;
+						return;
 					}
 					if( conditionValue.index() != boolIndex ) {
 						throwError("if statement condition was not bool!");
 					}
 					//the condition did not stall, meaning we can now run either true or false
 					if( std::get<bool>(conditionValue) ) {
-						try {
-							runStatement(*data.trueBranch);
-						}
-						catch(const StallFlag&){
+						runStatement(*data.trueBranch);
+						if(isStalled){
 							pushStallNodeInfo({ AstType::stmtIf, StallNodeInfo::ifTrue });
-							throw;
+							return;
 						}
 					}
 					else if( data.falseBranch ) {
-						try {
-							runStatement(*data.falseBranch);
-						}
-						catch(const StallFlag&){
+						runStatement(*data.falseBranch);
+						if(isStalled){
 							pushStallNodeInfo({ AstType::stmtIf, StallNodeInfo::ifFalse });
-							throw;
+							return;
 						}
 					}
 					break;
@@ -536,12 +532,10 @@ namespace darkness{
 			const auto& data{ std::get<AstStmtWhileData>(whileStatement.dataVariant) };
 			DataType conditionValue;//uninitialized!
 			//evaluate condition the first time
-			try {
-				conditionValue = runExpression(*data.condition);
-			}
-			catch(const StallFlag&){
+			conditionValue = runExpression(*data.condition);
+			if(isStalled){
 				pushStallNodeInfo({ AstType::stmtWhile, StallNodeInfo::whileCondition });
-				throw;
+				return;
 			}
 			if(conditionValue.index() != boolIndex){
 				throwError("while statement condition was not bool!");
@@ -549,20 +543,16 @@ namespace darkness{
 			//while the condition evaluates to true, run the body of the loop
 			while(std::get<bool>(conditionValue)){
 				//run body
-				try {
-					runStatement(*data.body);
-				}
-				catch(const StallFlag&){
+				runStatement(*data.body);
+				if(isStalled){
 					pushStallNodeInfo({ AstType::stmtWhile, StallNodeInfo::whileBody });
-					throw;
+					return;
 				}
 				//reevaluate condition
-				try {
-					conditionValue = runExpression(*data.condition);
-				}
-				catch(const StallFlag&){
+				conditionValue = runExpression(*data.condition);
+				if(isStalled){
 					pushStallNodeInfo({ AstType::stmtWhile, StallNodeInfo::whileCondition });
-					throw;
+					return;
 				}
 				if(conditionValue.index() != boolIndex){
 					throwError("while statement condition was not bool!");
@@ -586,36 +576,30 @@ namespace darkness{
 				//case 1: stall occurred in the body - resume the body once
 				case StallNodeInfo::whileBody:{
 					//the body may stall again
-					try {
-						resumeStatement(*data.body);
-					}
-					catch(const StallFlag&){
+					resumeStatement(*data.body);
+					if(isStalled){
 						pushStallNodeInfo({ AstType::stmtWhile, StallNodeInfo::whileBody });
-						throw;
+						return;
 					}
 					//body did not stall again, reevaluate condition
-					try {
-						conditionValue = runExpression(*data.condition);
-					}
-					catch(const StallFlag&){
+					conditionValue = runExpression(*data.condition);
+					if(isStalled){
 						pushStallNodeInfo(
 							{ AstType::stmtWhile, StallNodeInfo::whileCondition }
 						);
-						throw;
+						return;
 					}
 					break;
 				}
 				//case 2: stall occurred in the condition - resume the condition
 				case StallNodeInfo::whileCondition:{
 					//the condition may stall again
-					try {
-						conditionValue = resumeExpression(*data.condition);
-					}
-					catch(const StallFlag&){
+					conditionValue = resumeExpression(*data.condition);
+					if(isStalled){
 						pushStallNodeInfo(
 							{ AstType::stmtWhile, StallNodeInfo::whileCondition }
 						);
-						throw;
+						return;
 					}
 					break;
 				}
@@ -628,20 +612,16 @@ namespace darkness{
 			}
 			while(std::get<bool>(conditionValue)){
 				//run body
-				try {
-					runStatement(*data.body);
-				}
-				catch(const StallFlag&){
+				runStatement(*data.body);
+				if(isStalled){
 					pushStallNodeInfo({ AstType::stmtWhile, StallNodeInfo::whileBody });
-					throw;
+					return;
 				}
 				//reevaluate condition
-				try {
-					conditionValue = runExpression(*data.condition);
-				}
-				catch(const StallFlag&){
+				conditionValue = runExpression(*data.condition);
+				if(isStalled){
 					pushStallNodeInfo({ AstType::stmtWhile, StallNodeInfo::whileCondition });
-					throw;
+					return;
 				}
 				if(conditionValue.index() != boolIndex){
 					throwError("while statement condition was not bool!");
@@ -659,7 +639,11 @@ namespace darkness{
 			
 			//void returns actually just return false
 			if(data.hasValue){
-				throw runExpression(*data.value);
+				DataType returnValue{ runExpression(*data.value) };
+				if(isStalled){
+					return;
+				}
+				throw DataType{ returnValue };
 			}
 			else{
 				throw DataType{ false };
@@ -677,7 +661,11 @@ namespace darkness{
 			
 			//void returns actually just return false
 			if(data.hasValue){
-				throw resumeExpression(*data.value);
+				DataType returnValue{ resumeExpression(*data.value) };
+				if(isStalled){
+					return ;
+				}
+				throw DataType{ returnValue };
 			}
 			else{
 				throwError("somehow resumed return with no value");
@@ -695,30 +683,29 @@ namespace darkness{
 			else{
 				throwIfNotType(block, AstType::script, "not a script block!");
 			}
-			int currentIndex{ 0 };
 			const auto& statements{
 				std::get<AstStmtBlockData>(block.dataVariant).statements
 			};
 			//create a new environment who is a child of the old environment
 			pushEmptyEnvironment();
 			try{
-				for(; currentIndex < statements.size(); ++currentIndex){
+				for(int currentIndex{ 0 }; currentIndex < statements.size(); ++currentIndex){
 					runStatement(statements[currentIndex]);
+					if(isStalled){
+						/*
+						 * stalled on a native function! vomit onto the stack and return, but
+						 * DO NOT RESET THE ENVIRONMENT POINTER since we must resume in the
+						 * innermost environment.
+						 */
+						pushStallNodeInfo({ AstType::stmtBlock, currentIndex });
+						return;	//exits this function without resetting environment
+					}
 				}
 				//reset the environment to its parent
 				popEnvironment();
 			}
-			catch(const StallFlag&){
-				/*
-				 * stalled on a native function! vomit onto the stack and rethrow, but
-				 * DO NOT RESET THE ENVIRONMENT POINTER since we must resume in the innermost
-				 * environment.
-				 */
-				pushStallNodeInfo({ AstType::stmtBlock, currentIndex });
-				throw;
-			}
 			catch(...){
-				//caught something else, reset environment and rethrow.
+				//caught something unknown, reset environment and rethrow.
 				popEnvironment();
 				throw;
 			}
@@ -742,6 +729,7 @@ namespace darkness{
 			//get the stall info
 			const StallNodeInfo& stallNodeInfo{ popLastStallNodeInfo() };
 			throwIfNotType(stallNodeInfo, AstType::stmtBlock, "bad stall type: not block!");
+			
 			//resume running the block
 			int currentIndex{ stallNodeInfo.index };
 			const auto& statements{
@@ -750,22 +738,27 @@ namespace darkness{
 			try{
 				//resume the stalled statement
 				resumeStatement(statements[currentIndex]);
+				if(isStalled){
+					//stalled on same native function
+					pushStallNodeInfo({ AstType::stmtBlock, currentIndex });
+					return;	//exits this function without resetting environment
+				}
 				++currentIndex;
 				//run the rest of the statements like normal
 				for(; currentIndex < statements.size(); ++currentIndex){
 					runStatement(statements[currentIndex]);
+					if(isStalled){
+						/**
+				 		 * stalled on a different native function! vomit onto the stack and
+				 		 * return, but DO NOT RESET THE ENVIRONMENT POINTER since we must
+				 		 * resume in the inner-most environment.
+				 		 */
+						pushStallNodeInfo({ AstType::stmtBlock, currentIndex });
+						return;	//exits this function without resetting environment
+					}
 				}
 				//reset the environment to its parent
 				popEnvironment();
-			}
-			catch(const StallFlag&){
-				/**
-				 * stalled on a different native function! vomit onto the stack and rethrow,
-				 * but DO NOT RESET THE ENVIRONMENT POINTER since we must resume in the
-				 * inner-most environment.
-				 */
-				pushStallNodeInfo({ AstType::stmtBlock, currentIndex });
-				throw;
 			}
 			catch(...){
 				//caught something else, reset environment and rethrow.
@@ -910,6 +903,9 @@ namespace darkness{
 			DataType argValue{ runExpression(
 				*std::get<AstUnaryData>(unary.dataVariant).arg
 			) };
+			if(isStalled){
+				return {};
+			}
 			return evaluateUnaryBang(argValue);
 		}
 		
@@ -924,6 +920,9 @@ namespace darkness{
 			DataType argValue{ resumeExpression(
 				*std::get<AstUnaryData>(unary.dataVariant).arg
 			) };
+			if(isStalled){
+				return {};
+			}
 			return evaluateUnaryBang(argValue);
 		}
 		
@@ -961,6 +960,9 @@ namespace darkness{
 			DataType argValue{ runExpression(
 				*std::get<AstUnaryData>(unary.dataVariant).arg
 			) };
+			if(isStalled){
+				return {};
+			}
 			return evaluateUnaryPlus(argValue);
 		}
 		
@@ -976,6 +978,9 @@ namespace darkness{
 			DataType argValue{ resumeExpression(
 				*std::get<AstUnaryData>(unary.dataVariant).arg
 			) };
+			if(isStalled){
+				return {};
+			}
 			return evaluateUnaryPlus(argValue);
 		}
 		
@@ -1013,6 +1018,9 @@ namespace darkness{
 			DataType argValue{ runExpression(
 				*std::get<AstUnaryData>(unary.dataVariant).arg
 			) };
+			if(isStalled){
+				return {};
+			}
 			return evaluateUnaryMinus(argValue);
 		}
 		
@@ -1027,6 +1035,9 @@ namespace darkness{
 			DataType argValue{ resumeExpression(
 				*std::get<AstUnaryData>(unary.dataVariant).arg
 			) };
+			if(isStalled){
+				return {};
+			}
 			return evaluateUnaryMinus(argValue);
 		}
 		
@@ -1075,22 +1086,20 @@ namespace darkness{
 		 * Evaluates the two sides of a binary expression. Does not check for ast type
 		 */
 		std::pair<DataType, DataType> evaluateBinaryArgs(const AstNode& binary){
-			DataType leftValue;//uninitialized
-			try {
-				leftValue = runExpression(*std::get<AstBinData>(binary.dataVariant).left);
-			}
-			catch(const StallFlag&){
+			DataType leftValue{
+				runExpression(*std::get<AstBinData>(binary.dataVariant).left)
+			};
+			if(isStalled){
 				pushStallNodeInfo({ binary.type, StallNodeInfo::binLeft });
-				throw;
+				return {};
 			}
-			DataType rightValue;//uninitialized
-			try {
-				rightValue = runExpression(*std::get<AstBinData>(binary.dataVariant).right);
-			}
-			catch(const StallFlag&){
+			DataType rightValue{
+				runExpression(*std::get<AstBinData>(binary.dataVariant).right)
+			};
+			if(isStalled){
 				pushStallNodeData(leftValue);
 				pushStallNodeInfo({ binary.type, StallNodeInfo::binRight });
-				throw;
+				return {};
 			}
 			return { leftValue, rightValue };
 		}
@@ -1129,25 +1138,21 @@ namespace darkness{
 			switch(stallNodeInfo.index){
 				case StallNodeInfo::binLeft: {
 					//the left expression may stall again
-					try{
-						leftValue = resumeExpression(
-							*std::get<AstBinData>(binary.dataVariant).left
-						);
-					}
-					catch(const StallFlag&){
+					leftValue = resumeExpression(
+						*std::get<AstBinData>(binary.dataVariant).left
+					);
+					if(isStalled){
 						pushStallNodeInfo({ binary.type, StallNodeInfo::binLeft });
-						throw;
+						return {};
 					}
 					//the left expression did not stall again, evaluate to right side
-					try {
-						rightValue = runExpression(
-							*std::get<AstBinData>(binary.dataVariant).right
-						);
-					}
-					catch(const StallFlag&){
+					rightValue = runExpression(
+						*std::get<AstBinData>(binary.dataVariant).right
+					);
+					if(isStalled){
 						pushStallNodeData(leftValue);
 						pushStallNodeInfo({ binary.type, StallNodeInfo::binRight });
-						throw;
+						return {};
 					}
 					break;
 				}
@@ -1155,15 +1160,13 @@ namespace darkness{
 					//must pop stack in case lower expressions also need stack
 					leftValue = popLastStallData();
 					//the right expression may stall again
-					try{
-						rightValue = resumeExpression(
-							*std::get<AstBinData>(binary.dataVariant).right
-						);
-					}
-					catch(const StallFlag&){
+					rightValue = resumeExpression(
+						*std::get<AstBinData>(binary.dataVariant).right
+					);
+					if(isStalled){
 						pushStallNodeData(leftValue);
 						pushStallNodeInfo({ binary.type, StallNodeInfo::binRight });
-						throw;
+						return {};
 					}
 				}
 				default:
@@ -1971,13 +1974,12 @@ namespace darkness{
 		 */
 		DataType runBinaryAmpersand(const AstNode& binary){
 			throwIfNotType(binary, AstType::binAmpersand, "not binary ampersand!");
-			DataType leftValue;//uninitialized
-			try {
-				leftValue = runExpression(*std::get<AstBinData>(binary.dataVariant).left);
-			}
-			catch(const StallFlag&){
+			DataType leftValue{
+				runExpression(*std::get<AstBinData>(binary.dataVariant).left)
+			};
+			if(isStalled){
 				pushStallNodeInfo({ binary.type, StallNodeInfo::binLeft });
-				throw;
+				return {};
 			}
 			if(leftValue.index() != boolIndex){
 				throwError("left side of '&' not bool!");
@@ -1986,13 +1988,12 @@ namespace darkness{
 				//if the left side was false, short circuit and return false
 				return false;
 			}
-			DataType rightValue;//uninitialized
-			try {
-				rightValue = runExpression(*std::get<AstBinData>(binary.dataVariant).right);
-			}
-			catch(const StallFlag&){
+			DataType rightValue{
+				runExpression(*std::get<AstBinData>(binary.dataVariant).right)
+			};
+			if(isStalled){
 				pushStallNodeInfo({ binary.type, StallNodeInfo::binRight });
-				throw;
+				return {};
 			}
 			if(rightValue.index() != boolIndex){
 				throwError("right side of '&' not bool!");
@@ -2019,15 +2020,12 @@ namespace darkness{
 			switch(stallNodeInfo.index){
 				case StallNodeInfo::binLeft: {
 					//the left expression may stall again
-					DataType leftValue;//uninitialized
-					try{
-						leftValue = resumeExpression(
-							*std::get<AstBinData>(binary.dataVariant).left
-						);
-					}
-					catch(const StallFlag&){
+					DataType leftValue{
+						resumeExpression(*std::get<AstBinData>(binary.dataVariant).left)
+					};
+					if(isStalled){
 						pushStallNodeInfo({ binary.type, StallNodeInfo::binLeft });
-						throw;
+						return {};
 					}
 					//left side did not stall again -> execute remainder as normal
 					if(leftValue.index() != boolIndex){
@@ -2037,15 +2035,12 @@ namespace darkness{
 						//if the left side was false, short circuit and return false
 						return false;
 					}
-					DataType rightValue;//uninitialized
-					try {
-						rightValue = runExpression(
-							*std::get<AstBinData>(binary.dataVariant).right
-						);
-					}
-					catch(const StallFlag&){
+					DataType rightValue{
+						runExpression(*std::get<AstBinData>(binary.dataVariant).right)
+					};
+					if(isStalled){
 						pushStallNodeInfo({ binary.type, StallNodeInfo::binRight });
-						throw;
+						return {};
 					}
 					if(rightValue.index() != boolIndex){
 						throwError("right side of '&' not bool!");
@@ -2055,15 +2050,12 @@ namespace darkness{
 				}
 				case StallNodeInfo::binRight:{
 					//if we stalled on the right side, left must be false
-					DataType rightValue;//uninitialized
-					try {
-						rightValue = resumeExpression(
-							*std::get<AstBinData>(binary.dataVariant).right
-						);
-					}
-					catch(const StallFlag&){
+					DataType rightValue{
+						resumeExpression(*std::get<AstBinData>(binary.dataVariant).right)
+					};
+					if(isStalled){
 						pushStallNodeInfo({ binary.type, StallNodeInfo::binRight });
-						throw;
+						return {};
 					}
 					if(rightValue.index() != boolIndex){
 						throwError("right side of '&' not bool!");
@@ -2085,13 +2077,12 @@ namespace darkness{
 		 */
 		DataType runBinaryVerticalBar(const AstNode& binary){
 			throwIfNotType(binary, AstType::binVerticalBar, "not binary vertical bar!");
-			DataType leftValue;//uninitialized
-			try {
-				leftValue = runExpression(*std::get<AstBinData>(binary.dataVariant).left);
-			}
-			catch(const StallFlag&){
+			DataType leftValue{
+				runExpression(*std::get<AstBinData>(binary.dataVariant).left)
+			};
+			if(isStalled){
 				pushStallNodeInfo({ binary.type, StallNodeInfo::binLeft });
-				throw;
+				return {};
 			}
 			if(leftValue.index() != boolIndex){
 				throwError("left side of '|' not bool!");
@@ -2100,13 +2091,12 @@ namespace darkness{
 				//if the left side was true, short circuit and return true
 				return true;
 			}
-			DataType rightValue;//uninitialized
-			try {
-				rightValue = runExpression(*std::get<AstBinData>(binary.dataVariant).right);
-			}
-			catch(const StallFlag&){
+			DataType rightValue{
+				runExpression(*std::get<AstBinData>(binary.dataVariant).right)
+			};
+			if(isStalled){
 				pushStallNodeInfo({ binary.type, StallNodeInfo::binRight });
-				throw;
+				return {};
 			}
 			if(rightValue.index() != boolIndex){
 				throwError("right side of '|' not bool!");
@@ -2132,15 +2122,12 @@ namespace darkness{
 			);
 			switch(stallNodeInfo.index){
 				case StallNodeInfo::binLeft: {
-					DataType leftValue;//uninitialized
-					try{
-						leftValue = resumeExpression(
-							*std::get<AstBinData>(binary.dataVariant).left
-						);
-					}
-					catch(const StallFlag&){
+					DataType leftValue{
+						resumeExpression(*std::get<AstBinData>(binary.dataVariant).left)
+					};
+					if(isStalled){
 						pushStallNodeInfo({ binary.type, StallNodeInfo::binLeft });
-						throw;
+						return {};
 					}
 					//left side did not stall again -> execute remainder as normal
 					if(leftValue.index() != boolIndex){
@@ -2150,15 +2137,12 @@ namespace darkness{
 						//if the left side was true, short circuit and return true
 						return true;
 					}
-					DataType rightValue;//uninitialized
-					try {
-						rightValue = runExpression(
-							*std::get<AstBinData>(binary.dataVariant).right
-						);
-					}
-					catch(const StallFlag&){
+					DataType rightValue {
+						runExpression(*std::get<AstBinData>(binary.dataVariant).right)
+					};
+					if(isStalled){
 						pushStallNodeInfo({ binary.type, StallNodeInfo::binRight });
-						throw;
+						return {};
 					}
 					if(rightValue.index() != boolIndex){
 						throwError("right side of '|' not bool!");
@@ -2168,15 +2152,12 @@ namespace darkness{
 				}
 				case StallNodeInfo::binRight:{
 					//if we stalled on the right side, left must be false
-					DataType rightValue;//uninitialized
-					try {
-						rightValue = resumeExpression(
-							*std::get<AstBinData>(binary.dataVariant).right
-						);
-					}
-					catch(const StallFlag&){
+					DataType rightValue{
+						resumeExpression(*std::get<AstBinData>(binary.dataVariant).right)
+					};
+					if(isStalled){
 						pushStallNodeInfo({ binary.type, StallNodeInfo::binRight });
-						throw;
+						return {};
 					}
 					if(rightValue.index() != boolIndex){
 						throwError("right side of '|' not bool!");
@@ -2201,6 +2182,9 @@ namespace darkness{
 				std::get<AstAssignData>(assign.dataVariant)
 			};
 			DataType value{ runExpression(*data.right) };
+			if(isStalled){
+				return {};
+			}
 			innermostEnvironmentPointer->assign(data.varName, value);
 			return value;
 		}
@@ -2215,6 +2199,9 @@ namespace darkness{
 				std::get<AstAssignData>(assign.dataVariant)
 			};
 			DataType value{ resumeExpression(*data.right) };
+			if(isStalled){
+				return {};
+			}
 			innermostEnvironmentPointer->assign(data.varName, value);
 			return value;
 		}
@@ -2241,14 +2228,11 @@ namespace darkness{
 			const auto& data{ std::get<AstCallData>(call.dataVariant) };
 			
 			//get the function wrapper, which may stall
-			DataType functionWrapperData;
-			try {
-				functionWrapperData = runExpression(*data.funcExpr);
-			}
+			DataType functionWrapperData{ runExpression(*data.funcExpr) };
 			//stalled on evaluating the funcExpr!
-			catch(const StallFlag&){
+			if(isStalled){
 				pushStallNodeInfo({ AstType::call, StallNodeInfo::callFuncExpr });
-				throw;
+				return {};
 			}
 			if(!std::holds_alternative<FunctionWrapper>(functionWrapperData)){
 				throwError("tried to call non-function!");
@@ -2292,26 +2276,26 @@ namespace darkness{
 			//evaluate all args and store in a vector; each arg may stall
 			std::vector<DataType> args{};
 			int currentIndex{ 0 };
-			try {
-				for(; currentIndex < data.args.size(); ++currentIndex ) {
-					args.push_back(runExpression(data.args[currentIndex]));
+			DataType temp;//uninitialized
+			for(; currentIndex < data.args.size(); ++currentIndex ) {
+				temp = runExpression(data.args[currentIndex]);
+				//stalled on evaluating an arg!
+				if(isStalled){
+					int stalledIndex{ currentIndex };
+					//first, push all the args
+					//currentIndex points to the stalled arg (which wasn't complete)
+					for(--currentIndex; currentIndex >= 0; --currentIndex){
+						//by pushing the back element, the top will be the first arg
+						pushStallNodeData(args.back());
+						args.pop_back();
+					}
+					//second, push the function wrapper
+					pushStallNodeData(functionWrapperData);
+					//last, push a stall info pointing to the stalled arg
+					pushStallNodeInfo({ AstType::call, stalledIndex });
+					return {};
 				}
-			}
-			//stalled on evaluating an arg!
-			catch(const StallFlag&){
-				int stalledIndex{ currentIndex };
-				//first, push all the args
-				//currentIndex points to the stalled arg (which wasn't complete)
-				for(--currentIndex; currentIndex >= 0; --currentIndex){
-					//by pushing the back element, the top will be the first arg
-					pushStallNodeData(args.back());
-					args.pop_back();
-				}
-				//second, push the function wrapper
-				pushStallNodeData(functionWrapperData);
-				//last, push a stall info pointing to the stalled arg
-				pushStallNodeInfo({ AstType::call, stalledIndex });
-				throw;
+				args.push_back(temp);
 			}
 			//pass to native function, which may stall (in fact this is where stalls start)
 			return evaluateNativeFunctionWithArgs(nativeFunction, args, functionWrapperData);
@@ -2326,19 +2310,18 @@ namespace darkness{
 			const DataType& functionWrapperData
 		){
 			//try to run the native function
-			try {
-				return nativeFunction(args);
-			}
+			DataType toRet{ nativeFunction(args) };
 			//stalled on native function!
-			catch(const StallFlag&){
+			if(isStalled){
 				//don't push the args - instead set the stalling native function call
 				stallingNativeFunctionCall = { nativeFunction, args };
 				//next, push the function wrapper
 				pushStallNodeData(functionWrapperData);
 				//last, push a stall info for a native call stall
 				pushStallNodeInfo({ AstType::call, StallNodeInfo::callNative });
-				throw;
+				return {};
 			}
+			return toRet;
 		}
 		
 		/**
@@ -2358,21 +2341,21 @@ namespace darkness{
 			pushEmptyEnvironment();
 			//evaluate args and store in the function environment; each arg may stall
 			int currentIndex{ 0 };
-			try {
-				for(; currentIndex < data.args.size(); ++currentIndex ) {
-					innermostEnvironmentPointer->define(
-						userFunctionWrapper.paramNames[currentIndex],
-						runExpression(data.args[currentIndex])
-					);
+			DataType temp;//uninitialized
+			for(; currentIndex < data.args.size(); ++currentIndex ) {
+				temp = runExpression(data.args[currentIndex]);
+				//stalled on an arg
+				if(isStalled){
+					//in this case, there is no need to push all the args since we aren't
+					//resetting the environment. Do push the function and info though.
+					pushStallNodeData(functionWrapperData);
+					pushStallNodeInfo({ AstType::call, currentIndex });
+					return{};
 				}
-			}
-			//stalled on an arg
-			catch(const StallFlag&){
-				//in this case, there is no need to push all the args since we aren't
-				//resetting the environment. Do push the function and info though.
-				pushStallNodeData(functionWrapperData);
-				pushStallNodeInfo({ AstType::call, currentIndex });
-				throw;
+				innermostEnvironmentPointer->define(
+					userFunctionWrapper.paramNames[currentIndex],
+					temp
+				);
 			}
 			//all args evaluated, pass to function body
 			return evaluateUserFunctionWithArgs(functionWrapperData, userFunctionWrapper);
@@ -2389,6 +2372,17 @@ namespace darkness{
 			try{
 				//pass to the function body
 				runStatement(*userFunctionWrapper.body);
+				//stalled on the function body; DO NOT RESET ENVIRONMENT
+				if(isStalled){
+					/*
+					 * stalled on a native function! vomit onto the stack and rethrow, but
+					 * DO NOT RESET THE ENVIRONMENT POINTER since we must resume in the
+					 * innermost environment.
+					 */
+					pushStallNodeData(functionWrapperData);
+					pushStallNodeInfo({ AstType::call, StallNodeInfo::callUser });
+					return {};
+				}
 				popEnvironment();
 				//if no throw/return occurred, return false
 				return DataType{ false };
@@ -2397,17 +2391,6 @@ namespace darkness{
 			catch(const DataType& returnValue){
 				popEnvironment();
 				return returnValue;
-			}
-			//stalled on the function body; DO NOT RESET ENVIRONMENT
-			catch(const StallFlag&){
-				/*
-				 * stalled on a native function! vomit onto the stack and rethrow, but
-				 * DO NOT RESET THE ENVIRONMENT POINTER since we must resume in the
-				 * innermost environment.
-				 */
-				pushStallNodeData(functionWrapperData);
-				pushStallNodeInfo({ AstType::call, StallNodeInfo::callUser });
-				throw;
 			}
 			//error! reset environment
 			catch(...){
@@ -2418,8 +2401,8 @@ namespace darkness{
 		}
 		
 		/**
-		 * Resumes a function call node. A native function is the root of all stalls, but a user
-		 * function may be treated as a block of sorts.
+		 * Resumes a function call node. A native function is the root of all stalls, but a
+		 * user function may be treated as a block of sorts.
 		 */
 		DataType resumeCall(const AstNode& call){
 			throwIfNotType(call, AstType::call, "not a call node!");
@@ -2438,14 +2421,12 @@ namespace darkness{
 			//case 2: we stalled on the getting the function wrapper
 			if(stallNodeInfo.index == StallNodeInfo::callFuncExpr){
 				//try to get the function wrapper again
-				DataType functionWrapperData;
-				try {
-					functionWrapperData = resumeExpression(*data.funcExpr);
-				}
+				DataType functionWrapperData{ resumeExpression(*data.funcExpr) };
 				//stalled again on the funcExpr!
-				catch(const StallFlag&){
+				if(isStalled){
 					pushStallNodeInfo({ AstType::call, StallNodeInfo::callFuncExpr });
-					throw;
+					wasp::debug::log("restalled on func expr");
+					return {};
 				}
 				if(!std::holds_alternative<FunctionWrapper>(functionWrapperData)){
 					throwError("tried to call non-function!");
@@ -2522,17 +2503,11 @@ namespace darkness{
 				args.push_back(popLastStallData());
 			}
 			//try to get the rest of the args - may stall again!
-			try {
-				//resume evaluating the stalled arg
-				args.push_back(resumeExpression(data.args[currentIndex]));
-				++currentIndex;
-				//evaluate remainder of args as normal
-				for(; currentIndex < data.args.size(); ++currentIndex ) {
-					args.push_back(runExpression(data.args[currentIndex]));
-				}
-			}
+			DataType temp;//uninitialized
+			//resume evaluating the stalled arg
+			temp = resumeExpression(data.args[currentIndex]);
 			//stalled on an arg again!
-			catch(const StallFlag&){
+			if(isStalled){
 				int stalledIndex{ currentIndex };
 				//first, push all the args
 				//currentIndex points to the stalled arg (which wasn't complete)
@@ -2545,7 +2520,30 @@ namespace darkness{
 				pushStallNodeData(functionWrapperData);
 				//last, push a stall info pointing to the stalled arg
 				pushStallNodeInfo({ AstType::call, stalledIndex });
-				throw;
+				return {};
+			}
+			args.push_back(temp);
+			++currentIndex;
+			
+			//evaluate remainder of args as normal
+			for(; currentIndex < data.args.size(); ++currentIndex ) {
+				temp = runExpression(data.args[currentIndex]);
+				if(isStalled){
+					int stalledIndex{ currentIndex };
+					//first, push all the args
+					//currentIndex points to the stalled arg (which wasn't complete)
+					for(--currentIndex; currentIndex >= 0; --currentIndex){
+						//by pushing the back element, the top will be the first arg
+						pushStallNodeData(args.back());
+						args.pop_back();
+					}
+					//second, push the function wrapper
+					pushStallNodeData(functionWrapperData);
+					//last, push a stall info pointing to the stalled arg
+					pushStallNodeInfo({ AstType::call, stalledIndex });
+					return {};
+				}
+				args.push_back(temp);
 			}
 			//pass to native function, which may stall (in fact this is where stalls start)
 			return evaluateNativeFunctionWithArgs(nativeFunction, args, functionWrapperData);
@@ -2560,37 +2558,45 @@ namespace darkness{
 			//case 1: we stalled on an arg
 			if(stallNodeInfo.index >= 0){
 				int currentIndex{ stallNodeInfo.index };
-				try{
-					//try to evaluate the stalled arg
-					/*
-					 * The statements below are split up because when we resume from a stall,
-					 * we are currently in the environment containing the native function call.
-					 * resumeExpression() will reset the environment to the correct one
-					 * containing the parameter environment, but we should not access
-					 * innermostEnvironmentPointer prior to calling resumeExpression on the
-					 * stalled arg.
-					 */
-					const DataType& stalledArg{ resumeExpression(data.args[currentIndex]) };
-					innermostEnvironmentPointer->define(
-						userFunctionWrapper.paramNames[currentIndex],
-						stalledArg
-					);
-					++currentIndex;
-					//try to evaluate the remaining args
-					for(; currentIndex < data.args.size(); ++currentIndex ) {
-						innermostEnvironmentPointer->define(
-							userFunctionWrapper.paramNames[currentIndex],
-							runExpression(data.args[currentIndex])
-						);
-					}
-				}
+				//try to evaluate the stalled arg
+				/*
+				 * The statements below are split up because when we resume from a stall,
+				 * we are currently in the environment containing the native function call.
+				 * resumeExpression() will reset the environment to the correct one
+				 * containing the parameter environment, but we should not access
+				 * innermostEnvironmentPointer prior to calling resumeExpression on the
+				 * stalled arg.
+				 */
+				const DataType& stalledArg{ resumeExpression(data.args[currentIndex]) };
 				//stalled on an arg again!
-				catch(const StallFlag&){
+				if(isStalled){
 					//in this case, there is no need to push all the args since we aren't
 					//resetting the environment. Do push the function and info though.
 					pushStallNodeData(functionWrapperData);
 					pushStallNodeInfo({ AstType::call, currentIndex });
-					throw;
+					return {};
+				}
+				innermostEnvironmentPointer->define(
+					userFunctionWrapper.paramNames[currentIndex],
+					stalledArg
+				);
+				++currentIndex;
+				
+				//try to evaluate the remaining args
+				DataType temp;//uninitialized
+				for(; currentIndex < data.args.size(); ++currentIndex ) {
+					temp = runExpression(data.args[currentIndex]);
+					if(isStalled){
+						//in this case, there is no need to push all the args since we aren't
+						//resetting the environment. Do push the function and info though.
+						pushStallNodeData(functionWrapperData);
+						pushStallNodeInfo({ AstType::call, currentIndex });
+						return {};
+					}
+					innermostEnvironmentPointer->define(
+						userFunctionWrapper.paramNames[currentIndex],
+						temp
+					);
 				}
 				//all args evaluated and put into the environment, now pass to function body
 				return evaluateUserFunctionWithArgs(functionWrapperData, userFunctionWrapper);
@@ -2601,6 +2607,17 @@ namespace darkness{
 				try{
 					//pass to the function body
 					resumeStatement(*userFunctionWrapper.body);
+					//stalled on the function body again; DO NOT RESET ENVIRONMENT
+					if(isStalled){
+						/*
+					 	 * stalled on a native function! vomit onto the stack and rethrow, but
+					 	 * DO NOT RESET THE ENVIRONMENT POINTER since we must resume in the
+					 	 * innermost environment.
+					 	 */
+						pushStallNodeData(functionWrapperData);
+						pushStallNodeInfo({ AstType::call, StallNodeInfo::callUser });
+						return {};
+					}
 					popEnvironment();
 					//if no throw/return occurred, return false
 					return DataType{ false };
@@ -2609,17 +2626,6 @@ namespace darkness{
 				catch(const DataType& returnValue){
 					popEnvironment();
 					return returnValue;
-				}
-				//stalled on the function body again; DO NOT RESET ENVIRONMENT
-				catch(const StallFlag&){
-					/*
-					 * stalled on a native function! vomit onto the stack and rethrow, but
-					 * DO NOT RESET THE ENVIRONMENT POINTER since we must resume in the
-					 * innermost environment.
-					 */
-					pushStallNodeData(functionWrapperData);
-					pushStallNodeInfo({ AstType::call, StallNodeInfo::callUser });
-					throw;
 				}
 				//error! reset environment
 				catch(...){
@@ -2755,6 +2761,7 @@ namespace darkness{
 			);
 			stallInfoStack.clear();
 			stallDataStack.clear();
+			isStalled = false;
 		}
 		
 		/**
@@ -2766,6 +2773,7 @@ namespace darkness{
 			stallInfoStack = std::move(state.stallInfoStack);
 			stallDataStack = std::move(state.stallDataStack);
 			stallingNativeFunctionCall = std::move(state.stallingNativeFunctionCall);
+			isStalled = false;
 		}
 		
 		/**

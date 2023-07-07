@@ -144,6 +144,7 @@ namespace process::game {
 		};
 		if (writeSettingsFlagChannel.hasMessages()) {
 			writeSettingsCallback();
+			writeSettingsFlagChannel.clear();
 		}
 	}
 

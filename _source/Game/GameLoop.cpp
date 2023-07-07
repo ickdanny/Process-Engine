@@ -1,8 +1,19 @@
 #include "Game\GameLoop.h"
 
+#include "Scheduling.h"
+
 #include "Logging.h"
 
 namespace process::game {
+	
+	namespace{
+		constexpr uint64_t ratio100nsToSeconds { 10'000'000ull };
+		using clockType = std::chrono::steady_clock;
+		using ratioTimePointTo100ns = std::ratio<
+			clockType::period::num * ratio100nsToSeconds,
+			clockType::period::den
+		>;
+	}
 	
 	void GameLoop::run() {
 		DurationType timeBetweenUpdates {
@@ -33,9 +44,10 @@ namespace process::game {
 			//draw frames if possible
 			if( getCurrentTime() < nextUpdate ) {
 				renderFunction();
-				while( getCurrentTime() < nextUpdate && running ) {
-					//do nothing
-				}
+				wasp::utility::sleep100ns(
+					((nextUpdate - getCurrentTime()).count() * ratioTimePointTo100ns::num)
+					/ ratioTimePointTo100ns::den
+				);
 			}
 			else {
 				++updatesWithoutFrame;

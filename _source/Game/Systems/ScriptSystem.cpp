@@ -49,7 +49,7 @@ namespace process::game::systems {
 		addNativeFunction("print", print);
 		addNativeFunction("timer", std::bind(&ScriptSystem::timer, this, _1));
 		addNativeFunction("stall", std::bind(&ScriptSystem::stall, this, _1));
-		addNativeFunction("stallUntil", stallUntil);
+		addNativeFunction("stallUntil", std::bind(&ScriptSystem::stallUntil, this, _1));
 		
 		//general queries
 		addNativeFunction("isBossDead", std::bind(&ScriptSystem::isBossDead, this, _1));
@@ -563,13 +563,15 @@ namespace process::game::systems {
 		//if there is a positive timer, tick down the timer and continue stalling
 		if(containerTimer > 0){
 			--containerTimer;
-			throw StallFlag{};
+			isStalled = true;
+			return {};
 		}
 		//if there is no timer, begin the timer and stall
 		else if(containerTimer == ScriptContainer::noTimer){
 			throwIfNativeFunctionWrongArity(1, parameters, "timer");
 			containerTimer = std::get<int>(parameters[0]);
-			throw StallFlag{};
+			isStalled = true;
+			return {};
 		}
 		//if the timer is over, set to no timer and exit
 		else if(containerTimer == 0){
@@ -590,7 +592,8 @@ namespace process::game::systems {
 		if(containerTimer == ScriptContainer::noTimer){
 			throwIfNativeFunctionWrongArity(0, parameters, "stall");
 			++containerTimer;
-			throw StallFlag{};
+			isStalled = true;
+			return {};
 		}
 		//otherwise, exit
 		else{
@@ -628,7 +631,8 @@ namespace process::game::systems {
 		}
 		//otherwise, keep stalling
 		else{
-			throw StallFlag{};
+			isStalled = true;
+			return {};
 		}
 	}
 	

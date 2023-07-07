@@ -93,7 +93,7 @@ namespace process::game::systems {
 		static DataType print(const std::vector<DataType>& parameters);
 		DataType timer(const std::vector<DataType>& parameters);
 		DataType stall(const std::vector<DataType>& parameters);
-		static DataType stallUntil(const std::vector<DataType>& parameters);
+		DataType stallUntil(const std::vector<DataType>& parameters);
 		
 		//general queries
 		DataType isBossDead(const std::vector<DataType>& parameters);
