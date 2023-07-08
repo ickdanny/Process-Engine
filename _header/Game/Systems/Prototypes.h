@@ -51,6 +51,15 @@ namespace process::game::systems{
 			int relativeDepth
 		);
 		
+		void addEnemyForwardProjectile(
+			resources::ScriptStorage& scriptStorage,
+			resources::SpriteStorage& spriteStorage,
+			const std::string& type,
+			float hitbox,
+			const std::string& color,
+			int relativeDepth
+		);
+		
 		void add(
 			const std::string& prototypeID,
 			const ComponentTupleSharedPointer& prototypePointer

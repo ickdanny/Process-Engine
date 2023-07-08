@@ -1,0 +1,21 @@
+let maxTime = 45;
+let symmetry = 3;
+let tick = diff(4, 2, 1, 1);
+let angle = angleToPlayer();
+let angleIncrement = diff(16.0, 15.0, 16.0, 16.0) * tick / phi;
+let speed = 1.0;
+
+let position = entityPosition(); #stationary during this attack
+
+func spawnBullets(velocity){
+    spawn("sharpLPurple", position, velocity, "b1_1_shot3_bullet1");
+    spawn("sharpDPurple", position, velocity, "b1_1_shot3_bullet2");
+}
+
+let baseVelocity = makePolar(speed, angle);
+for(let t = 0; t < maxTime; t = t + tick){
+    ring(baseVelocity, symmetry, spawnBullets);
+    angle = angle + angleIncrement;
+    baseVelocity = makePolar(speed, angle);
+    timer(tick);
+}

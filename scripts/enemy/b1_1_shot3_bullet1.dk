@@ -1,0 +1,6 @@
+let angleShift = -diff(25.0, 45.0, 60.0, 90.0);
+let waitTime = 30;
+let shiftTime = 50;
+
+timer(waitTime);
+shiftAnglePeriod(entityAngle() + angleShift, shiftTime);

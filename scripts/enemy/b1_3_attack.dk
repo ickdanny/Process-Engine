@@ -1,0 +1,24 @@
+let health = 1400;
+let initWaitTime = 35;
+let betweenWaitTime = 149;
+let afterWaitTime = 115;
+let rLow = 50;
+let rHigh = 60;
+let maxSpeed = 1.2;
+
+setHealth(health);
+
+#shot 1 = red ring grenades, shot 2 = blue column grenades, shot 3 = purple aim
+while(true){
+    timer(initWaitTime);
+    addSpawn("b1_3_shot1");
+
+    timer(betweenWaitTime);
+    addSpawn("b1_3_shot2");
+
+    timer(betweenWaitTime);
+    addSpawn("b1_3_shot3");
+
+    timer(afterWaitTime);
+    boundGotoDecelerating(bossXLow, bossXHigh, bossYLow, bossYHigh, rLow, rHigh, maxSpeed);
+}

@@ -5,6 +5,7 @@
 #include <functional>
 #include <any>
 #include <utility>
+#include <sstream>
 
 #include "Logging.h"
 
@@ -2335,7 +2336,17 @@ namespace darkness{
 			const UserFunctionWrapper& userFunctionWrapper
 		){
 			if(userFunctionWrapper.paramNames.size() != data.args.size()){
-				throwError("user function bad arity");
+				std::stringstream errorMessageStream{};
+				errorMessageStream << "user function bad arity: expected ";
+				errorMessageStream << std::to_string(userFunctionWrapper.paramNames.size());
+				errorMessageStream << " but got ";
+				errorMessageStream << std::to_string(data.args.size());
+				errorMessageStream << "; ";
+				for(const auto& paramName : userFunctionWrapper.paramNames){
+					errorMessageStream << paramName;
+					errorMessageStream << ", ";
+				}
+				throwError(errorMessageStream.str());
 			}
 			//create a new environment for the function
 			pushEmptyEnvironment();

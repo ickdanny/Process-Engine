@@ -1,0 +1,6 @@
+let initWaitTime = 45;
+let finalSpeed = 1.4;
+let speedTime = 45;
+
+timer(initWaitTime);
+shiftSpeedPeriod(finalSpeed, speedTime);

@@ -1,0 +1,41 @@
+let lifetime = 75;
+let symmetry = diff(1, 2, 3, 4);
+let spiralAngleIncrement = -7.5 * phi;
+
+removeOutbound();
+
+let angularVelocity = -840.0 / lifetime;
+let radiusIncrement = 0.6;
+
+let originalPos = entityPosition();
+let currentPos = originalPos;
+let currentDist = 0.0;
+let currentAngle = pointAngle(originalPos, currentPos);
+
+func spawnBullet(velocity){
+    spawn("sharpLPurple", entityPosition(), velocity, "b1_2_shot2_bullet2");
+}
+
+let baseAngle = random(0.0, 360.0);
+let angle = baseAngle;
+func spawnBullets(){
+    ring(makePolar(0.0, angle), symmetry, spawnBullet);
+    angle = angle + spiralAngleIncrement;
+}
+
+let offset;
+let nextPos;
+let vel;
+for(let t = 0; t < lifetime; t = t + 1){
+    spawnBullets();
+    currentAngle = currentAngle + angularVelocity;
+    currentDist = currentDist + radiusIncrement;
+    offset = makePolar(currentDist, currentAngle);
+    nextPos = originalPos + offset;
+    vel = makePolar(pointDist(currentPos, nextPos), pointAngle(currentPos, nextPos));
+    setVelocity(vel);
+    currentPos = nextPos;
+    stall();
+}
+
+die();

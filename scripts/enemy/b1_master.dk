@@ -5,8 +5,34 @@ showDialogue("1_1");
 stallUntil(isDialogueOver);
 setCollidable();
 
-addSpawn("b1_1_attack");
+addSpawn("b1_1_attack"); # grenades + dual curving spiral
 stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+
+timer(50);
+addSpawn("b1_2_attack"); # spiral spawner
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+addSpawn("largePower");
+
+timer(50);
+addSpawn("b1_3_attack"); # ring grenades + aim
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+
+gotoDecelerating(bossMidpoint, 1.0);
+timer(50);
+addSpawn("b1_4_attack"); # helix spirals
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
 
 print("broadcasting win");
 win();

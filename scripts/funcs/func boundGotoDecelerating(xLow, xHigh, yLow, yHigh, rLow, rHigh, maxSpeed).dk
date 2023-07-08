@@ -2,7 +2,7 @@
 
 print("boundGotoDecelerating");
 
-let pos = entityPos();
+let pos = entityPosition();
 let r = max(random(rLow, rHigh), random(rLow, rHigh));
 let angle = random(0.0, 360.0);
 let targetPos = pos + makePolar(r, angle);
@@ -18,4 +18,4 @@ while(x < xLow | x > xHigh | y < yLow | y > yHigh){
     y = getY(targetPos);
 }
 
-gotoDecelerating(x, y, maxSpeed);
+gotoDecelerating(makePoint(x, y), maxSpeed);

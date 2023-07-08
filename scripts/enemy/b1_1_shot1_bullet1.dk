@@ -1,0 +1,7 @@
+let lifetime = random(45, 55);
+let slowestSpeed = 0.2;
+
+removeOutbound();
+shiftSpeedPeriod(slowestSpeed, lifetime);
+addDeathSpawn("b1_1_shot1_bullet1Explode");
+die();

@@ -1,0 +1,19 @@
+let maxTime = 60;
+let tick = 3;
+let baseInitSpeed = 0.8;
+let initSpeedIncrement = 0.12;
+let baseAngle = random(0.0, 360.0);
+let angleIncrement = 23.45;
+
+let pos = entityPosition();
+let initSpeed = baseInitSpeed;
+let angle = baseAngle;
+let velocity = makePolar(initSpeed, angle);
+
+for(let t = 0; t < maxTime; t = t + tick){
+    spawn("mediumLRed", pos, velocity, "b1_3_shot1_bullet");
+    initSpeed = initSpeed + initSpeedIncrement;
+    angle = angle + angleIncrement;
+    velocity = makePolar(initSpeed, angle);
+    timer(tick);
+}

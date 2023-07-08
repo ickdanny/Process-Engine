@@ -1,0 +1,22 @@
+let health = 2400;
+let initWaitTime = 42;
+let timeBetweenSpawns = 99;
+let baseAngle = angleToPlayer();
+let angleIncrement = 9.43 * phi;
+let centerSpeed = 0.6 * 0.9;
+
+setHealth(health);
+timer(initWaitTime);
+
+let angle = baseAngle;
+let pos = entityPosition(); # completely stationary attack
+while(true){
+    spawn("sharpOrange", pos, makePolar(0.0, angle), "b1_4_bullet1");
+    spawn("sharpLPurple", pos, makePolar(0.0, angle + 120.0), "b1_4_bullet2");
+    spawn("sharpLBlue", pos, makePolar(0.0, angle - 120.0), "b1_4_bullet3");
+    spawn("mediumOrange", pos, makePolar(centerSpeed, angle));
+    spawn("mediumLPurple", pos, makePolar(centerSpeed, angle + 120.0));
+    spawn("mediumLBlue", pos, makePolar(centerSpeed, angle - 120.0));
+    angle = angle + angleIncrement;
+    timer(timeBetweenSpawns);
+}

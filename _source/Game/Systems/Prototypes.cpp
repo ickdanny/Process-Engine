@@ -46,7 +46,7 @@ namespace process::game::systems{
 		constexpr float smallHitbox{ 2.5f };
 		constexpr float mediumHitbox{ 4.0f };
 		constexpr float largeHitbox{ 10.0f };
-		constexpr float sharpHitbox{ 3.75f };
+		constexpr float sharpHitbox{ 1.5f };
 		constexpr float outbound{ -21.0f };
 	}
 	
@@ -365,6 +365,32 @@ namespace process::game::systems{
 		addSmall("Yellow");
 		#undef addSmall
 		
+		#define addSharp(color) \
+			addEnemyForwardProjectile( \
+				scriptStorage, \
+				spriteStorage, \
+				"sharp", \
+				enemyProjectile::sharpHitbox, \
+				color, \
+                3 \
+            )
+		addSharp("Black");
+		addSharp("DBlue");
+		addSharp("Blue");
+		addSharp("LBlue");
+		addSharp("Clear");
+		addSharp("DGray");
+		addSharp("LGray");
+		addSharp("DGreen");
+		addSharp("LGreen");
+		addSharp("Orange");
+		addSharp("DPurple");
+		addSharp("LPurple");
+		addSharp("DRed");
+		addSharp("LRed");
+		addSharp("Yellow");
+		#undef addSharp
+		
 		//MOBS
 		add("enemyExplode", EntityBuilder::makeVisiblePrototype(
 			SpriteInstruction{
@@ -556,6 +582,34 @@ namespace process::game::systems{
 				spriteStorage.get(stringUtil::convertToWideString(type + color))->sprite,
 				config::enemyBulletDepth + relativeDepth
 			},
+			Outbound{ enemyProjectile::outbound },
+			DeathCommand{ DeathCommand::Commands::deathSpawn },
+			DeathSpawn{ ScriptList{ {
+				scriptStorage.get(L"projectileExplode"),
+				std::string{ ScriptList::spawnString } + "projectileExplode"
+			} } }
+		).heapClone());
+	}
+	
+	void Prototypes::addEnemyForwardProjectile(
+		resources::ScriptStorage& scriptStorage,
+		resources::SpriteStorage& spriteStorage,
+		const std::string& type,
+		float hitbox,
+		const std::string& color,
+		int relativeDepth
+	){
+		add(type + color, EntityBuilder::makeVisibleCollidablePrototype(
+			AABB{ hitbox },
+			PlayerCollisions::Source{ components::CollisionCommands::death },
+			BulletCollisions::Target{ components::CollisionCommands::death },
+			ClearMarker{},
+			Damage{ 1 },
+			SpriteInstruction{
+				spriteStorage.get(stringUtil::convertToWideString(type + color))->sprite,
+				config::enemyBulletDepth + relativeDepth
+			},
+			RotateSpriteForwardMarker{},
 			Outbound{ enemyProjectile::outbound },
 			DeathCommand{ DeathCommand::Commands::deathSpawn },
 			DeathSpawn{ ScriptList{ {

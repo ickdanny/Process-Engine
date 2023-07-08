@@ -1,3 +1,30 @@
-let health = 300;
+let health = 1500;
+let initWaitTime = 35;
+let betweenWaitTime = 106;
+let afterWaitTime = 135;
+let rLow = 50;
+let rHigh = 60;
+let maxSpeed = 1.2;
 
 setHealth(health);
+
+#shot 1 = red grenades, shot 2 = blue grenades, shot 3 = purple spiral curve
+while(true){
+    timer(initWaitTime);
+    addSpawn("b1_1_shot1");
+
+    timer(betweenWaitTime);
+    addSpawn("b1_1_shot3");
+
+    timer(afterWaitTime);
+    boundGotoDecelerating(bossXLow, bossXHigh, bossYLow, bossYHigh, rLow, rHigh, maxSpeed);
+
+    timer(initWaitTime);
+    addSpawn("b1_1_shot2");
+
+    timer(betweenWaitTime);
+    addSpawn("b1_1_shot3");
+
+    timer(afterWaitTime);
+    boundGotoDecelerating(bossXLow, bossXHigh, bossYLow, bossYHigh, rLow, rHigh, maxSpeed);
+}
