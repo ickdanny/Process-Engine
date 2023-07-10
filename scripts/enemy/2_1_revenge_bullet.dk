@@ -1,0 +1,7 @@
+let gravDirection = -90.0;
+let gravAccel = 0.01;
+let gravDragLow = 0.001;
+let gravDragHigh = 0.01;
+
+let gravDrag = random(gravDragLow, gravDragHigh);
+gravity(gravDirection, gravAccel, gravDrag);

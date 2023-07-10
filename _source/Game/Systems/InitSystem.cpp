@@ -754,11 +754,11 @@ namespace process::game::systems {
 		switch (gameState.stage) {
 			case 1:
 				backgroundID = L"tile1";
-				pixelScrollPerTick = 1.0f;
+				pixelScrollPerTick = 0.5f;
 				break;
 			case 2:
 				backgroundID = L"tile2";
-				pixelScrollPerTick = 1.0f;
+				pixelScrollPerTick = 0.25f;
 				break;
 			case 3:
 				backgroundID = L"tile3";

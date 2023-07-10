@@ -1,0 +1,25 @@
+# func randomColorfulColor()
+
+let randFloat = random(0.0, 1.0);
+if(randFloat < 0.5){
+    if(randFloat < 0.16667){
+        return "LBlue";
+    }
+    else if(randFloat < 0.33333){
+        return "LGreen";
+    }
+    else{
+        return "LPurple";
+    }
+}
+else{
+    if(randFloat < 0.66667){
+        return "LRed";
+    }
+    else if(randFloat < 0.83333){
+        return "Orange";
+    }
+    else{
+        return "Yellow";
+    }
+}

@@ -1,3 +1,10 @@
-print("TO DO stage 2");
+timer(630);
+addSpawn("2_1_spawner"); # wave 1 = cloud colony from right
 
-removeEntity();
+
+stallUntil(isWin);
+timer(timeBeforePostDialogue);
+
+showDialogue("2_2");
+stallUntil(isDialogueOver);
+endStage();

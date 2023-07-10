@@ -1,0 +1,19 @@
+let numSpawns = 16;
+let tick = 22;
+let yLow = 10.0;
+let yHigh = 60.0;
+let speedLow = 0.4;
+let speedHigh = 0.8;
+let baseAngle = 185.0;
+let angleOffset = 10.0;
+
+let y;
+let speed;
+let angle;
+for(let i = 0; i < numSpawns; i = i + 1){
+    y = random(yLow, yHigh);
+    speed = random(speedLow, speedHigh);
+    angle = baseAngle + random(-angleOffset, angleOffset);
+    spawn("cloud", getRightSpawn(y), makePolar(speed, angle), "2_1_enemy");
+    timer(tick);
+}

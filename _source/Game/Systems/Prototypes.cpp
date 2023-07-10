@@ -37,8 +37,11 @@ namespace process::game::systems{
 	namespace enemy{
 		constexpr int spawnHealth{ 32000 };//set health in each script
 		constexpr float outbound{ -30.0f };
-		constexpr float machineHitbox{ 12.0f };
-		constexpr float machine2Hitbox{ 11.0f };
+		constexpr float machineHitbox{ 10.0f };
+		constexpr float machine2Hitbox{ 9.0f };
+		constexpr float batHitbox{ 8.0f };
+		constexpr float wingHitbox{ 11.0f };
+		constexpr float cloudHitbox{ 9.5f };
 		constexpr float bossHitbox{ 13.0f };
 	}
 	
@@ -513,6 +516,91 @@ namespace process::game::systems{
 					true
 				},
 				3
+			},
+			Health{ enemy::spawnHealth },
+			Outbound{ enemy::outbound },
+			DeathCommand{ DeathCommand::Commands::deathSpawn },
+			DeathSpawn{ ScriptList{ {
+				scriptStorage.get(L"enemyExplode"),
+				std::string{ ScriptList::spawnString } + "enemyExplode"
+			} } }
+		).heapClone());
+		add("bat", EntityBuilder::makeVisibleCollidablePrototype(
+			AABB{ enemy::batHitbox },
+			PlayerCollisions::Source{},
+			EnemyCollisions::Target{ components::CollisionCommands::damage },
+			SpriteInstruction{
+				spriteStorage.get(L"bat1")->sprite,
+				config::enemyDepth
+			},
+			RotateSpriteForwardMarker{},
+			game::AnimationList{
+				components::Animation {
+					{
+						L"bat1",
+						L"bat2"
+					},
+					true
+				},
+				8
+			},
+			Health{ enemy::spawnHealth },
+			Outbound{ enemy::outbound },
+			DeathCommand{ DeathCommand::Commands::deathSpawn },
+			DeathSpawn{ ScriptList{ {
+				scriptStorage.get(L"enemyExplode"),
+				std::string{ ScriptList::spawnString } + "enemyExplode"
+			} } }
+		).heapClone());
+		add("wing", EntityBuilder::makeVisibleCollidablePrototype(
+			AABB{ enemy::wingHitbox },
+			PlayerCollisions::Source{},
+			EnemyCollisions::Target{ components::CollisionCommands::damage },
+			SpriteInstruction{
+				spriteStorage.get(L"wing1")->sprite,
+				config::enemyDepth
+			},
+			game::AnimationList{
+				components::Animation {
+					{
+						L"wing1",
+						L"wing2",
+						L"wing3",
+						L"wing4",
+						L"wing5",
+						L"wing6"
+					},
+					true
+				},
+				5
+			},
+			Health{ enemy::spawnHealth },
+			Outbound{ enemy::outbound },
+			DeathCommand{ DeathCommand::Commands::deathSpawn },
+			DeathSpawn{ ScriptList{ {
+				scriptStorage.get(L"bossExplode"),	//enemy is big so use boss explode
+				std::string{ ScriptList::spawnString } + "bossExplode"
+			} } }
+		).heapClone());
+		add("cloud", EntityBuilder::makeVisibleCollidablePrototype(
+			AABB{ enemy::cloudHitbox },
+			PlayerCollisions::Source{},
+			EnemyCollisions::Target{ components::CollisionCommands::damage },
+			SpriteInstruction{
+				spriteStorage.get(L"cloud1")->sprite,
+				config::enemyDepth
+			},
+			game::AnimationList{
+				components::Animation {
+					{
+						L"cloud1",
+						L"cloud2",
+						L"cloud3",
+						L"cloud4"
+					},
+					true
+				},
+				6
 			},
 			Health{ enemy::spawnHealth },
 			Outbound{ enemy::outbound },

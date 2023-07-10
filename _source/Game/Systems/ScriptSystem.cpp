@@ -424,8 +424,8 @@ namespace process::game::systems {
 				return left + right;
 			}
 			else if(std::holds_alternative<PolarVector>(rightData)){
-				const Velocity& right{ std::get<PolarVector>(rightData) };
-				return left + right;
+				const PolarVector& right{ std::get<PolarVector>(rightData) };
+				return PolarVector{ left + right };
 			}
 			else{
 				throw std::runtime_error{ "native binary plus bad right type for polar!" };

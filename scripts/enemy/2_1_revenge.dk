@@ -1,0 +1,15 @@
+let numSpawns = diff(3, 6, 9, 12);
+let initSpeedLow = 0.4;
+let initSpeedHigh = 1.4;
+let angleOffsetMax = 30;
+
+let speed;
+let angle;
+let velocity;
+let position = entityPosition();
+for(let i = 0; i < numSpawns; i = i + 1){
+    speed = random(initSpeedLow, initSpeedHigh);
+    angle = 90.0 + random(-angleOffsetMax, angleOffsetMax);
+    velocity = makePolar(speed, angle);
+    spawn("small" + randomColorfulColor(), position, velocity, "2_1_revenge_bullet");
+}
