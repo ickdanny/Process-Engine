@@ -1,0 +1,36 @@
+# func spawnV(centerX, offset, numSpawns, timeBetweenSpawns, speed, scriptID)
+
+if(numSpawns <= 0){
+    return;
+}
+
+let velocity = makePolar(speed, -90.0);
+
+#spawn center first
+spawn("bat", getTopSpawnLeft(centerX), velocity, scriptID);
+
+if(numSpawns > 1){
+    timer(timeBetweenSpawns);
+
+    let bound = 10.0;
+    let leftBound =  bound;
+    let rightBound = gameWidth - bound;
+    let xLeft;
+    let xRight;
+    let positionLeft;
+    let positionRight;
+    for(let i = 1; i < numSpawns; i = i + 1){
+        xLeft = centerX - offset * i;
+        xRight = centerX + offset * i;
+
+        if(xLeft > leftBound){
+            positionLeft = getTopSpawnLeft(xLeft);
+            spawn("bat", positionLeft, velocity, scriptID);
+        }
+        if(xRight < rightBound){
+            positionRight = getTopSpawnLeft(xRight);
+            spawn("bat", positionRight, velocity, scriptID);
+        }
+        timer(timeBetweenSpawns);
+    }
+}

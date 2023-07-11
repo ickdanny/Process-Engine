@@ -1,0 +1,19 @@
+let offset = 13.0;
+let timeBetweenSpawns = 20;
+let speed = 0.8;
+let scriptID = "2_2_enemy";
+
+let xLow = gameWidth * 0.3;
+let xHigh = gameWidth * 0.7;
+
+func spawnBats(numSpawnsOnEachSide){
+    spawnV(random(xLow, xHigh), offset, numSpawnsOnEachSide, timeBetweenSpawns, speed, scriptID);
+}
+
+spawnBats(4);
+timer(20);
+spawnBats(4);
+timer(20);
+spawnBats(5);
+timer(20);
+spawnBats(5);

@@ -1,0 +1,21 @@
+let health = 500;
+let initWaitTime = 20;
+let slowTime = 55;
+let beforeShotTime = 10;
+let afterShotTime = 25;
+let finalSpeed = 0.75;
+let finalSpeedTime = 55;
+
+setHealth(health);
+addDeathSpawn("largePower");
+
+timer(initWaitTime);
+shiftSpeedPeriod(0.0, slowTime);
+
+timer(beforeShotTime);
+addSpawn("2_3_shot");
+stall();
+stallUntil(isNotSpawning);
+
+timer(afterShotTime);
+shiftSpeedPeriod(finalSpeed, finalSpeedTime);

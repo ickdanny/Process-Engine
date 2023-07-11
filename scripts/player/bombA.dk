@@ -7,7 +7,7 @@ func velConsumer(velocity){
     spawn("scythe", pos, velocity, "scytheSpiral");
 }
 
-let angle = random(0.0, 360.0);
+let angle = randomAngle();
 let baseVel = makePolar(speed, angle);
 
 #velConsumer(baseVel);

@@ -1,0 +1,8 @@
+let spiralAngleIncrement = -7.5 * phi;
+let angularVelocityFull = -840.0;
+b1_2_bulletPrimary(
+    spiralAngleIncrement,
+    angularVelocityFull,
+    "sharpLPurple",
+    "b1_2_shot2_bullet2"
+);

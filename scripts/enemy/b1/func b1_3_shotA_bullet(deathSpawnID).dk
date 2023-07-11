@@ -1,0 +1,9 @@
+# func b1_3_shotA_bullet(deathSpawnID)
+
+let lifetime = 49;
+let slowestSpeed = 0.5;
+
+removeOutbound();
+shiftSpeedPeriod(slowestSpeed, lifetime);
+addDeathSpawn(deathSpawnID);
+die();

@@ -1,0 +1,2 @@
+let angleIncrement = -23.45;
+b1_3_shotA(angleIncrement, "mediumBlue", "b1_3_shot2_bullet");

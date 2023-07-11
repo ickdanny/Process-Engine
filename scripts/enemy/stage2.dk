@@ -1,5 +1,9 @@
 timer(630);
 addSpawn("2_1_spawner"); # wave 1 = cloud colony from right
+timer(500);
+addSpawn("2_2_spawner"); # wave 2 = bat Vs
+timer(500);
+addSpawn("2_3_spawner"); # wave 2 = first wing
 
 
 stallUntil(isWin);

@@ -1,0 +1,9 @@
+# func b1_1_shotA_bulletSecondary(angleShift, deathSpawnID)
+
+let lifetime = random(45, 55);
+let slowestSpeed = 0.25;
+
+removeOutbound();
+shiftVelocityTurnPeriod(slowestSpeed, entityAngle() + angleShift, lifetime);
+addDeathSpawn(deathSpawnID);
+die();

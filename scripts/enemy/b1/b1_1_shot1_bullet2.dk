@@ -1,0 +1,2 @@
+let angleShift = -90.0;
+b1_1_shotA_bulletSecondary(angleShift, "b1_1_shot1_bullet2Explode");

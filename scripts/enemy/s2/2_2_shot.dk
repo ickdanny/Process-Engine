@@ -1,0 +1,25 @@
+let timeBetweenShots = diff(100, 80, 60, 50);
+let speed = diff(1.7, 2.3, 2.8, 3.2);
+let arcSymmetry = diff(1, 1, 3, 5);
+let arcIncrement = diff(0.0, 0.0, 20.983, 18.34);
+
+timer(random(0, timeBetweenShots));
+
+let position;
+func spawnBullet(velocity){
+    spawn("smallBlue", position, velocity);
+}
+
+func spawnArc(velocity){
+    arc(velocity, arcSymmetry, arcIncrement, spawnBullet);
+}
+
+let yHigh = gameHeight * 0.5;
+func isInBounds(y){
+    return y < yHigh;
+}
+
+while(isInBounds(getY(position = entityPosition()))){
+    spawnArc(makePolar(speed, angleToPlayer()));
+    timer(timeBetweenShots);
+}

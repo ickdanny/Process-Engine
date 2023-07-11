@@ -1,0 +1,11 @@
+let symmetry = diff(6, 10, 13, 16);
+let speed = 0.8;
+let baseAngle = randomAngle();
+let baseVelocity = makePolar(speed, baseAngle);
+
+let pos = entityPosition();
+func spawnBullet(velocity){
+    spawn("sharpLRed", pos, velocity);
+}
+
+ring(baseVelocity, symmetry, spawnBullet);

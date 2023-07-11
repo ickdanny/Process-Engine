@@ -1,0 +1,3 @@
+let pos = entityPosition();
+let vel = makePolar(0.0, randomAngle());
+spawn("sharpLGreen", pos, vel, "b1_2_shot1_bullet1");

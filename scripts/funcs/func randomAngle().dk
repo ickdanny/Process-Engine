@@ -1,0 +1,2 @@
+# func randomAngle();
+return random(0.0, 360.0);

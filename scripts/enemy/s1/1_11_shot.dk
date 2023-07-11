@@ -1,0 +1,28 @@
+let maxTime = 270;
+let tick = diff(16, 13, 11, 9);
+let symmetry = diff(2, 3, 3, 4);
+let speed = 1.28;
+let baseAngle1 = randomAngle();
+let baseAngle2 = randomAngle();
+let angleOffset1 = (120.0 / symmetry) * phi;
+let angleOffset2 = -angleOffset1;
+
+let position = entityPosition(); #stationary enemy
+
+func spawnBullet1(velocity){
+    spawn("mediumLPurple", position, velocity, "1_11_bullet1");
+}
+
+func spawnBullet2(velocity){
+    spawn("mediumLRed", position, velocity, "1_11_bullet2");
+}
+
+let angle1 = baseAngle1;
+let angle2 = baseAngle2;
+for(let t = 0; t < maxTime; t = t + tick){
+    ring(makePolar(speed, angle1), symmetry, spawnBullet1);
+    ring(makePolar(speed, angle2), symmetry, spawnBullet2);
+    angle1 = angle1 + angleOffset1;
+    angle2 = angle2 + angleOffset2;
+    timer(tick);
+}

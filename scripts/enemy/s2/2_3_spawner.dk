@@ -1,0 +1,3 @@
+let x = gameWidth / 2.0;
+let initSpeed = 1.15;
+spawn("wing", getTopSpawnLeft(x), makePolar(initSpeed, -90.0), "2_3_enemy");

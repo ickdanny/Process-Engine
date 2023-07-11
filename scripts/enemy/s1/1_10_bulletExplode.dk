@@ -1,0 +1,22 @@
+func spawnBullet(velocity){
+    spawn("smallLPurple", entityPosition(), velocity);
+}
+
+let symmetry = diff(3, 5, 7, 9);
+let numSpawns = diff(3, 4, 5, 6);
+let baseSpeed = 0.94;
+let speedIncrement = diff(0.5, 0.4, 0.3, 0.2);
+let baseAngle = randomAngle();
+let angleIncrement = diff(12.0, 11.0, 10.0, 9.0);
+let timeIncrement = diff(10, 6, 5, 4);
+
+let speed = baseSpeed;
+let angle = baseAngle;
+let baseVelocity = makePolar(speed, angle);
+for(let s = 0; s < numSpawns; s = s + 1){
+    ring(baseVelocity, symmetry, spawnBullet);
+    speed = speed + speedIncrement;
+    angle = angle + angleIncrement;
+    baseVelocity = makePolar(speed, angle);
+    timer(timeIncrement);
+}

@@ -1,0 +1,10 @@
+let slowTimeLow = 45;
+let slowTimeHigh = 60;
+let finalSpeedLow = 1.3;
+let finalSpeedHigh = 1.5;
+
+shiftSpeedPeriod(0.0, random(slowTimeLow, slowTimeHigh));
+let finalSpeed = random(finalSpeedLow, finalSpeedHigh);
+let finalAngle = angleToPlayer();
+setVelocity(makePolar(finalSpeed, finalAngle));
+spawn("sharpLRed", entityPosition(), makePolar(finalSpeed, finalAngle + 180.0));

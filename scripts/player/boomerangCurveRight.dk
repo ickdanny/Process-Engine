@@ -1,4 +1,4 @@
-setRotation(random(0.0, 360.0));
+setRotation(randomAngle());
 let currentAngle = entityAngle();
 let baseIncrement = 8.0;
 let fallOff = 0.94;

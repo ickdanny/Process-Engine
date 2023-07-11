@@ -1,7 +1,0 @@
-let lifetime = 49;
-let slowestSpeed = 0.5;
-
-removeOutbound();
-shiftSpeedPeriod(slowestSpeed, lifetime);
-addDeathSpawn("b1_3_shot2_bulletExplode");
-die();

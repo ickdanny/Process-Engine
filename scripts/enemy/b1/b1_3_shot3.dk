@@ -1,0 +1,22 @@
+let numSpawns = 3;
+let timeBetweenSpawns = 27;
+let symmetry = diff(7, 9, 11, 13);
+let colCount = diff(2, 3, 4, 5);
+let baseSpeed = diff(1.0, 1.1, 1.2, 1.3);
+let speedIncrement = 0.3;
+
+let pos = entityPosition();
+func spawnBullet(velocity){
+    spawn("sharpLPurple", pos, velocity);
+}
+
+func spawnColumn(velocity){
+    column(velocity, colCount, speedIncrement, spawnBullet);
+}
+
+let baseVelocity;
+for(let i = 0; i < numSpawns; i = i + 1){
+    baseVelocity = makePolar(baseSpeed, angleToPlayer());
+    ring(baseVelocity, symmetry, spawnColumn);
+    timer(timeBetweenSpawns);
+}

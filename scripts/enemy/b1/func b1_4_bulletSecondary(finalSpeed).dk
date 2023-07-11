@@ -1,0 +1,7 @@
+# func b1_4_bulletSecondary(finalSpeed)
+
+let initWaitTime = 45;
+let speedTime = 45;
+
+timer(initWaitTime);
+shiftSpeedPeriod(finalSpeed, speedTime);

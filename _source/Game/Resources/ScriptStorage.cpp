@@ -1,6 +1,7 @@
 #include "Game/Resources/ScriptStorage.h"
 
 #include "File/FileUtil.h"
+#include "StringUtil.h"
 
 #include <fstream>
 
@@ -109,6 +110,13 @@ namespace process::game::resources {
 		std::stringstream stringStream{};
 		stringStream << inStream.rdbuf();
 		inStream.close();
-		return parser.parse(lexer.lex(stringStream.str()));
+		try {
+			return parser.parse(lexer.lex(stringStream.str()));
+		}
+		catch(const std::runtime_error& runtimeError){
+			throw std::runtime_error{
+				stringUtil::convertFromWideString(fileName) + runtimeError.what()
+			};
+		}
 	}
 }

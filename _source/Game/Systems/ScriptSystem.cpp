@@ -331,16 +331,22 @@ namespace process::game::systems {
 			if(!scriptContainer.scriptPointer){
 				throw std::runtime_error{ "bad script pointer! " + scriptContainer.name };
 			}
-			//if the script is not stalled, run the script
-			if(!scriptContainer.state.stalled){
-				scriptContainer.state = runScript(*scriptContainer.scriptPointer);
+			try {
+				//if the script is not stalled, run the script
+				if( !scriptContainer.state.stalled ) {
+					scriptContainer.state = runScript(*scriptContainer.scriptPointer);
+				}
+					//if the script IS stalled, resume the script
+				else {
+					scriptContainer.state = resumeScript(
+						*scriptContainer.scriptPointer,
+						scriptContainer.state
+					);
+				}
 			}
-			//if the script IS stalled, resume the script
-			else{
-				scriptContainer.state = resumeScript(
-					*scriptContainer.scriptPointer,
-					scriptContainer.state
-				);
+			catch(const std::runtime_error& runtimeError){
+				const std::string& scriptName{ scriptContainer.name };
+				throw std::runtime_error{ scriptName + " " + runtimeError.what() };
 			}
 			//if the script is stalled after being run, go to the next script
 			if(scriptContainer.state.stalled){

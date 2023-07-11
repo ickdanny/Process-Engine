@@ -1,9 +1,0 @@
-let symmetry = diff(4, 8, 12, 16);
-let angle = random(0.0, 360.0);
-let speed = 1.9;
-
-func spawnBullet(velocity){
-    spawn("smallLRed", entityPosition(), velocity);
-}
-
-ring(makePolar(speed, angle), symmetry, spawnBullet);
