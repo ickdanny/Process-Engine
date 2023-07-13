@@ -1,35 +1,33 @@
-let numSpawnsPerSide = diff(6, 8, 11, 14);
+let num1PerSide = diff(4, 6, 8, 10);
+let num2PerSide = diff(1, 2, 3, 4);
 let angleRand = 20.0;
 let speedLow = 0.2;
 let speedHigh = 3.0;
-let bullet2Chance = 0.2;
 let tick = 45;
 let maxTime = 350;
 
 let position = entityPosition();
 
 func spawnBullet1(velocity){
-    spawn("sharpClear", position, velocity, "2_3_bullet1");
+    spawn("sharpOrange", position, velocity, "2_3_bullet1");
 }
 
 func spawnBullet2(velocity){
     spawn("sharpLRed", position, velocity, "2_3_bullet2");
 }
 
-func spawnBullet(velocity){
-    if(chance(bullet2Chance)){
-        spawnBullet2(velocity);
-    }
-    else{
-        spawnBullet1(velocity);
-    }
-}
-
 let i;
 for(let t = 0; t < maxTime; t = t + tick){
-    for(i = 0; i < numSpawnsPerSide; i = i + 1){
-        spawnBullet(makePolar(random(speedLow, speedHigh), random(-angleRand, angleRand)));
-        spawnBullet(
+    for(i = 0; i < num1PerSide; i = i + 1){
+        spawnBullet1(makePolar(random(speedLow, speedHigh), random(-angleRand, angleRand)));
+        spawnBullet1(
+            makePolar(random(speedLow, speedHigh),
+            180.0 + random(-angleRand, angleRand))
+        );
+    }
+    for(i = 0; i < num2PerSide; i = i + 1){
+        spawnBullet2(makePolar(random(speedLow, speedHigh), random(-angleRand, angleRand)));
+        spawnBullet2(
             makePolar(random(speedLow, speedHigh),
             180.0 + random(-angleRand, angleRand))
         );

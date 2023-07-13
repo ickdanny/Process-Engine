@@ -1,29 +1,33 @@
+let yOffset = 8.0;
 let speed = 10.0;
+
+let yOffsetVector = makeVector(0.0, yOffset);
 
 func spawnSingle(offset, angle){
     if(isFocused()){
-        spawn("smallLaser", entityPosition() + offset, makePolar(speed, 90.0));
+        spawn("smallLaser", entityPosition() + offset + yOffsetVector, makePolar(speed, 90.0));
     }
     else{
-        spawn("smallLaser", entityPosition() + offset, makePolar(speed, angle));
+        spawn("smallLaser", entityPosition() + offset + yOffsetVector, makePolar(speed, angle));
     }
 }
 
 func spawnPair(offset, rightAngle){
     let mirrorOffset = flipX(offset);
     if(isFocused()){
-        spawn("smallLaser", entityPosition() + offset, makePolar(speed, 90.0));
-        spawn("smallLaser", entityPosition() + mirrorOffset, makePolar(speed, 90.0));
+        let velocity = makePolar(speed, 90.0);
+        spawn("smallLaser", entityPosition() + offset + yOffsetVector, velocity);
+        spawn("smallLaser", entityPosition() + mirrorOffset + yOffsetVector, velocity);
     }
     else{
         spawn(
             "smallLaser",
-            entityPosition() + offset,
+            entityPosition() + offset + yOffsetVector,
             makePolar(speed, rightAngle)
         );
         spawn(
             "smallLaser",
-            entityPosition() + mirrorOffset,
+            entityPosition() + mirrorOffset + yOffsetVector,
             makePolar(speed, 180.0 - rightAngle)
         );
     }

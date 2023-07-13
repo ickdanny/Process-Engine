@@ -1,0 +1,33 @@
+let maxTime = 330;
+let timeWithoutRotation = 40;
+let tick = diff(30 ,25, 23, 19);
+let symmetry = 6;
+let colCount = diff(1, 1, 2, 2);
+let colIncrement = diff(0.0, 0.0, 0.5, 0.5);
+let baseSpeed = diff(1.0, 1.0, 0.7, 0.7);
+let angleIncrement = 0.33 * tick;
+
+let position = entityPosition();
+if(getX(position) > (gameWidth / 2.0)){
+    angleIncrement = -angleIncrement;
+}
+
+func spawnBullet(velocity){
+    spawn("mediumClear", position, velocity);
+}
+
+func spawnColumn(velocity){
+    column(velocity, colCount, colIncrement, spawnBullet);
+}
+
+let angle = 0.0;
+let t = 0;
+for(; t < timeWithoutRotation; t = t + tick){
+    ring(makePolar(baseSpeed, angle), symmetry, spawnColumn);
+    timer(tick);
+}
+for(; t < maxTime; t = t + tick){
+    ring(makePolar(baseSpeed, angle), symmetry, spawnColumn);
+    angle = angle + angleIncrement;
+    timer(tick);
+}

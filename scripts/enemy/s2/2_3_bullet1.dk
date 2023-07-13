@@ -1,7 +1,7 @@
 let slowTimeLow = 45;
 let slowTimeHigh = 60;
-let finalSpeedLow = 0.9;
-let finalSpeedHigh = 1.1;
+let finalSpeedLow = 0.8;
+let finalSpeedHigh = 1.2;
 let angleRand = 15.0;
 
 shiftSpeedPeriod(0.0, random(slowTimeLow, slowTimeHigh));

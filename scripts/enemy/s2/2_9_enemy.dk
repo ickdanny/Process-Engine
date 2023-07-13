@@ -1,0 +1,17 @@
+let health = 1500;
+let initWaitTime = 20;
+let afterTime = 125;
+
+setHealth(health);
+addDeathSpawn("life");
+addDeathSpawn("sendBossDeath");
+setSpecialCollisionSource();
+timer(initWaitTime);
+
+addSpawn("2_9_shot");
+stall();
+stallUntil(isNotSpawning);
+
+timer(afterTime);
+spawn("enemyExplode", entityPosition(), zeroPolar);
+removeEntity();

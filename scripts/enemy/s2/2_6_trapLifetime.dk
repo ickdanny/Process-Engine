@@ -1,0 +1,3 @@
+addDeathSpawn("2_6_spawnEmerge");
+timer(trapLifetime);
+die();

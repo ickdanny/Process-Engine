@@ -14,6 +14,6 @@ spawnBats(3);
 timer(20);
 spawnBats(4);
 timer(20);
-spawnBats(5);
-timer(20);
 spawnBats(4);
+timer(20);
+spawnBats(3);

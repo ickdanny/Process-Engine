@@ -103,5 +103,6 @@ namespace process::game::systems {
 		detectCollisions<EnemyCollisions>(scene);
 		detectCollisions<BulletCollisions>(scene);
 		detectCollisions<PickupCollisions>(scene);
+		detectCollisions<SpecialCollisions>(scene);
 	}
 }

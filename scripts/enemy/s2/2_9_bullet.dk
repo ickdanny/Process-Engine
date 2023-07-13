@@ -1,0 +1,26 @@
+let angleIncrement = 10.1;
+let speed = entitySpeed() * 1.5;
+
+let speedMultiOffset = 0.2;
+let purpleSpeed = speed * (1 - speedMultiOffset * 2.5);
+let blueSpeed = speed * (1 - speedMultiOffset * 1.5);
+let greenSpeed = speed * (1 - speedMultiOffset * 0.5);
+let yellowSpeed = speed * (1 + speedMultiOffset * 0.5);
+let orangeSpeed = speed * (1 + speedMultiOffset * 1.5);
+let redSpeed = speed * (1 + speedMultiOffset * 2.5);
+
+setSpecialCollisionTarget();
+stall();
+stallUntil(specialCollision);
+
+#spawn rainbow
+let position = entityPosition();
+let baseAngle = entityAngle();
+spawn("sharpLRed", position, makePolar(redSpeed, baseAngle - angleIncrement * 2.5));
+spawn("sharpOrange", position, makePolar(orangeSpeed, baseAngle - angleIncrement * 1.5));
+spawn("sharpYellow", position, makePolar(yellowSpeed, baseAngle - angleIncrement * 0.5));
+spawn("sharpLGreen", position, makePolar(greenSpeed, baseAngle + angleIncrement * 0.5));
+spawn("sharpBlue", position, makePolar(blueSpeed, baseAngle + angleIncrement * 1.5));
+spawn("sharpLPurple", position, makePolar(purpleSpeed, baseAngle + angleIncrement * 2.5));
+
+die();

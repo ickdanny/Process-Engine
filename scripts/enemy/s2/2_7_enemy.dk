@@ -1,0 +1,15 @@
+let health = 200;
+let initWaitTime = 20;
+let afterTime = 55;
+
+setHealth(health);
+addDeathSpawn("smallPower");
+timer(initWaitTime);
+
+addSpawn("2_7_shot");
+stall();
+stallUntil(isNotSpawning);
+
+timer(afterTime);
+spawn("enemyExplode", entityPosition(), zeroPolar);
+removeEntity();

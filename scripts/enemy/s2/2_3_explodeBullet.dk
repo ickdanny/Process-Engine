@@ -1,0 +1,21 @@
+let slowTime = 43;
+let baseAngle = entityAngle() + 45;
+let symmetry = diff(4, 4, 8, 8);
+let colCount = diff(1, 2, 3, 4);
+let baseSpeed = diff(1.3, 1.1, 0.9, 0.8);
+let colIncrement = diff(0.0, 0.4, 0.3, 0.25);
+
+shiftSpeedPeriod(0.0, slowTime);
+
+let position = entityPosition();
+func spawnBullet(velocity){
+    spawn("sharpLRed", position, velocity);
+}
+
+func spawnColumn(velocity){
+    column(velocity, colCount, colIncrement, spawnBullet);
+}
+
+let baseVelocity = makePolar(baseSpeed, baseAngle);
+ring(baseVelocity, symmetry, spawnColumn);
+die();

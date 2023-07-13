@@ -1,0 +1,34 @@
+# func spawnCrystalsDownMiddle(
+#     numSpawns,
+#     timeBetweenSpawns,
+#     initY,
+#     yOffset,
+#     baseAngle,
+#     offsetAngleRand,
+#     offsetDistLow,
+#     offsetDistHigh,
+#     trapScriptID
+# )
+
+let xMid = getX(bossMidpoint);
+
+func randomOffset(baseAngle){
+    return makePolar(
+        random(offsetDistLow, offsetDistHigh),
+        baseAngle + random(-offsetAngleRand, offsetAngleRand)
+    );
+}
+
+func spawnTrap(position){
+    spawn("trap", position, zeroPolar, trapScriptID);
+}
+
+let y = initY;
+let position = makePoint(xMid, y);
+for(let i = 0; i < numSpawns; i = i + 1){
+    spawnTrap(position + randomOffset(baseAngle));
+    y = y + yOffset;
+    position = makePoint(xMid, y);
+    baseAngle = flipY(baseAngle);
+    timer(timeBetweenSpawns);
+}

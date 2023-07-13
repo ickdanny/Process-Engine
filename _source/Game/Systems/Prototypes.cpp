@@ -42,12 +42,15 @@ namespace process::game::systems{
 		constexpr float batHitbox{ 8.0f };
 		constexpr float wingHitbox{ 11.0f };
 		constexpr float cloudHitbox{ 9.5f };
+		constexpr float crystalHitbox{ 6.0f };
 		constexpr float bossHitbox{ 13.0f };
+		
+		constexpr float trapSpin{ -2.342f };
 	}
 	
 	namespace enemyProjectile{
 		constexpr float smallHitbox{ 2.5f };
-		constexpr float mediumHitbox{ 4.0f };
+		constexpr float mediumHitbox{ 3.5f };
 		constexpr float largeHitbox{ 10.0f };
 		constexpr float sharpHitbox{ 1.5f };
 		constexpr float outbound{ -21.0f };
@@ -609,6 +612,85 @@ namespace process::game::systems{
 				scriptStorage.get(L"enemyExplode"),
 				std::string{ ScriptList::spawnString } + "enemyExplode"
 			} } }
+		).heapClone());
+		add("crystal", EntityBuilder::makeVisibleCollidablePrototype(
+			AABB{ enemy::crystalHitbox },
+			PlayerCollisions::Source{},
+			EnemyCollisions::Target{ components::CollisionCommands::damage },
+			SpriteInstruction{
+				spriteStorage.get(L"crystal1")->sprite,
+				config::enemyDepth
+			},
+			game::AnimationList{
+				components::Animation {
+					{
+						L"crystal1",
+						L"crystal2",
+						L"crystal3"
+					},
+					true
+				},
+				5
+			},
+			Health{ enemy::spawnHealth },
+			Outbound{ enemy::outbound },
+			DeathCommand{ DeathCommand::Commands::deathSpawn },
+			DeathSpawn{ ScriptList{ {
+				scriptStorage.get(L"enemyExplode"),
+				std::string{ ScriptList::spawnString } + "enemyExplode"
+			} } }
+		).heapClone());
+		add("crystalEmerge", EntityBuilder::makeVisiblePrototype(
+			SpriteInstruction{
+				spriteStorage.get(L"crystalEmerge1")->sprite,
+				config::enemyDepth
+			},
+			game::AnimationList{
+				components::Animation {
+					{
+						L"crystalEmerge1",
+						L"crystalEmerge2",
+						L"crystalEmerge3",
+						L"crystalEmerge4",
+						L"crystalEmerge5",
+						L"crystalEmerge6",
+						L"crystalEmerge7"
+					},
+					false
+				},
+				5
+			},
+			DeathCommand{ DeathCommand::Commands::deathSpawn },
+			DeathSpawn{ ScriptList{} }
+		).heapClone());
+		add("trap", EntityBuilder::makeVisiblePrototype(
+			SpriteInstruction{
+				spriteStorage.get(L"trap1")->sprite,
+				config::enemyBulletDepth - 1
+			},
+			game::AnimationList{
+				components::Animation {
+					{
+						L"trap1",
+						L"trap2",
+						L"trap3",
+						L"trap4",
+						L"trap5",
+						L"trap6",
+						L"trap7",
+						L"trap8",
+						L"trap9",
+						L"trap10",
+						L"trap11",
+						L"trap12"
+					},
+					false
+				},
+				3
+			},
+			SpriteSpin{ enemy::trapSpin },
+			DeathCommand{ DeathCommand::Commands::deathSpawn },
+			DeathSpawn{ ScriptList{} }
 		).heapClone());
 		
 		//bosses

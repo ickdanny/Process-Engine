@@ -1,0 +1,17 @@
+let colCount = 3;
+let baseSpeed = 1.0;
+let colIncrement = 1.2;
+let baseAngle = 45.0;
+
+let position = entityPosition();
+func spawnBullet(velocity){
+    spawn("mediumLRed", position, velocity, "2_3_explodeBullet");
+}
+
+func spawnColumn(velocity){
+    column(velocity, colCount, colIncrement, spawnBullet);
+}
+
+let baseVelocity = makePolar(baseSpeed, baseAngle);
+stall();
+ring(baseVelocity, 4, spawnColumn);

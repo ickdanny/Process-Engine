@@ -1,0 +1,2 @@
+let spawnPos = entityPosition() + makeVector(0.0, -9.0);
+spawn("crystalEmerge", spawnPos, zeroPolar, "2_6_emergeLifetime");

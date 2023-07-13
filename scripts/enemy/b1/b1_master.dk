@@ -1,5 +1,6 @@
 gotoDecelerating(bossMidpoint, 1.9);
 clearBullets();
+isBossDead(); #use the side effect to clear the boss deaths channel just in case
 showDialogue("1_1");
 
 stallUntil(isDialogueOver);

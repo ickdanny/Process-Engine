@@ -120,9 +120,12 @@ namespace process::game::systems {
 		DataType isNotSpawning(const std::vector<DataType>& parameters);
 		DataType playerPower(const std::vector<DataType>& parameters);
 		DataType isFocused(const std::vector<DataType>& parameters);
+		DataType isNotSpecialCollisionTarget(const std::vector<DataType>& parameters);
 		
 		//entity mutators
 		DataType setCollidable(const std::vector<DataType>& parameters);
+		DataType setSpecialCollisionSource(const std::vector<DataType>& parameters);
+		DataType setSpecialCollisionTarget(const std::vector<DataType>& parameters);
 		DataType setHealth(const std::vector<DataType>& parameters);
 		DataType setDamage(const std::vector<DataType>& parameters);
 		DataType setInbound(const std::vector<DataType>& parameters);
@@ -174,6 +177,7 @@ namespace process::game::systems {
 		DataType chance(const std::vector<DataType>& parameters);
 		
 		//scene signaling
+		DataType sendBossDeath(const std::vector<DataType>& parameters);
 		DataType clearBullets(const std::vector<DataType>& parameters);
 		DataType showDialogue(const std::vector<DataType>& parameters);
 		DataType win(const std::vector<DataType>& parameters);

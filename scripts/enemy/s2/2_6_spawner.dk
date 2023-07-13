@@ -1,0 +1,11 @@
+let pos1 = makePoint(30.0, 42.0);
+let pos2 = makePoint(60.0, 62.0);
+
+let axis = (gameWidth / 2.0) + getX(gameOffset);
+
+func spawnCrystal(position, velocity){
+    spawn("trap", position, velocity, "2_6_trapLifetime");
+}
+
+mirror(pos1, zeroPolar, axis, spawnCrystal);
+mirror(pos2, zeroPolar, axis, spawnCrystal);

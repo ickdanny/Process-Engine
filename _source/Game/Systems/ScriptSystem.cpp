@@ -8,12 +8,21 @@
 namespace process::game::systems {
 	
 	namespace{
+		constexpr float angleEquivalenceEpsilon{ 0.05f };
+		constexpr float pointEquivalenceEpsilon{ 0.5f };
+		
+		constexpr float enemySpawnDist{ 20.0f };
+		
 		constexpr float bossY{ 60.0f };
 		constexpr float bossInbound{ 30.0f };
 		constexpr float bossXLow{ bossInbound + config::gameOffset.x };
 		constexpr float bossXHigh{ config::gameWidth - bossInbound + config::gameOffset.x };
 		constexpr float bossYLow{ bossInbound + config::gameOffset.y };
 		constexpr float bossYHigh{ (config::gameHeight * 0.28f) + config::gameOffset.y };
+		
+		constexpr int trapLifetime{ 36 };
+		constexpr int crystalEmergeLifetime{ 35 };
+		constexpr int timeBeforePostDialogue{ 80 };
 	}
 	
 	using namespace wasp::ecs;
@@ -33,15 +42,15 @@ namespace process::game::systems {
 		, prototypes{ *scriptStoragePointer, *spriteStoragePointer } {
 		
 		//add native vars
-		addNativeVariable("angleEquivalenceEpsilon", 0.05f);
-		addNativeVariable("pointEquivalenceEpsilon", 0.5f);
+		addNativeVariable("angleEquivalenceEpsilon", angleEquivalenceEpsilon);
+		addNativeVariable("pointEquivalenceEpsilon", pointEquivalenceEpsilon);
 		addNativeVariable("gameOffset", config::gameOffset);
 		addNativeVariable("gameWidth", config::gameWidth);
 		addNativeVariable("gameHeight", config::gameHeight);
 		addNativeVariable("zeroPoint", Point2{ 0.0f, 0.0f });
 		addNativeVariable("zeroVector", Vector2{ 0.0f, 0.0f });
 		addNativeVariable("zeroPolar", PolarVector{ 0.0f, 0.0f });
-		addNativeVariable("enemySpawnDist", 20.0f);
+		addNativeVariable("enemySpawnDist", enemySpawnDist);
 		addNativeVariable("bossMidpoint",
 			Point2{ (config::gameWidth / 2.0f) + config::gameOffset.x, bossY }
 		);
@@ -49,7 +58,9 @@ namespace process::game::systems {
 		addNativeVariable("bossXHigh", bossXHigh);
 		addNativeVariable("bossYLow", bossYLow);
 		addNativeVariable("bossYHigh", bossYHigh);
-		addNativeVariable("timeBeforePostDialogue", 80);
+		addNativeVariable("timeBeforePostDialogue", timeBeforePostDialogue);
+		addNativeVariable("trapLifetime", trapLifetime);
+		addNativeVariable("crystalEmergeLifetime", crystalEmergeLifetime);
 		addNativeVariable("pi", wasp::math::pi);
 		addNativeVariable("phi", wasp::math::phi);
 		
@@ -104,6 +115,9 @@ namespace process::game::systems {
 		);
 		addNativeFunction("playerPower", std::bind(&ScriptSystem::playerPower, this, _1));
 		addNativeFunction("isFocused", std::bind(&ScriptSystem::isFocused, this, _1));
+		addNativeFunction("specialCollision",
+			std::bind(&ScriptSystem::isNotSpecialCollisionTarget, this, _1)
+		);
 		addNativeFunction("isXAbove",
 			std::bind(&ScriptSystem::checkCoordinate<true, true>, this, _1)
 		);
@@ -125,6 +139,28 @@ namespace process::game::systems {
 				this,
 				"removeCollidable",
 				_1
+			)
+		);
+		addNativeFunction("setSpecialCollisionSource",
+			std::bind(&ScriptSystem::setSpecialCollisionSource, this, _1)
+		);
+		addNativeFunction("removeSpecialCollisionSource",
+			std::bind(
+				  &ScriptSystem::removeComponent<SpecialCollisions::Source>,
+				  this,
+				  "removeSpecialCollisionSource",
+				  _1
+			)
+		);
+		addNativeFunction("setSpecialCollisionTarget",
+			std::bind(&ScriptSystem::setSpecialCollisionTarget, this, _1)
+		);
+		addNativeFunction("removeSpecialCollisionTarget",
+			std::bind(
+				  &ScriptSystem::removeComponent<SpecialCollisions::Target>,
+				  this,
+				  "removeSpecialCollisionTarget",
+				  _1
 			)
 		);
 		addNativeFunction("setHealth", std::bind(&ScriptSystem::setHealth, this, _1));
@@ -190,6 +226,7 @@ namespace process::game::systems {
 		addNativeFunction("chance", std::bind(&ScriptSystem::chance, this, _1));
 		
 		//scene signaling
+		addNativeFunction("sendBossDeath", std::bind(&ScriptSystem::sendBossDeath, this, _1));
 		addNativeFunction("clearBullets", std::bind(&ScriptSystem::clearBullets, this, _1));
 		addNativeFunction("showDialogue", std::bind(&ScriptSystem::showDialogue, this, _1));
 		addNativeFunction("win", std::bind(&ScriptSystem::win, this, _1));
@@ -844,6 +881,29 @@ namespace process::game::systems {
 		EntityHandle entityHandle{ makeCurrentEntityHandle() };
 		componentOrderQueue.queueSetComponent<CollidableMarker>(
 			entityHandle, CollidableMarker{}
+		);
+		return false;
+	}
+	
+	ScriptSystem::DataType ScriptSystem::setSpecialCollisionSource(
+		const std::vector<DataType>& parameters
+	){
+		throwIfNativeFunctionWrongArity(0, parameters, "setSpecialCollisionSource");
+		EntityHandle entityHandle{ makeCurrentEntityHandle() };
+		componentOrderQueue.queueSetComponent<SpecialCollisions::Source>(
+			entityHandle, SpecialCollisions::Source{ components::CollisionCommands::none }
+		);
+		return false;
+	}
+	
+	ScriptSystem::DataType ScriptSystem::setSpecialCollisionTarget(
+		const std::vector<DataType>& parameters
+	){
+		throwIfNativeFunctionWrongArity(0, parameters, "setSpecialCollisionTarget");
+		EntityHandle entityHandle{ makeCurrentEntityHandle() };
+		componentOrderQueue.queueSetComponent<SpecialCollisions::Target>(
+			entityHandle,
+			SpecialCollisions::Target{ components::CollisionCommands::removeCollisionType }
 		);
 		return false;
 	}
@@ -1508,6 +1568,15 @@ namespace process::game::systems {
 		return false;
 	}
 	
+	ScriptSystem::DataType ScriptSystem::isNotSpecialCollisionTarget(
+		const std::vector<DataType>& parameters
+	){
+		throwIfNativeFunctionWrongArity(0, parameters, "isNotSpecialCollisionTarget");
+		const auto& entityHandle{ makeCurrentEntityHandle() };
+		const auto& dataStorage{ currentScenePointer->getDataStorage() };
+		return !dataStorage.containsComponent<SpecialCollisions::Target>(entityHandle);
+	}
+	
 	/**
 	 * float speed
 	 */
@@ -1621,6 +1690,17 @@ namespace process::game::systems {
 	ScriptSystem::DataType ScriptSystem::removeEntity(const std::vector<DataType>& parameters) {
 		throwIfNativeFunctionWrongArity(0, parameters, "removeEntity");
 		componentOrderQueue.queueRemoveEntity(makeCurrentEntityHandle());
+		return false;
+	}
+	
+	ScriptSystem::DataType ScriptSystem::sendBossDeath(
+		const std::vector<DataType>& parameters
+	){
+		throwIfNativeFunctionWrongArity(0, parameters, "sendBossDeath");
+		auto& bossDeathsChannel{
+			currentScenePointer->getChannel(SceneTopics::bossDeaths)
+		};
+		bossDeathsChannel.addMessage(makeCurrentEntityHandle());
 		return false;
 	}
 	

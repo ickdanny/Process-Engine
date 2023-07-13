@@ -1,0 +1,30 @@
+let maxTime = 800;
+let maxTimeBeforeSpawning = 500;
+let inBetweenTime = 50;
+let tick = 42;
+let yLow = 10.0;
+let yHigh = 60.0;
+let speedLow = 0.4;
+let speedHigh = 0.8;
+let baseAngle = flipY(185.0);
+let angleOffset = 10.0;
+
+let t = 0;
+isBossDead(); #use the side effect to clear the boss deaths channel just in case
+while(!isBossDead() & t < maxTimeBeforeSpawning){
+    t = t + 1;
+    stall();
+}
+
+timer(inBetweenTime);
+
+let y;
+let speed;
+let angle;
+for(; t < maxTime; t = t + tick){
+    y = random(yLow, yHigh);
+    speed = random(speedLow, speedHigh);
+    angle = baseAngle + random(-angleOffset, angleOffset);
+    spawn("cloud", getLeftSpawn(y), makePolar(speed, angle), "2_1_enemy");
+    timer(tick);
+}

@@ -119,6 +119,7 @@ namespace process::game {
     struct EnemyCollisions : components::CollisionType<EnemyCollisions> {};
     struct BulletCollisions : components::CollisionType<BulletCollisions> {};
     struct PickupCollisions : components::CollisionType<PickupCollisions> {};
+	struct SpecialCollisions : components::CollisionType<SpecialCollisions> {};
 
     struct Hitbox : wasp::math::AABB {
         using wasp::math::AABB::AABB;

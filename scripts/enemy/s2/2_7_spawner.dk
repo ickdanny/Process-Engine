@@ -1,0 +1,19 @@
+let initY = 31;
+let yOffset = 20;
+let numSpawns = 4;
+let timeBetweenSpawns = 28;
+let offsetAngleRand = 10;
+let offsetDistLow = 10.0;
+let offsetDistHigh = 20.0;
+
+spawnCrystalsDownMiddle(
+    numSpawns,
+    timeBetweenSpawns,
+    initY,
+    yOffset,
+    0.0,
+    offsetAngleRand,
+    offsetDistLow,
+    offsetDistHigh,
+    "2_7_trapLifetime"
+);

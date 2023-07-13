@@ -8,6 +8,7 @@ namespace process::game::components {
 		none,
 		death,
 		damage,
+		removeCollisionType,
 		player,
 		pickup
 	};

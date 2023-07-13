@@ -11,7 +11,6 @@ namespace process::game::systems {
 		: scriptStoragePointer{ scriptStoragePointer } {
 	}
 	
-
 	void CollisionHandlerSystem::operator()(Scene& scene) {
 		//this system is responsible for clearing the playerHits channel
 		scene.getChannel(SceneTopics::playerHits).clear();
@@ -20,35 +19,7 @@ namespace process::game::systems {
 		handleCollisions<EnemyCollisions>(scene);
 		handleCollisions<BulletCollisions>(scene);
 		handleCollisions<PickupCollisions>(scene);
-	}
-
-	void CollisionHandlerSystem::handleCollisionCommand(
-		Scene& scene,
-		const EntityHandle& entityHandle,
-		const CollisionCommands command,
-		const EntityHandle& collidedHandle
-	) {
-		switch (command) {
-			case CollisionCommands::death:
-				handleDeathCommand(scene, entityHandle);
-				break;
-			case CollisionCommands::damage:
-				handleDamageCommand(scene, entityHandle, collidedHandle);
-				break;
-			case CollisionCommands::player:
-				handlePlayerCommand(scene, entityHandle);
-				break;
-			case CollisionCommands::pickup:
-				handlePickupCommand(scene, entityHandle, collidedHandle);
-				break;
-			case CollisionCommands::none:
-				//do nothing
-				break;
-			default:
-				throw std::runtime_error{
-					"default case reached in collision handler system"
-				};
-		}
+		handleCollisions<SpecialCollisions>(scene);
 	}
 
 	void CollisionHandlerSystem::handlePickupCommand(

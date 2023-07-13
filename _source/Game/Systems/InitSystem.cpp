@@ -11,6 +11,8 @@ namespace process::game::systems {
 			config::graphicsWidth / 2.0f,
 			config::graphicsHeight / 2.0f
 		};
+		
+		constexpr int playerAnimationTickRate{ 4 };
 
 		//middle X for scenes that overlay on top of the game screen
 		constexpr float middleX{ 100.0f };
@@ -269,7 +271,7 @@ namespace process::game::systems {
 			EntityBuilder::makeVisible(
 				wasp::math::Point2{ center.x - xOffset, playerY },
 				SpriteInstruction{
-					spriteStoragePointer->get(L"p_idle_1")->sprite,
+					spriteStoragePointer->get(L"p1Idle1")->sprite,
 					config::playerDepth,
 					wasp::math::Vector2{ 0.0f, 4.0f }			//offset
 				},
@@ -279,9 +281,9 @@ namespace process::game::systems {
 				} },
 				AnimationList{
 					components::Animation{ {
-						L"p_idle_1", L"p_idle_2", L"p_idle_3", L"p_idle_4"
+						L"p1Idle1", L"p1Idle2", L"p1Idle3", L"p1Idle4"
 					} },
-					4	//ticks
+					playerAnimationTickRate	//ticks
 				}
 			).package()
 		);
@@ -290,7 +292,7 @@ namespace process::game::systems {
 			EntityBuilder::makeVisible(
 				wasp::math::Point2{ center.x + xOffset, playerY },
 				SpriteInstruction{
-					spriteStoragePointer->get(L"p_idle_1")->sprite,
+					spriteStoragePointer->get(L"p1Idle1")->sprite,
 					config::playerDepth,
 					wasp::math::Vector2{ 0.0f, 4.0f }			//offset
 				},
@@ -300,11 +302,11 @@ namespace process::game::systems {
 						std::string{ ScriptList::spawnString } + " shotBPreview"
 					} },
 				},
-				AnimationList{ 
+				AnimationList{
 					components::Animation{ {
-						L"p_idle_1", L"p_idle_2", L"p_idle_3", L"p_idle_4"
+						L"p1Idle1", L"p1Idle2", L"p1Idle3", L"p1Idle4"
 					} },
-					4	//ticks
+					playerAnimationTickRate	//ticks
 				}
 			).package()
 		);
@@ -666,7 +668,7 @@ namespace process::game::systems {
 				config::playerHitbox,
 				Velocity{},
 				SpriteInstruction{
-					spriteStoragePointer->get(L"p_idle_1")->sprite,
+					spriteStoragePointer->get(L"p1Idle1")->sprite,
 					config::playerDepth,
 					wasp::math::Vector2{ 0.0f, 4.0f }	//sprite offset
 				},
@@ -683,35 +685,23 @@ namespace process::game::systems {
 				AnimationList{ 
 					{
 						components::Animation{ {
-							L"p_left_1", L"p_left_2", L"p_left_3", L"p_left_4"
+							L"p1Left1", L"p1Left2", L"p1Left3", L"p1Left4"
 						} },
 						components::Animation{ {
-							L"p_left_t_3"
+							L"p1LeftTurn"
 						} },
 						components::Animation{ {
-							L"p_left_t_2"
+							L"p1Idle1", L"p1Idle2", L"p1Idle3", L"p1Idle4"
 						} },
 						components::Animation{ {
-							L"p_left_t_1"
+							L"p1RightTurn"
 						} },
 						components::Animation{ {
-							L"p_idle_1", L"p_idle_2", L"p_idle_3", L"p_idle_4"
-						} },
-						components::Animation{ {
-							L"p_right_t_1"
-						} },
-						components::Animation{ {
-							L"p_right_t_2"
-						} },
-						components::Animation{ {
-							L"p_right_t_3"
-						} },
-						components::Animation{ {
-							L"p_right_1", L"p_right_2", L"p_right_3", L"p_right_4"
+							L"p1Right1", L"p1Right2", L"p1Right3", L"p1Right4"
 						} }
 					},
-					4,	//idle index
-					4	//ticks
+					2,	//idle index
+					playerAnimationTickRate	//ticks
 				}
 			).package()
 		);

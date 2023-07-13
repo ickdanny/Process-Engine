@@ -1,0 +1,27 @@
+timer(trapLifetime);
+
+# copy from 2_9_spawner
+let centerX = getX(bossMidpoint);
+let centerY = 63.0;
+let center = makePoint(centerX, centerY);
+
+let symmetry = 3;
+let maxTime = 45;
+let tick = diff(10, 8, 6, 5);
+let speed = 0.8;
+let position = entityPosition();
+let angleRand = 20.0;
+let angle = pointAngle(position, center) + random(-angleRand, angleRand);
+let angleIncrement = diff(15.0, 14.0, 13.0, 12.0) * 1.5;
+
+func spawnBullet(velocity){
+    spawn("sharpClear", position, velocity, "2_9_bullet");
+}
+
+for(let t = 0; t < maxTime; t = t + tick){
+    ring(makePolar(speed, angle), symmetry, spawnBullet);
+    angle = angle + angleIncrement;
+    timer(tick);
+}
+
+removeEntity();

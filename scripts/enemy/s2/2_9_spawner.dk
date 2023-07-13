@@ -1,0 +1,5 @@
+let x = getX(bossMidpoint);
+let y = 63.0;
+let position = makePoint(x, y);
+
+spawn("trap", position, zeroPolar, "2_9_trapLifetime");

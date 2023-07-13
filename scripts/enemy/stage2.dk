@@ -1,10 +1,23 @@
 timer(630);
-addSpawn("2_1_spawner"); # wave 1 = cloud colony from right
+addSpawn("2_1_spawner"); # wave 1  = cloud colony from right
 timer(500);
-addSpawn("2_2_spawner"); # wave 2 = bat Vs
+addSpawn("2_2_spawner"); # wave 2  = bat Vs
 timer(500);
-addSpawn("2_3_spawner"); # wave 2 = first wing
-
+addSpawn("2_3_spawner"); # wave 2  = first wing
+addSpawn("2_4_spawner"); # wave 4  = cloud colony from left only if time permits
+timer(570);
+addSpawn("2_5_spawner"); # wave 5  = more bat Vs
+timer(400);
+addSpawn("2_6_spawner"); # wave 6  = four crystals
+timer(500);
+addSpawn("2_7_spawner"); # wave 7  = four crystals down middle
+timer(400);
+addSpawn("2_8_spawner"); # wave 8  = four more crystals, reverse sides
+timer(500);
+addSpawn("2_9_spawner"); # wave 9  = center crystal; item dropper
+addSpawn("2_10_spawner");# wave 10 = clouds from both sides only if time permits
+timer(1000);
+addSpawn("2_11_spawner");# wave 11 = alternating sides wings
 
 stallUntil(isWin);
 timer(timeBeforePostDialogue);
