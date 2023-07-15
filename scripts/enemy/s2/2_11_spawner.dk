@@ -1,1 +1,14 @@
-print("to do 2_11 spawner");
+let spawnDist = 48.4;
+let leftSpawnPos = getTopSpawnLeft(spawnDist);
+let rightSpawnPos = getTopSpawnRight(spawnDist);
+let initSpeed = 1.15;
+let velocity = makePolar(initSpeed, -90.0);
+let timeBetweenSpawns = 480;
+
+func spawnEnemy(position){
+    spawn("wing", position, velocity, "2_3_enemy");
+}
+
+spawnEnemy(leftSpawnPos);
+timer(timeBetweenSpawns);
+spawnEnemy(rightSpawnPos);

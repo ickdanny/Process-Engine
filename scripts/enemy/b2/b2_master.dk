@@ -1,11 +1,12 @@
 gotoDecelerating(bossMidpoint, 1.9);
 clearBullets();
 isBossDead(); #use the side effect to clear the boss deaths channel just in case
-showDialogue("1_1");
+showDialogue("2_1");
 
 stallUntil(isDialogueOver);
 setCollidable();
 
+print("to do boss 2");
 addSpawn("b1_1_attack"); # grenades + dual curving spiral
 stallUntil(isBossDead);
 clearSpawns();

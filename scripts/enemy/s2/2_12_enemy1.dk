@@ -1,0 +1,11 @@
+let health = 450;
+let lifetime = 950;
+
+setHealth(health);
+addDeathSpawn("smallPower");
+setSpecialCollisionSource();
+
+timer(lifetime);
+
+spawn("enemyExplode", entityPosition(), zeroPolar);
+removeEntity();

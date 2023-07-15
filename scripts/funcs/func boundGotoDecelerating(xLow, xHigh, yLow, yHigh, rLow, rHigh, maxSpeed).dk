@@ -1,7 +1,5 @@
 #func boundGotoDecelerating(xLow, xHigh, yLow, yHigh, rLow, rHigh, maxSpeed)
 
-print("boundGotoDecelerating");
-
 let pos = entityPosition();
 let r = max(random(rLow, rHigh), random(rLow, rHigh));
 let angle = randomAngle();

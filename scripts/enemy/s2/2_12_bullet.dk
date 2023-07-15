@@ -1,4 +1,4 @@
-let rainbowEntitySpeedMulti = 1.5;
+let rainbowEntitySpeedMulti = 1.12;
 
 setSpecialCollisionTarget();
 stall();

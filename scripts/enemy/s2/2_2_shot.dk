@@ -14,7 +14,7 @@ func spawnArc(velocity){
     arc(velocity, arcSymmetry, arcIncrement, spawnBullet);
 }
 
-let yHigh = gameHeight * 0.5;
+let yHigh = gameHeight * 0.45;
 func isInBounds(y){
     return y < yHigh;
 }

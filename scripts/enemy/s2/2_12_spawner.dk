@@ -1,0 +1,38 @@
+let waitTime = 60;
+
+# spawn crystals
+
+let numSpawns = 6;
+let dist = (gameWidth / (numSpawns + 1.0));
+let yBase = 108.0;
+let yOffset = -3.0;
+
+func spawnCrystal(position){
+    spawn("trap", position, zeroPolar, "2_12_trapLifetime");
+}
+
+let spawnPos;
+for(let i = 1; i <= numSpawns; i = i + 1){
+    spawnPos = getTopSpawnLeft(dist * i) + makeVector(0.0, yBase + yOffset * i);
+    spawnCrystal(spawnPos);
+}
+
+timer(waitTime);
+
+# spawn bats at random
+
+let maxTime = 770;
+let tick = 20;
+let xLow = 10.0;
+let xHigh = gameWidth - xLow;
+let speed = 0.7;
+let velocity = makePolar(speed, -90.0);
+
+func spawnBat(position){
+    spawn("bat", position, velocity, "2_12_enemy2");
+}
+
+for(let t = 0; t < maxTime; t = t + tick){
+    spawnBat(getTopSpawnLeft(random(xLow, xHigh)));
+    timer(tick);
+}

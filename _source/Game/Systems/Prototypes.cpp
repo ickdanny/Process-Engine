@@ -46,6 +46,7 @@ namespace process::game::systems{
 		constexpr float bossHitbox{ 13.0f };
 		
 		constexpr float trapSpin{ -2.342f };
+		constexpr int bossAnimationTick{ 6 };
 	}
 	
 	namespace enemyProjectile{
@@ -705,13 +706,14 @@ namespace process::game::systems{
 			game::AnimationList{
 				components::Animation {
 					{
-						L"machine2Red1",
-						L"machine2Red2",
-						L"machine2Red3"
+						L"b1Idle1",
+						L"b1Idle2",
+						L"b1Idle3",
+						L"b1Idle4"
 					},
 					true
 				},
-				3
+				enemy::bossAnimationTick
 			},
 			Health{ enemy::spawnHealth },
 			DeathCommand{ DeathCommand::Commands::bossDeath },

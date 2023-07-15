@@ -1,0 +1,1 @@
+spawn("crystal", entityPosition(), zeroPolar, "2_12_enemy1");
