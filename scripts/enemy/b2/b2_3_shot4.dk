@@ -1,0 +1,12 @@
+let offsetRight = makeVector(35.0, 4.0);
+let offsetLeft = flipY(offsetRight);
+let tick = 73;
+
+# CW right = 1
+# CCW left = 2
+
+while(true){
+    spawn("trap", entityPosition() + offsetRight, zeroPolar, "b2_3_shot4_trapLifetime1");
+    spawn("trap", entityPosition() + offsetLeft, zeroPolar, "b2_3_shot4_trapLifetime2");
+    timer(tick);
+}

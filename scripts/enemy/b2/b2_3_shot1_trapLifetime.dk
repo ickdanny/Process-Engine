@@ -1,0 +1,20 @@
+let numSpawns = diff(2, 3, 4, 5);
+let tick = 5;
+let speed = 0.945;
+
+setClearMarker();
+timer(trapLifetime);
+
+let position = entityPosition();
+func spawnBullet(velocity){
+    spawn("sharpUnderSmallDRed", position, velocity);
+}
+
+let angle = angleToPlayer();
+let velocity = makePolar(speed, angle);
+for(let i = 0; i < numSpawns; i = i + 1){
+    spawnBullet(velocity);
+    timer(tick);
+}
+
+removeEntity();

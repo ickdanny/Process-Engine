@@ -45,6 +45,7 @@ namespace process::game::systems{
 		void addEnemyProjectile(
 			resources::ScriptStorage& scriptStorage,
 			resources::SpriteStorage& spriteStorage,
+			const std::string& idPrefix,
 			const std::string& type,
 			float hitbox,
 			const std::string& color,
@@ -54,6 +55,7 @@ namespace process::game::systems{
 		void addEnemyForwardProjectile(
 			resources::ScriptStorage& scriptStorage,
 			resources::SpriteStorage& spriteStorage,
+			const std::string& idPrefix,
 			const std::string& type,
 			float hitbox,
 			const std::string& color,

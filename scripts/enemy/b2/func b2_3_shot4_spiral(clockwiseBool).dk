@@ -1,0 +1,30 @@
+let maxTime = 24;
+let tick = diff(12, 8, 6, 4);
+let ringSymmetry = 3;
+let colCount = diff(2, 2, 3, 3);
+let colIncrement = -0.103;
+let baseSpeed = 0.68;
+let angleIncrement = tick * phi * pi;
+
+let position = entityPosition();
+let playerPos = getPlayerPos();
+let baseAngle = getX(playerPos) * getY(playerPos) * getY(position) * phi;
+if(!clockwiseBool){
+    baseAngle = flipY(baseAngle);
+    angleIncrement = -angleIncrement;
+}
+
+func spawnBullet(velocity){
+    spawn("smallLRed", position, velocity);
+}
+
+func spawnColumn(velocity){
+    column(velocity, colCount, colIncrement, spawnBullet);
+}
+
+let angle = baseAngle;
+for(let t = 0; t < maxTime; t = t + tick){
+    ring(makePolar(baseSpeed, angle), ringSymmetry, spawnColumn);
+    angle = angle + angleIncrement;
+    timer(tick);
+}

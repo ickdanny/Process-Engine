@@ -1,0 +1,8 @@
+let health = 3000;
+
+setHealth(health);
+
+while(true){
+    addSpawn("b2_4_shot");
+    timer(450);
+}

@@ -1,0 +1,5 @@
+setClearMarker();
+timer(trapLifetime);
+
+b2_3_shot4_spiral(false);
+removeEntity();

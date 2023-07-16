@@ -1,0 +1,24 @@
+let tick = diff(30, 25, 20, 15);
+let halfSideLength = 14.0;
+
+let topRightOffset = makeVector(halfSideLength, -halfSideLength);
+let topLeftOffset = makeVector(-halfSideLength, -halfSideLength);
+let bottomLeftOffset = makeVector(-halfSideLength, halfSideLength);
+let bottomRightOffset = makeVector(halfSideLength, halfSideLength);
+
+# topRight = 1
+# topLeft = 2
+# bottomLeft = 3
+# bottomRight = 4
+
+let position;
+while(true){
+    position = entityPosition();
+    spawn("trap", position + topRightOffset, zeroPolar, "b2_3_shot2_trapLifetime1");
+    spawn("trap", position + topLeftOffset, zeroPolar, "b2_3_shot2_trapLifetime2");
+    spawn("trap", position + bottomLeftOffset, zeroPolar, "b2_3_shot2_trapLifetime3");
+    spawn("trap", position + bottomRightOffset, zeroPolar, "b2_3_shot2_trapLifetime4");
+
+
+    timer(tick);
+}

@@ -325,6 +325,7 @@ namespace process::game::systems{
 				scriptStorage, \
 				spriteStorage, \
 				"large", \
+				"large", \
 				enemyProjectile::largeHitbox, \
 				color, \
 				0 \
@@ -351,9 +352,10 @@ namespace process::game::systems{
 				scriptStorage, \
 				spriteStorage, \
 				"medium", \
+				"medium", \
 				enemyProjectile::mediumHitbox, \
 				color, \
-				1 \
+				10 \
             )
 		addMedium("Black");
 		addMedium("DBlue");
@@ -377,9 +379,10 @@ namespace process::game::systems{
 				scriptStorage, \
 				spriteStorage, \
 				"small", \
+				"small", \
 				enemyProjectile::smallHitbox, \
 				color, \
-                2 \
+                20 \
             )
 		addSmall("Black");
 		addSmall("DBlue");
@@ -403,9 +406,10 @@ namespace process::game::systems{
 				scriptStorage, \
 				spriteStorage, \
 				"sharp", \
+				"sharp", \
 				enemyProjectile::sharpHitbox, \
 				color, \
-                3 \
+                30 \
             )
 		addSharp("Black");
 		addSharp("DBlue");
@@ -423,6 +427,33 @@ namespace process::game::systems{
 		addSharp("LRed");
 		addSharp("Yellow");
 		#undef addSharp
+		
+		#define addSharpUnderSmall(color) \
+			addEnemyForwardProjectile( \
+				scriptStorage, \
+				spriteStorage, \
+				"sharpUnderSmall", \
+				"sharp", \
+				enemyProjectile::sharpHitbox, \
+				color, \
+                19 \
+            )
+		addSharpUnderSmall("Black");
+		addSharpUnderSmall("DBlue");
+		addSharpUnderSmall("Blue");
+		addSharpUnderSmall("LBlue");
+		addSharpUnderSmall("Clear");
+		addSharpUnderSmall("DGray");
+		addSharpUnderSmall("LGray");
+		addSharpUnderSmall("DGreen");
+		addSharpUnderSmall("LGreen");
+		addSharpUnderSmall("Orange");
+		addSharpUnderSmall("DPurple");
+		addSharpUnderSmall("LPurple");
+		addSharpUnderSmall("DRed");
+		addSharpUnderSmall("LRed");
+		addSharpUnderSmall("Yellow");
+		#undef addSharpUnderSmall
 		
 		//MOBS
 		add("enemyExplode", EntityBuilder::makeVisiblePrototype(
@@ -776,6 +807,34 @@ namespace process::game::systems{
 				"clearBullets"
 			} } }
 		).heapClone());
+		
+		add("boss3", EntityBuilder::makeVisiblePrototype(
+			Hitbox{ enemy::bossHitbox },
+			PlayerCollisions::Source{},
+			EnemyCollisions::Target{ components::CollisionCommands::damage },
+			SpriteInstruction{
+				spriteStorage.get(L"b3Idle1")->sprite,
+				config::enemyDepth + 100
+			},
+			game::AnimationList{
+				components::Animation {
+					{
+						L"b3Idle1",
+						L"b3Idle2",
+						L"b3Idle3",
+						L"b3Idle4"
+					},
+					true
+				},
+				enemy::bossAnimationTick
+			},
+			Health{ enemy::spawnHealth },
+			DeathCommand{ DeathCommand::Commands::bossDeath },
+			DeathSpawn{ ScriptList{ {
+				scriptStorage.get(L"clearBullets"),
+				"clearBullets"
+			} } }
+		).heapClone());
 	}
 	
 	Prototypes::ComponentTupleSharedPointer Prototypes::get(
@@ -793,12 +852,13 @@ namespace process::game::systems{
 	void Prototypes::addEnemyProjectile(
 		resources::ScriptStorage& scriptStorage,
 		resources::SpriteStorage& spriteStorage,
+		const std::string& idPrefix,
 		const std::string& type,
 		float hitbox,
 		const std::string& color,
 		int relativeDepth
 	){
-		add(type + color, EntityBuilder::makeVisibleCollidablePrototype(
+		add(idPrefix + color, EntityBuilder::makeVisibleCollidablePrototype(
 			AABB{ hitbox },
 			PlayerCollisions::Source{ components::CollisionCommands::death },
 			BulletCollisions::Target{ components::CollisionCommands::death },
@@ -820,12 +880,13 @@ namespace process::game::systems{
 	void Prototypes::addEnemyForwardProjectile(
 		resources::ScriptStorage& scriptStorage,
 		resources::SpriteStorage& spriteStorage,
+		const std::string& idPrefix,
 		const std::string& type,
 		float hitbox,
 		const std::string& color,
 		int relativeDepth
 	){
-		add(type + color, EntityBuilder::makeVisibleCollidablePrototype(
+		add(idPrefix + color, EntityBuilder::makeVisibleCollidablePrototype(
 			AABB{ hitbox },
 			PlayerCollisions::Source{ components::CollisionCommands::death },
 			BulletCollisions::Target{ components::CollisionCommands::death },
