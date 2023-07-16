@@ -13,7 +13,7 @@ func spawnSingle(offset, angle){
 }
 
 func spawnPair(offset, rightAngle){
-    let mirrorOffset = flipX(offset);
+    let mirrorOffset = flipY(offset);
     if(isFocused()){
         let velocity = makePolar(speed, 90.0);
         spawn("smallLaser", entityPosition() + offset + yOffsetVector, velocity);

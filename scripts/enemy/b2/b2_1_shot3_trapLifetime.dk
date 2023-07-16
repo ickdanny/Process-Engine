@@ -1,0 +1,19 @@
+let numSpawns = diff(2, 3, 4, 5);
+let tick = diff(7, 6, 5, 5);
+let speed = 1.9;
+
+setClearMarker();
+timer(trapLifetime);
+
+let position = entityPosition();
+func spawnBullet(velocity){
+    spawn("sharpLBlue", position, velocity);
+}
+
+let velocity = makePolar(speed, -90.0);
+for(let i = 0; i < numSpawns; i = i + 1){
+    spawnBullet(velocity);
+    timer(tick);
+}
+
+removeEntity();

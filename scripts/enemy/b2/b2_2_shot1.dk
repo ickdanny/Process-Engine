@@ -1,0 +1,80 @@
+let initPos = makePoint(gameWidth / 2.0, -10.0) + gameOffset;
+let bulletSpawnOut = 10.0;
+let spawnPointSpeed = 1.33;
+let gameOffsetX = getX(gameOffset);
+let gameOffsetY = getY(gameOffset);
+let leftBorder = -bulletSpawnOut + gameOffsetX;
+let rightBorder = bulletSpawnOut + gameWidth + leftBorder;
+let bottomBorder = bulletSpawnOut + gameHeight + gameOffsetY;
+let tick = diff(17, 13, 10, 8);
+let angleRand = 2.4;
+let speedLow = 0.4;
+let speedHigh = 1.0;
+let bottomSpawnY = gameHeight + gameOffsetY + bulletSpawnOut;
+
+func spawnBullet(position, angle){
+    spawn(
+        "mediumBlue",
+        position,
+        makePolar(random(speedLow, speedHigh), angle + random(-angleRand, angleRand))
+    );
+}
+
+let leftSpawnPoint = initPos;
+let rightSpawnPoint = initPos;
+
+#spawn first bullet in middle
+
+spawnBullet(initPos, -90.0);
+timer(tick);
+
+#spawn bullets across top
+
+let leftTopOffset = makeVector(-spawnPointSpeed * tick, 0.0);
+let rightTopOffset = makeVector(spawnPointSpeed * tick, 0.0);
+leftSpawnPoint = leftSpawnPoint + leftTopOffset;
+rightSpawnPoint = rightSpawnPoint + rightTopOffset;
+while(getX(leftSpawnPoint) > leftBorder){
+    spawnBullet(leftSpawnPoint, -90.0);
+    spawnBullet(rightSpawnPoint, -90.0);
+    leftSpawnPoint = leftSpawnPoint + leftTopOffset;
+    rightSpawnPoint = rightSpawnPoint + rightTopOffset;
+    timer(tick);
+}
+
+#spawn bullets down sides
+
+leftSpawnPoint = setX(leftSpawnPoint, leftBorder);
+rightSpawnPoint = setX(rightSpawnPoint, rightBorder);
+let downOffset = makeVector(0.0, spawnPointSpeed * tick);
+while(getY(leftSpawnPoint) < bottomBorder){
+    spawnBullet(leftSpawnPoint, 0.0);
+    spawnBullet(rightSpawnPoint, 180.0);
+    leftSpawnPoint = leftSpawnPoint + downOffset;
+    rightSpawnPoint = rightSpawnPoint + downOffset;
+    timer(tick);
+}
+
+#spawn bullets across bottom shrinking the safe area
+
+let spawnZoneIncrement = spawnPointSpeed * tick;
+let spawnZone = spawnZoneIncrement;
+let halfGameWidth = gameWidth / 2.0;
+
+while(spawnZone < halfGameWidth){
+    spawnBullet(makePoint(random(0.0, spawnZone) + gameOffsetX, bottomSpawnY), 90.0);
+    spawnBullet(
+        makePoint(random(gameWidth - spawnZone, gameWidth) + gameOffsetY, bottomSpawnY),
+        90.0
+    );
+    spawnZone = spawnZone + spawnZoneIncrement;
+    timer(tick);
+}
+
+#spawn area now covers entire bottom
+
+while(true){
+    spawnBullet(makePoint(random(0.0, halfGameWidth) + gameOffsetX, bottomSpawnY), 90.0);
+    spawnBullet(makePoint(random(halfGameWidth, gameWidth) + gameOffsetY, bottomSpawnY), 90.0);
+    timer(tick);
+}

@@ -1,0 +1,20 @@
+let maxTime = 30;
+let tick = diff(15, 10, 6, 5);
+let speed = diff(1.0, 1.2, 1.4, 1.6) * 2;
+
+setClearMarker();
+timer(trapLifetime);
+
+let position = entityPosition();
+func spawnBullet(velocity){
+    spawn("sharpLBlue", position, velocity);
+}
+
+let angle = angleToPlayer();
+let velocity = makePolar(speed, angle);
+for(let t = 0; t < maxTime; t = t + tick){
+    spawnBullet(velocity);
+    timer(tick);
+}
+
+removeEntity();

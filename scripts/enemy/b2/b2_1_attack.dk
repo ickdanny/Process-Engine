@@ -1,0 +1,23 @@
+let health = 3000;
+let timeBeforeMove = 43;
+let timeAfterMove = 39;
+let rLow = 20;
+let rHigh = 30;
+let maxSpeed = 0.8;
+
+setHealth(health);
+
+# shot 1 = aimed line
+addSpawn("b2_1_shot1");
+# shot 2 = corner arcs
+addSpawn("b2_1_shot2");
+# shot 3 = center line
+addSpawn("b2_1_shot3");
+# shot 4 = side spirals
+addSpawn("b2_1_shot4");
+
+while(true){
+    timer(timeBeforeMove);
+    boundGotoDecelerating(bossXLow, bossXHigh, bossYLow, bossYHigh - 15.0, rLow, rHigh, maxSpeed);
+    timer(timeAfterMove);
+}

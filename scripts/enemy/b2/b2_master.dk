@@ -1,20 +1,19 @@
 gotoDecelerating(bossMidpoint, 1.9);
 clearBullets();
 isBossDead(); #use the side effect to clear the boss deaths channel just in case
-showDialogue("2_1");
+showDialogue("1_1");
 
 stallUntil(isDialogueOver);
 setCollidable();
 
-print("to do boss 2");
-addSpawn("b1_1_attack"); # grenades + dual curving spiral
-stallUntil(isBossDead);
-clearSpawns();
-stall();
-setVelocity(zeroPolar);
+#addSpawn("b2_1_attack"); # plane 1
+#stallUntil(isBossDead);
+#clearSpawns();
+#stall();
+#setVelocity(zeroPolar);
 
 timer(50);
-addSpawn("b1_2_attack"); # spiral spawner
+addSpawn("b2_2_attack"); # floor bubbles
 stallUntil(isBossDead);
 clearSpawns();
 stall();

@@ -1,0 +1,20 @@
+let offsetRight = makeVector(45.0, -12.0);
+let offsetLeft = flipY(offsetRight);
+let tick = diff(65, 62, 59, 55);
+let side = true;
+
+func spawnTrap(position){
+    spawn("trap", position, zeroPolar, "b2_1_shot1_trapLifetime");
+}
+
+while(true){
+    if(side){
+        spawnTrap(entityPosition() + offsetRight);
+        side = false;
+    }
+    else{
+        spawnTrap(entityPosition() + offsetLeft);
+        side = true;
+    }
+    timer(tick);
+}

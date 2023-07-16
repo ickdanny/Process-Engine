@@ -52,7 +52,7 @@ namespace process::game::systems{
 	namespace enemyProjectile{
 		constexpr float smallHitbox{ 2.5f };
 		constexpr float mediumHitbox{ 3.5f };
-		constexpr float largeHitbox{ 10.0f };
+		constexpr float largeHitbox{ 7.5f };
 		constexpr float sharpHitbox{ 1.5f };
 		constexpr float outbound{ -21.0f };
 	}
@@ -320,6 +320,32 @@ namespace process::game::systems{
 		resources::SpriteStorage& spriteStorage
 	){
 		//PROJECTILES
+		#define addLarge(color) \
+			addEnemyProjectile( \
+				scriptStorage, \
+				spriteStorage, \
+				"large", \
+				enemyProjectile::largeHitbox, \
+				color, \
+				0 \
+            )
+		addLarge("Black");
+		addLarge("DBlue");
+		addLarge("Blue");
+		addLarge("LBlue");
+		addLarge("Clear");
+		addLarge("DGray");
+		addLarge("LGray");
+		addLarge("DGreen");
+		addLarge("LGreen");
+		addLarge("Orange");
+		addLarge("DPurple");
+		addLarge("LPurple");
+		addLarge("DRed");
+		addLarge("LRed");
+		addLarge("Yellow");
+		#undef addLarge
+		
 		#define addMedium(color) \
 			addEnemyProjectile( \
 				scriptStorage, \
@@ -700,7 +726,7 @@ namespace process::game::systems{
 			PlayerCollisions::Source{},
 			EnemyCollisions::Target{ components::CollisionCommands::damage },
 			SpriteInstruction{
-				spriteStorage.get(L"machine2Red1")->sprite,
+				spriteStorage.get(L"b1Idle1")->sprite,
 				config::enemyDepth + 100
 			},
 			game::AnimationList{
@@ -710,6 +736,34 @@ namespace process::game::systems{
 						L"b1Idle2",
 						L"b1Idle3",
 						L"b1Idle4"
+					},
+					true
+				},
+				enemy::bossAnimationTick
+			},
+			Health{ enemy::spawnHealth },
+			DeathCommand{ DeathCommand::Commands::bossDeath },
+			DeathSpawn{ ScriptList{ {
+				scriptStorage.get(L"clearBullets"),
+				"clearBullets"
+			} } }
+		).heapClone());
+		
+		add("boss2", EntityBuilder::makeVisiblePrototype(
+			Hitbox{ enemy::bossHitbox },
+			PlayerCollisions::Source{},
+			EnemyCollisions::Target{ components::CollisionCommands::damage },
+			SpriteInstruction{
+				spriteStorage.get(L"b2Idle1")->sprite,
+				config::enemyDepth + 100
+			},
+			game::AnimationList{
+				components::Animation {
+					{
+						L"b2Idle1",
+						L"b2Idle2",
+						L"b2Idle3",
+						L"b2Idle4"
 					},
 					true
 				},

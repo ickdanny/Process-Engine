@@ -1,0 +1,9 @@
+let baseAngle = 45.0;
+let baseSpeed = 1.823;
+let baseVelocity = makePolar(baseSpeed, baseAngle);
+
+setClearMarker();
+timer(trapLifetime);
+
+b2_1_shot2_arc(baseVelocity);
+removeEntity();

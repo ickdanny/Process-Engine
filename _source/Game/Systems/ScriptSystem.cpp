@@ -84,6 +84,7 @@ namespace process::game::systems {
 		addNativeFunction("isDialogueOver", std::bind(&ScriptSystem::isDialogueOver, this, _1));
 		addNativeFunction("isWin", std::bind(&ScriptSystem::isWin, this, _1));
 		addNativeFunction("getDifficulty", std::bind(&ScriptSystem::getDifficulty, this, _1));
+		addNativeFunction("getPlayerPos", std::bind(&ScriptSystem::getPlayerPos, this, _1));
 		
 		//entity graphics
 		addNativeFunction("setVisible", std::bind(&ScriptSystem::setVisible, this, _1));
@@ -170,6 +171,17 @@ namespace process::game::systems {
 		addNativeFunction("setDamage", std::bind(&ScriptSystem::setDamage, this, _1));
 		addNativeFunction("removeDamage",
 			std::bind(&ScriptSystem::removeComponent<Damage>, this, "removeDamage", _1)
+		);
+		addNativeFunction("setClearMarker",
+			std::bind(&ScriptSystem::setClearMarker, this, _1)
+		);
+		addNativeFunction("removeClearMarker",
+			std::bind(
+				&ScriptSystem::removeComponent<ClearMarker>,
+				this,
+				"removeClearMarker",
+				_1
+			)
 		);
 		addNativeFunction("setInbound", std::bind(&ScriptSystem::setInbound, this, _1));
 		addNativeFunction("removeInbound",
@@ -874,6 +886,35 @@ namespace process::game::systems {
 		return static_cast<int>(gameStateChannel.getMessages()[0].difficulty);
 	}
 	
+	ScriptSystem::DataType ScriptSystem::getPlayerPos(
+		const std::vector<DataType>& parameters
+	){
+		throwIfNativeFunctionWrongArity(0, parameters, "getPlayerPos");
+		
+		//get the iterator for players
+		static const Topic<Group*> playerGroupPointerStorageTopic{};
+		
+		auto playerGroupPointer{
+			getGroupPointer<PlayerData, Position>(
+				*currentScenePointer,
+				playerGroupPointerStorageTopic
+			)
+		};
+		auto playerGroupIterator{
+			playerGroupPointer->groupIterator<Position>()
+		};
+		
+		if (playerGroupIterator.isValid()) {
+			//just grab the first player
+			const auto [playerPos] = *playerGroupIterator;
+			return static_cast<Point2>(playerPos);
+		}
+		else {
+			return Point2{ config::gameWidth / 2.0, config::gameHeight / 2.0 }
+				+ config::gameOffset;
+		}
+	}
+	
 	ScriptSystem::DataType ScriptSystem::setCollidable(
 		const std::vector<DataType>& parameters
 	) {
@@ -927,6 +968,15 @@ namespace process::game::systems {
 		int damage{ std::get<int>(parameters[0]) };
 		EntityHandle entityHandle{ makeCurrentEntityHandle() };
 		componentOrderQueue.queueSetComponent<Damage>(entityHandle, { damage });
+		return false;
+	}
+	
+	ScriptSystem::DataType ScriptSystem::setClearMarker(
+		const std::vector<DataType>& parameters
+	){
+		throwIfNativeFunctionWrongArity(0, parameters, "setClearMarker");
+		EntityHandle entityHandle{ makeCurrentEntityHandle() };
+		componentOrderQueue.queueSetComponent<ClearMarker>(entityHandle, {});
 		return false;
 	}
 	
@@ -1152,23 +1202,43 @@ namespace process::game::systems {
 	}
 	
 	/**
-	 * Vector2 vector, float x
+	 * Vector2 vector OR Point2 point, float x
 	 */
 	ScriptSystem::DataType ScriptSystem::setX(const std::vector<DataType>& parameters){
 		throwIfNativeFunctionWrongArity(2, parameters, "setX");
-		const Vector2& vector{ std::get<Vector2>(parameters[0]) };
+		const DataType& data{ parameters[0] };
 		float x{ std::get<float>(parameters[1]) };
-		return Vector2{ x, vector.y };
+		if(std::holds_alternative<Vector2>(data)) {
+			const Vector2& vector { std::get<Vector2>(data) };
+			return Vector2 { x, vector.y };
+		}
+		else if(std::holds_alternative<Point2>(data)){
+			const Point2& point { std::get<Point2>(data) };
+			return Point2 { x, point.y };
+		}
+		else{
+			throw std::runtime_error{ "native func setX bad type!" };
+		}
 	}
 	
 	/**
-	 * Vector2 vector, float y
+	 * Vector2 vector OR Point2 point, float y
 	 */
 	ScriptSystem::DataType ScriptSystem::setY(const std::vector<DataType>& parameters){
 		throwIfNativeFunctionWrongArity(2, parameters, "setY");
-		const Vector2& vector{ std::get<Vector2>(parameters[0]) };
+		const DataType& data{ parameters[0] };
 		float y{ std::get<float>(parameters[1]) };
-		return Vector2{ vector.x, y };
+		if(std::holds_alternative<Vector2>(data)) {
+			const Vector2& vector { std::get<Vector2>(data) };
+			return Vector2 { vector.x, y };
+		}
+		else if(std::holds_alternative<Point2>(data)){
+			const Point2& point { std::get<Point2>(data) };
+			return Point2 { point.x, y };
+		}
+		else{
+			throw std::runtime_error{ "native func setY bad type!" };
+		}
 	}
 	
 	/**
@@ -1202,7 +1272,7 @@ namespace process::game::systems {
 		}
 		else if(std::holds_alternative<Vector2>(data)){
 			Vector2 vector{ std::get<Vector2>(data) };
-			vector.x *= -1;
+			vector.y *= -1; //flip x needs to change y!
 			return vector;
 		}
 		else if(std::holds_alternative<PolarVector>(data)){
@@ -1228,7 +1298,7 @@ namespace process::game::systems {
 		}
 		else if(std::holds_alternative<Vector2>(data)){
 			Vector2 vector{ std::get<Vector2>(data) };
-			vector.y *= -1;
+			vector.x *= -1; //flip y needs to change x!
 			return vector;
 		}
 		else if(std::holds_alternative<PolarVector>(data)){

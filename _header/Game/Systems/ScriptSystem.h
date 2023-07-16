@@ -100,6 +100,7 @@ namespace process::game::systems {
 		DataType isDialogueOver(const std::vector<DataType>& parameters);
 		DataType isWin(const std::vector<DataType>& parameters);
 		DataType getDifficulty(const std::vector<DataType>& parameters);
+		DataType getPlayerPos(const std::vector<DataType>& parameters);
 		
 		//entity graphics
 		DataType setVisible(const std::vector<DataType>& parameters);
@@ -128,6 +129,7 @@ namespace process::game::systems {
 		DataType setSpecialCollisionTarget(const std::vector<DataType>& parameters);
 		DataType setHealth(const std::vector<DataType>& parameters);
 		DataType setDamage(const std::vector<DataType>& parameters);
+		DataType setClearMarker(const std::vector<DataType>& parameters);
 		DataType setInbound(const std::vector<DataType>& parameters);
 		DataType setOutbound(const std::vector<DataType>& parameters);
 		DataType setPosition(const std::vector<DataType>& parameters);
