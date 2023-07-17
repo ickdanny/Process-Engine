@@ -752,7 +752,7 @@ namespace process::game::systems {
 				break;
 			case 3:
 				backgroundID = L"tile3";
-				pixelScrollPerTick = 1.0f;
+				pixelScrollPerTick = 0.5f;
 				break;
 			case 4:
 				backgroundID = L"tile4";

@@ -1,3 +1,12 @@
-print("TO DO stage 3");
+timer(630);
+addSpawn("3_1_spawner"); # wave 1  =
 
-removeEntity();
+timer(1200);
+#spawn("boss3", getTopSpawnLeft(gameWidth / 2.0), zeroPolar, "b3_master");
+
+stallUntil(isWin);
+timer(timeBeforePostDialogue);
+
+showDialogue("3_2");
+stallUntil(isDialogueOver);
+endStage();
