@@ -19,6 +19,5 @@ while(true){
     spawn("trap", position + bottomLeftOffset, zeroPolar, "b2_1_shot2_trapLifetime3");
     spawn("trap", position + bottomRightOffset, zeroPolar, "b2_1_shot2_trapLifetime4");
 
-
     timer(tick);
 }

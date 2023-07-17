@@ -6,35 +6,57 @@ showDialogue("1_1");
 stallUntil(isDialogueOver);
 setCollidable();
 
-#addSpawn("b2_1_attack"); # plane 1
-#stallUntil(isBossDead);
-#clearSpawns();
-#stall();
-#setVelocity(zeroPolar);
-#
-#timer(50);
-#addSpawn("b2_2_attack"); # floor bubbles
-#stallUntil(isBossDead);
-#clearSpawns();
-#stall();
-#setVelocity(zeroPolar);
-#addSpawn("largePower");
-#
-#timer(50);
-#addSpawn("b2_3_attack"); # plane 2
-#stallUntil(isBossDead);
-#clearSpawns();
-#stall();
-#setVelocity(zeroPolar);
-#
-#gotoDecelerating(bossMidpoint, 1.0);
+addSpawn("b2_1_attack"); # plane 1
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+
+timer(50);
+addSpawn("b2_2_attack"); # floor bubbles
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+addSpawn("largePower");
+
+timer(50);
+addSpawn("b2_3_attack"); # plane 2
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+
+gotoDecelerating(bossMidpoint, 1.0);
 timer(50);
 addSpawn("b2_4_attack"); # lightning
 stallUntil(isBossDead);
 clearSpawns();
 stall();
 setVelocity(zeroPolar);
+clearBullets();
 addSpawn("largePower");
+
+gotoDecelerating(bossMidpoint, 1.0);
+timer(50);
+addSpawn("b2_5_attack"); # crystals
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+
+gotoDecelerating(bossMidpoint, 1.0);
+timer(50);
+addSpawn("b2_6_attack"); # crazy rings
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
 
 win();
 spawn("bossExplode", entityPosition(), zeroPolar);

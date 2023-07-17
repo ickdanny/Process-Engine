@@ -34,29 +34,37 @@ namespace process::game::systems {
 				//handle the commands for each source/target pair
 				for (const auto& [sourceHandle, targetHandle]
 					: collisionChannel.getMessages()
-					) {
-					const auto sourceCommand{
-						dataStorage.getComponent<typename CollisionType::Source>(
-							sourceHandle
-						).command
-					};
-					handleCollisionCommand<CollisionType>(
-						scene,
-						sourceHandle,
-						sourceCommand,
-						targetHandle
-					);
-					const auto targetCommand{
-						dataStorage.getComponent<typename CollisionType::Target>(
-							targetHandle
-						).command
-					};
-					handleCollisionCommand<CollisionType>(
-						scene,
-						targetHandle,
-						targetCommand,
+				) {
+					if(dataStorage.containsComponent<typename CollisionType::Source>(
 						sourceHandle
-					);
+					)) {
+						const auto sourceCommand {
+							dataStorage.getComponent<typename CollisionType::Source>(
+								sourceHandle
+							).command
+						};
+						handleCollisionCommand<CollisionType>(
+							scene,
+							sourceHandle,
+							sourceCommand,
+							targetHandle
+						);
+					}
+					if(dataStorage.containsComponent<typename CollisionType::Target>(
+						targetHandle
+					)) {
+						const auto targetCommand {
+							dataStorage.getComponent<typename CollisionType::Target>(
+								targetHandle
+							).command
+						};
+						handleCollisionCommand<CollisionType>(
+							scene,
+							targetHandle,
+							targetCommand,
+							sourceHandle
+						);
+					}
 				}
 			}
 		}

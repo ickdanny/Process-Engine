@@ -1,6 +1,6 @@
-let tick = diff(4, 3, 2, 1);
+let tick = diff(5, 4, 3, 2);
 let initAngle = entityAngle();
-let angleRand = 24.5;
+let angleRand = 20.5;
 let angleRandomChance = 0.2;
 let spawnOffshootChance = 0.2;
 let offshootAngleRandLow = 25.0;
@@ -9,11 +9,11 @@ let offshootSpeed = 2.3 + 0.4 * getDifficulty();
 let lowerBound = gameHeight + getY(gameOffset) + 3.0;
 
 func spawnBullet(velocity){
-    spawn("sharpYellow", entityPosition(), velocity, "b2_4_bullet2");
+    spawn("sharpYellow", entityPosition(), velocity, "b2_4_shot1_bullet2");
 }
 
 func spawnOffshoot(velocity){
-    spawn("sharpClear", entityPosition(), velocity, "b2_4_bullet3");
+    spawn("sharpClear", entityPosition(), velocity, "b2_4_shot1_bullet3");
 }
 
 func randomizeAngle(){

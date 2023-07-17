@@ -1,0 +1,23 @@
+let maxTime = 48;
+let symmetry = 7;
+let tick = diff(4, 3, 2, 1);
+let angle = random(0.0, 360.0);
+let angleRand = 2.0;
+let angleIncrement = tick * -6.234;
+let initSpeed = 2.0;
+
+func spawnBullet(velocity){
+    velocity = setTheta(velocity, getTheta(velocity) + random(-angleRand, angleRand));
+    if(chance(0.5)){
+        spawn("sharpLRed", entityPosition(), velocity, "b2_4_shot2_bullet");
+    }
+    else{
+        spawn("sharpOrange", entityPosition(), velocity, "b2_4_shot2_bullet");
+    }
+}
+
+for(let t = 0; t < maxTime; t = t + tick){
+    ring(makePolar(initSpeed, angle), symmetry, spawnBullet);
+    angle = angle + angleIncrement;
+    timer(tick);
+}

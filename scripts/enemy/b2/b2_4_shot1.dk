@@ -1,0 +1,20 @@
+let tick = 20;
+let numSpawnsPerSide = 3;
+let speed = 2.3 + 0.4 * getDifficulty();
+let angleIncrement = 180.0 / numSpawnsPerSide;
+let baseAngle = 90.0;
+
+let position = entityPosition();
+func spawnBullet(velocity){
+    spawn("sharpClear", position, velocity, "b2_4_shot1_bullet1");
+}
+
+let angle1 = baseAngle + angleIncrement / 2.0;
+let angle2 = baseAngle - angleIncrement / 2.0;
+for(let i = 0; i < numSpawnsPerSide; i = i + 1){
+    spawnBullet(makePolar(speed, angle1));
+    spawnBullet(makePolar(speed, angle2));
+    angle1 = angle1 + angleIncrement;
+    angle2 = angle2 - angleIncrement;
+    timer(tick);
+}

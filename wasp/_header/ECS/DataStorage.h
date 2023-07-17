@@ -141,7 +141,10 @@ namespace wasp::ecs {
                     );
                 }
                 else {
-                    throw std::runtime_error{ "entity doesn't contain component!" };
+                    throw std::runtime_error{
+						"entity doesn't contain component!"
+							+ std::to_string(component::ComponentIndexer::getIndex<T>())
+					};
                 }
             }
             throw std::runtime_error{ "tried to get component of dead entity!" };
@@ -157,7 +160,10 @@ namespace wasp::ecs {
                     );
                 }
                 else {
-                    throw std::runtime_error{ "entity doesn't contain component!" };
+					throw std::runtime_error{
+						"entity doesn't contain component!"
+							+ std::to_string(component::ComponentIndexer::getIndex<T>())
+					};
                 }
             }
             throw std::runtime_error{ "tried to get component of dead entity!" };
@@ -175,7 +181,10 @@ namespace wasp::ecs {
                     );
                 }
                 else {
-                    throw std::runtime_error{ "entity doesn't contain component!" };
+					throw std::runtime_error{
+						"entity doesn't contain component!"
+							+ std::to_string(component::ComponentIndexer::getIndex<T>())
+					};
                 }
             }
             throw std::runtime_error{ "tried to get component of dead entity!" };
@@ -191,7 +200,10 @@ namespace wasp::ecs {
                         );
                 }
                 else {
-                    throw std::runtime_error{ "entity doesn't contain component!" };
+					throw std::runtime_error{
+						"entity doesn't contain component!"
+							+ std::to_string(component::ComponentIndexer::getIndex<T>())
+					};
                 }
             }
             throw std::runtime_error{ "tried to get component of dead entity!" };

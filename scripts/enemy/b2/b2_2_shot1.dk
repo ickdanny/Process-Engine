@@ -6,11 +6,12 @@ let gameOffsetY = getY(gameOffset);
 let leftBorder = -bulletSpawnOut + gameOffsetX;
 let rightBorder = bulletSpawnOut + gameWidth + leftBorder;
 let bottomBorder = bulletSpawnOut + gameHeight + gameOffsetY;
-let tick = diff(17, 13, 10, 8);
+let tick = diff(20, 16, 13, 10);
 let angleRand = 2.4;
 let speedLow = 0.4;
 let speedHigh = 1.0;
 let bottomSpawnY = gameHeight + gameOffsetY + bulletSpawnOut;
+let betweenWaitTime = 30;
 
 func spawnBullet(position, angle){
     spawn(
@@ -42,6 +43,8 @@ while(getX(leftSpawnPoint) > leftBorder){
     timer(tick);
 }
 
+timer(betweenWaitTime);
+
 #spawn bullets down sides
 
 leftSpawnPoint = setX(leftSpawnPoint, leftBorder);
@@ -54,6 +57,8 @@ while(getY(leftSpawnPoint) < bottomBorder){
     rightSpawnPoint = rightSpawnPoint + downOffset;
     timer(tick);
 }
+
+timer(betweenWaitTime);
 
 #spawn bullets across bottom shrinking the safe area
 

@@ -1,0 +1,7 @@
+let finalSpeedLow = 0.64;
+let finalSpeedHigh = 1.02;
+let speedTime = 61;
+let initWaitTime = 42;
+
+timer(initWaitTime);
+shiftSpeedPeriod(random(finalSpeedLow, finalSpeedHigh), speedTime);

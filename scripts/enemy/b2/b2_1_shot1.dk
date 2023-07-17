@@ -1,6 +1,6 @@
 let offsetRight = makeVector(45.0, -12.0);
 let offsetLeft = flipY(offsetRight);
-let tick = diff(65, 62, 59, 55);
+let tick = diff(75, 72, 69, 65);
 let side = true;
 
 func spawnTrap(position){

@@ -1,0 +1,5 @@
+setClearMarker();
+timer(trapLifetime);
+let spawnPos = entityPosition() + makeVector(0.0, -9.0);
+spawn("crystalEmerge", spawnPos, zeroPolar, "b2_5_emergeLifetime");
+removeEntity();

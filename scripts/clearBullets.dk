@@ -1,1 +1,3 @@
 clearBullets();
+stall();
+clearBullets();

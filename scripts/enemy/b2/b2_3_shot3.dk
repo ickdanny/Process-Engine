@@ -1,5 +1,5 @@
 let offset = makeVector(0.0, 29.0);
-let tick = diff(90, 85, 80, 75);
+let tick = diff(95, 90, 85, 80);
 
 while(true){
     spawn("trap", entityPosition() + offset, zeroPolar, "b2_3_shot3_trapLifetime");

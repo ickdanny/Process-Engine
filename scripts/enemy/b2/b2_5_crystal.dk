@@ -1,0 +1,9 @@
+let lifetime = 483;
+let health = 100;
+
+setHealth(health);
+setClearMarker();
+setSpecialCollisionSource();
+timer(lifetime);
+spawn("enemyExplode", entityPosition(), zeroPolar);
+removeEntity();

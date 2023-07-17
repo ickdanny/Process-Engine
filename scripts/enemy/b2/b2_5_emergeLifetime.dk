@@ -1,0 +1,4 @@
+setClearMarker();
+timer(crystalEmergeLifetime);
+spawn("crystal", entityPosition(), zeroPolar, "b2_5_crystal");
+removeEntity();

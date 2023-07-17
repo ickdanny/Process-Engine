@@ -16,8 +16,8 @@ addSpawn("b2_2_shot1");
 let spawnTime = diff(1, 1, 2, 3) * 49; #see b2_2_shot2
 timer(timeBeforeShot2);
 while(true){
+    boundGotoDecelerating(bossXLow, bossXHigh, bossYLow, bossYHigh - 15.0, rLow, rHigh, maxSpeed);
     timer(timeBeforeShoot);
     addSpawn("b2_2_shot2");
     timer(spawnTime + timeAfterShoot);
-    boundGotoDecelerating(bossXLow, bossXHigh, bossYLow, bossYHigh - 15.0, rLow, rHigh, maxSpeed);
 }

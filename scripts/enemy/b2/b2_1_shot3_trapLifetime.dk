@@ -1,6 +1,6 @@
 let numSpawns = diff(2, 3, 4, 5);
 let tick = diff(7, 6, 5, 5);
-let speed = 1.9;
+let speed = 1.7;
 
 setClearMarker();
 timer(trapLifetime);

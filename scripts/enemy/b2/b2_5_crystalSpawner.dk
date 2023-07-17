@@ -1,0 +1,14 @@
+let tick = 132;
+let xLow = 10.0 + getX(gameOffset);
+let xHigh = gameWidth - 10.0 + getX(gameOffset);
+let yLow = gameHeight / 2.0 - 15.0;
+let yHigh = gameHeight / 2.0 + 15.0;
+
+func spawnCrystal(position){
+    spawn("trap", position, zeroPolar, "b2_5_trapLifetime");
+}
+
+while(true){
+    spawnCrystal(makePoint(random(xLow, xHigh), random(yLow, yHigh)));
+    timer(tick);
+}

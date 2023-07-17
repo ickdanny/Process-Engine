@@ -1,0 +1,7 @@
+let waitTime = 44;
+let targetSpeed = 1.0;
+let speedIncrement = 1.3 / 60.0;
+
+addScript("b2_5_bullet3Collision");
+timer(waitTime);
+shiftSpeedIncrement(targetSpeed, speedIncrement);

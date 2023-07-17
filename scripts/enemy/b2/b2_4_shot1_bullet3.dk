@@ -1,13 +1,13 @@
 let lifetimeMax = 10;
 let dieChance = 0.12;
-let tick = diff(4, 3, 2, 1);
+let tick = diff(5, 4, 3, 2);
 let initAngle = entityAngle();
 let angleRand = 20.5;
 let angleRandomChance = 0.2;
 let lowerBound = gameHeight + getY(gameOffset);
 
 func spawnBullet(velocity){
-    spawn("sharpYellow", entityPosition(), velocity, "b2_4_bullet2");
+    spawn("sharpYellow", entityPosition(), velocity, "b2_4_shot1_bullet2");
 }
 
 func randomizeAngle(){

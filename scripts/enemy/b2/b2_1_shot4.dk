@@ -1,6 +1,6 @@
 let offsetRight = makeVector(35.0, 4.0);
 let offsetLeft = flipY(offsetRight);
-let tick = 63;
+let tick = 73;
 
 # CW right = 1
 # CCW left = 2

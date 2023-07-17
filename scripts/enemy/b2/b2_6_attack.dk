@@ -1,0 +1,72 @@
+let health = 4500;
+let symmetry = diff(4, 4, 5, 6);
+let tick = diff(3, 2, 1, 1);
+let maxTimeBeforeWrapping = 1000;
+let spawnChance = 0.7;
+let speed = 1.8;
+let angle = -90.0;
+let accel0 = 0.0;
+let accel1 = 0.0;
+let accel2 = 0.0;
+
+setHealth(health);
+
+let tShift = 1.0 / 40.0;
+let sinCoefficient = 0.008;
+let farAccelRand = 0.0001;
+func calcFarAccel(t){
+    return sinCoefficient * sin(t * tShift) + random(-farAccelRand, farAccelRand);
+}
+
+let position = entityPosition();
+func spawnBullet(velocity){
+    if(chance(spawnChance)){
+        if(chance(0.5)){
+            spawn("sharpLRed", position, velocity);
+        }
+        else{
+            spawn("sharpLPurple", position, velocity);
+        }
+    }
+}
+
+let t = 0;
+let ticker = tick;
+while(true){
+    if(ticker <= 1){
+        ring(makePolar(speed, angle), symmetry, spawnBullet);
+        ticker = tick;
+    }
+    else{
+        ticker = ticker - 1;
+    }
+    angle = angle + accel0;
+    accel0 = accel0 + accel1;
+    accel1 = accel1 + accel2;
+    accel2 = calcFarAccel(t);
+
+    if(angle > 360.0){
+        angle = angle - 360.0;
+    }
+    else if(angle < -360.0){
+        angle = angle + 360.0;
+    }
+    if(accel0 > 360.0){
+        accel0 = accel0 - 360.0;
+    }
+    else if(accel0 < -360.0){
+        accel0 = accel0 + 360.0;
+    }
+    if(accel1 > 360.0){
+        accel1 = accel1 - 360.0;
+    }
+    else if(accel1 < -360.0){
+        accel1 = accel1 + 360.0;
+    }
+
+    t = t + 1;
+    if(t > maxTimeBeforeWrapping){
+        t = 0;
+    }
+    stall();
+}

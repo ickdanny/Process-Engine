@@ -3,7 +3,7 @@ let tick = diff(12, 6, 4, 3);
 let ringSymmetry = 3;
 let colCount = diff(1, 1, 2, 2);
 let colIncrement = 0.23;
-let baseSpeed = 0.9;
+let baseSpeed = 0.85;
 let angleIncrement = tick * phi * pi;
 
 let position = entityPosition();
