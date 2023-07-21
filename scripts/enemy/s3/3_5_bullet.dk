@@ -1,0 +1,11 @@
+let waitTime = 30;
+let speed1 = 1.04;
+let angleShift1 = 48.3;
+let shiftTime1 = 44;
+let speed2 = 1.64;
+let angleShift2 = -283.4;
+let shiftTime2 = 64;
+
+timer(waitTime);
+shiftVelocityTurnPeriod(speed1, entityAngle() + angleShift1, shiftTime1);
+shiftVelocityLongTurnPeriod(speed2, entityAngle() + angleShift2, shiftTime2);

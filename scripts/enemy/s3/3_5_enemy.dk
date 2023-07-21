@@ -1,16 +1,16 @@
-let health = 250;
-let slowTime = 64;
+let health = 1000;
+let slowTime = 84;
 let finalWaitTime = 59;
 let finalSpeed = 0.5;
-let finalAngle = 90.0;
+let finalAngle = -90.0;
 let finalAngleRand = 15.0;
 let finalSpeedTime = 45;
 
 setHealth(health);
-addDeathSpawn("smallPower2");
+addDeathSpawn("bomb");
 
 shiftSpeedPeriod(0.0, slowTime);
-addSpawn("3_3_shot");
+addSpawn("3_5_shot");
 
 stall();
 stallUntil(isNotSpawning);

@@ -1,4 +1,4 @@
-let health = 100;
+let health = 80;
 let slowTime = 45;
 let finalWaitTime = 20;
 let finalSpeed = 0.5;

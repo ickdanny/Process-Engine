@@ -20,7 +20,7 @@ namespace process::game::systems{
 	namespace playerB{
 		constexpr float laserHitbox{ 10.0f };
 		constexpr int laserDamage{ 7 };
-		constexpr float laserOutbound{ -20.0f };
+		constexpr float laserOutbound{ -70.0f };
 		
 		constexpr float laserPartHitbox{ 15.0f };
 		constexpr int laserPartDamage{ 1 };//damage per tick

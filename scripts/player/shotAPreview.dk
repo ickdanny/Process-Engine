@@ -1,1 +1,66 @@
-print("TO DO shot A preview");
+let speed = 7.0;
+let focusedRightAngle = 23.0;
+
+let focusBool = false;
+func spawnPair(rightAngle){
+    if(focusBool){
+        spawn(
+            "boomerang",
+            entityPosition(),
+            makePolar(speed, focusedRightAngle),
+            "boomerangCurveRight"
+        );
+        spawn(
+            "boomerang",
+            entityPosition(),
+            makePolar(speed, 180.0 - focusedRightAngle),
+            "boomerangCurveLeft"
+        );
+    }
+    else{
+        spawn(
+            "boomerang",
+            entityPosition(),
+            makePolar(speed, rightAngle),
+            "boomerangCurveRight"
+        );
+        spawn(
+            "boomerang",
+            entityPosition(),
+            makePolar(speed, 180.0 - rightAngle),
+            "boomerangCurveLeft"
+        );
+    }
+}
+
+func spawnShot(){
+    spawnPair(55.0);
+    timer(3);
+    spawnPair(45.0);
+    timer(3);
+    spawnPair(35.0);
+    timer(3);
+    spawnPair(25.0);
+    timer(3);
+    spawnPair(15.0);
+    timer(3);
+    spawnPair(5.0);
+    timer(3);
+    spawnPair(15.0);
+    timer(3);
+    spawnPair(25.0);
+    timer(3);
+    spawnPair(35.0);
+    timer(3);
+    spawnPair(45.0);
+    timer(3);
+}
+
+while(true){
+    focusBool = false;
+    spawnShot();
+    spawnShot();
+    focusBool = true;
+    spawnShot();
+    spawnShot();
+}

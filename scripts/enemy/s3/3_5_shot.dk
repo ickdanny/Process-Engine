@@ -1,0 +1,42 @@
+let maxTime = 200;
+let tick = 1;
+let symmetry = diff(3, 4, 5, 6);
+let baseAngle = random(0.0, 360.0);
+let angleIncrement = 2.5 * phi;
+let initSpeed = 0.0;
+let spawnThetaCoefficient = 0.85;
+let spawnAmplitude = 35.4;
+
+func spawnRFunc(degrees){
+    return spawnAmplitude * sin(spawnThetaCoefficient * toRadians(degrees));
+}
+
+func spawnAngleFunc(degrees){
+    return 180 * sin(toRadians(degrees));
+}
+
+func spawnBullet(position, velocity){
+    spawn("sharpYellow", position, velocity, "3_5_bullet");
+}
+
+let basePosition = entityPosition();
+func spawnSpecialRing(offsetDist, spawnOffsetBaseAngle, directionBaseAngle, symmetry){
+    let angleIncrement = 360.0 / symmetry;
+    for(let i = 0; i < symmetry; i = i + 1){
+        spawnBullet(
+            basePosition + makePolar(offsetDist, spawnOffsetBaseAngle + angleIncrement * i),
+            makePolar(initSpeed, directionBaseAngle + angleIncrement * i)
+        );
+    }
+}
+
+let r;
+let spawnOffset;
+let velocity;
+let posAngle = baseAngle;
+for(let t = 0; t < maxTime; t = t + tick){
+    r = spawnRFunc(posAngle);
+    spawnSpecialRing(r, posAngle, spawnAngleFunc(posAngle), symmetry);
+    posAngle = posAngle + angleIncrement;
+    timer(tick);
+}

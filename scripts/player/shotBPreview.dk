@@ -1,1 +1,57 @@
-print("TO DO shot B preview");
+let yOffset = 8.0;
+let speed = 10.0;
+
+let yOffsetVector = makeVector(0.0, yOffset);
+
+func spawnSingle(offset, angle){
+    if(isFocused()){
+        spawn("smallLaser", entityPosition() + offset + yOffsetVector, makePolar(speed, 90.0));
+    }
+    else{
+        spawn("smallLaser", entityPosition() + offset + yOffsetVector, makePolar(speed, angle));
+    }
+}
+
+let focusBool = false;
+func spawnPair(offset, rightAngle){
+    let mirrorOffset = flipY(offset);
+    if(focusBool){
+        let velocity = makePolar(speed, 90.0);
+        spawn("smallLaser", entityPosition() + offset + yOffsetVector, velocity);
+        spawn("smallLaser", entityPosition() + mirrorOffset + yOffsetVector, velocity);
+    }
+    else{
+        spawn(
+            "smallLaser",
+            entityPosition() + offset + yOffsetVector,
+            makePolar(speed, rightAngle)
+        );
+        spawn(
+            "smallLaser",
+            entityPosition() + mirrorOffset + yOffsetVector,
+            makePolar(speed, 180.0 - rightAngle)
+        );
+    }
+}
+
+func spawnShot(){
+    let offset1 = makeVector(5.5, 0.0);
+    let offset2 = makeVector(9.5, 0.0);
+    for(let i = 0; i < 5; i = i + 1){
+        spawnSingle(zeroVector, 90.0);
+        stall();
+        spawnPair(offset1, 84.0);
+        stall();
+        spawnPair(offset2, 79.0);
+        timer(4);
+    }
+}
+
+while(true){
+    focusBool = false;
+    spawnShot();
+    spawnShot();
+    focusBool = true;
+    spawnShot();
+    spawnShot();
+}

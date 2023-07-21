@@ -247,23 +247,28 @@ namespace process::game::systems {
 			L"background_menu_shot",
 			config::playerBulletDepth - config::backgroundDepth + 10
 		);
+		
+		//create the prng
+		scene.getChannel(SceneTopics::random).addMessage(
+			config::PrngType{ 12345L }
+		);
 
 		constexpr float buttonY{ 202.0f };
 		constexpr float backY{ 123.0f };
-		constexpr float playerY{ 130.0f };
+		constexpr float playerY{ 150.0f };
 		constexpr float xOffset{ 64.0f };
 
 		addBackground(
 			dataStorage, 
 			L"background_menu_shot_back",
 			-100,
-			wasp::math::Point2{ center.x + xOffset, backY }
+			wasp::math::Point2{ center.x + xOffset - 1.0, backY }
 		);
 		addBackground(
 			dataStorage,
 			L"background_menu_shot_back",
 			-100,
-			wasp::math::Point2{ center.x - xOffset + 1, backY }
+			wasp::math::Point2{ center.x - xOffset, backY }
 		);
 
 		//adding the player previews
@@ -281,7 +286,58 @@ namespace process::game::systems {
 				} },
 				AnimationList{
 					components::Animation{ {
-						L"p1Idle1", L"p1Idle2", L"p1Idle3", L"p1Idle4"
+						L"p1Idle1",
+						L"p1Idle2",
+						L"p1Idle3",
+						L"p1Idle4",
+						L"p1Idle1",
+						L"p1Idle2",
+						L"p1Idle3",
+						L"p1Idle4",
+						L"p1Idle1",
+						L"p1Idle2",
+						L"p1Idle3",
+						L"p1Idle4",
+						L"p1RightTurn",
+						L"p1Right1",
+						L"p1Right2",
+						L"p1Right3",
+						L"p1Right4",
+						L"p1Right1",
+						L"p1Right2",
+						L"p1Right3",
+						L"p1Right4",
+						L"p1Right1",
+						L"p1Right2",
+						L"p1Right3",
+						L"p1Right4",
+						L"p1RightTurn",
+						L"p1Idle1",
+						L"p1Idle2",
+						L"p1Idle3",
+						L"p1Idle4",
+						L"p1Idle1",
+						L"p1Idle2",
+						L"p1Idle3",
+						L"p1Idle4",
+						L"p1Idle1",
+						L"p1Idle2",
+						L"p1Idle3",
+						L"p1Idle4",
+						L"p1LeftTurn",
+						L"p1Left1",
+						L"p1Left2",
+						L"p1Left3",
+						L"p1Left4",
+						L"p1Left1",
+						L"p1Left2",
+						L"p1Left3",
+						L"p1Left4",
+						L"p1Left1",
+						L"p1Left2",
+						L"p1Left3",
+						L"p1Left4",
+						L"p1LeftTurn"
 					} },
 					playerAnimationTickRate	//ticks
 				}
@@ -304,7 +360,58 @@ namespace process::game::systems {
 				},
 				AnimationList{
 					components::Animation{ {
-						L"p1Idle1", L"p1Idle2", L"p1Idle3", L"p1Idle4"
+						L"p1Idle1",
+						L"p1Idle2",
+						L"p1Idle3",
+						L"p1Idle4",
+						L"p1Idle1",
+						L"p1Idle2",
+						L"p1Idle3",
+						L"p1Idle4",
+						L"p1Idle1",
+						L"p1Idle2",
+						L"p1Idle3",
+						L"p1Idle4",
+						L"p1RightTurn",
+						L"p1Right1",
+						L"p1Right2",
+						L"p1Right3",
+						L"p1Right4",
+						L"p1Right1",
+						L"p1Right2",
+						L"p1Right3",
+						L"p1Right4",
+						L"p1Right1",
+						L"p1Right2",
+						L"p1Right3",
+						L"p1Right4",
+						L"p1RightTurn",
+						L"p1Idle1",
+						L"p1Idle2",
+						L"p1Idle3",
+						L"p1Idle4",
+						L"p1Idle1",
+						L"p1Idle2",
+						L"p1Idle3",
+						L"p1Idle4",
+						L"p1Idle1",
+						L"p1Idle2",
+						L"p1Idle3",
+						L"p1Idle4",
+						L"p1LeftTurn",
+						L"p1Left1",
+						L"p1Left2",
+						L"p1Left3",
+						L"p1Left4",
+						L"p1Left1",
+						L"p1Left2",
+						L"p1Left3",
+						L"p1Left4",
+						L"p1Left1",
+						L"p1Left2",
+						L"p1Left3",
+						L"p1Left4",
+						L"p1LeftTurn"
 					} },
 					playerAnimationTickRate	//ticks
 				}
