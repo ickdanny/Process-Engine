@@ -1,0 +1,9 @@
+let initSpeed = 1.5;
+let initVelocity = makePolar(initSpeed, -90.0);
+
+func spawnEnemy(position, velocity){
+    spawn("automatonBlue", position, velocity, "3_3_enemy");
+}
+
+spawnEnemy(getTopSpawnLeft(23.3), initVelocity);
+spawnEnemy(getTopSpawnRight(23.3), initVelocity);

@@ -1,0 +1,20 @@
+let maxTime = 36;
+let tick = diff(4, 3, 2, 1);
+let speedRand = 0.2;
+let speedHigh = 3.0;
+let speedLow = 0.2;
+let angleRand = 5.0;
+
+let speedSlope = (speedLow - speedHigh) / maxTime;
+func getSpeed(t){
+    return speedSlope * t + speedHigh;
+}
+
+let baseAngle = entityAngle();
+for(let t = 0; t < maxTime; t = t + tick){
+    spawnFlamethrowerBullet(
+        makePolar(getSpeed(t) + random(-speedRand, speedRand),
+        baseAngle + random(-angleRand, angleRand))
+    );
+    timer(tick);
+}

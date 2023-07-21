@@ -1,29 +1,29 @@
-#timer(260);
-#addSpawn("1_1_spawner"); # wave 1  = robots from the side, shooting curving arcs
-#timer(370);
-#addSpawn("1_2_spawner"); # wave 2  = robots from the sides of the top, shooting
-#timer(200);
-#addSpawn("1_3_spawner"); # wave 3  = spiky robot from top right, radial type attacks
-#timer(240);
-#addSpawn("1_4_spawner"); # wave 4  = wave 2 but flip
-#timer(200);
-#addSpawn("1_5_spawner"); # wave 5  = wave 3 but flip
-#timer(380);
-#addSpawn("1_6_spawner"); # wave 6  = right side pairs of robots, small shot
-#timer(225);
-#addSpawn("1_7_spawner"); # wave 7  = left side pairs of robots, small shot
-#timer(225);
-#addSpawn("1_8_spawner"); # wave 8  = center pairs of robots, small shot
-#timer(205);
-#addSpawn("1_9_spawner"); # wave 9  = two spiky robots at both sides
-#timer(150);
-#addSpawn("1_10_spawner");# wave 10 = red robots alternating sides
-#timer(380);
-#addSpawn("1_11_spawner");# wave 11 = red spiky robot in center, dropping bomb
-#timer(550);
-#addSpawn("1_12_spawner");# wave 12 = red robots from top left to top right, aimed explode
-#
-#timer(560);
+timer(260);
+addSpawn("1_1_spawner"); # wave 1  = robots from the side, shooting curving arcs
+timer(370);
+addSpawn("1_2_spawner"); # wave 2  = robots from the sides of the top, shooting
+timer(200);
+addSpawn("1_3_spawner"); # wave 3  = spiky robot from top right, radial type attacks
+timer(240);
+addSpawn("1_4_spawner"); # wave 4  = wave 2 but flip
+timer(200);
+addSpawn("1_5_spawner"); # wave 5  = wave 3 but flip
+timer(380);
+addSpawn("1_6_spawner"); # wave 6  = right side pairs of robots, small shot
+timer(225);
+addSpawn("1_7_spawner"); # wave 7  = left side pairs of robots, small shot
+timer(225);
+addSpawn("1_8_spawner"); # wave 8  = center pairs of robots, small shot
+timer(205);
+addSpawn("1_9_spawner"); # wave 9  = two spiky robots at both sides
+timer(150);
+addSpawn("1_10_spawner");# wave 10 = red robots alternating sides
+timer(380);
+addSpawn("1_11_spawner");# wave 11 = red spiky robot in center, dropping bomb
+timer(550);
+addSpawn("1_12_spawner");# wave 12 = red robots from top left to top right, aimed explode
+
+timer(560);
 spawn("boss1", getLeftSpawn(5.0), zeroPolar, "b1_master");
 
 stallUntil(isWin);

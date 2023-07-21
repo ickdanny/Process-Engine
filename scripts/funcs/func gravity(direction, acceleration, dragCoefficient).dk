@@ -8,8 +8,8 @@ let accelerationPolar = makePolar(acceleration, direction);
 while(true){
     velocity = entityVelocity();
     velocity = velocity + accelerationPolar;
-    let speed = getR(velocity);
-    let drag = speed * speed * dragCoefficient; #technically should have a 0.5 term
+    speed = getR(velocity);
+    drag = speed * speed * dragCoefficient; #technically should have a 0.5 term
     setVelocity(setR(velocity, speed - drag));
     stall();
 }

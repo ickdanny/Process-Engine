@@ -1,0 +1,16 @@
+let maxTime = 150;
+let tick = diff(50, 30, 25, 20);
+let arcSymmetry = diff(1, 3, 3, 5);
+let arcIncrement = diff(0.0, 24.0, 20.0, 13.4);
+let speed = diff(1.4, 1.6, 1.8, 2.0);
+
+func spawnBullet(velocity){
+    spawn("smallYellow", entityPosition(), velocity);
+}
+
+let baseVelocity;
+for(let t = 0; t < maxTime; t = t + tick){
+    baseVelocity = makePolar(speed, angleToPlayer());
+    arc(baseVelocity, arcSymmetry, arcIncrement, spawnBullet);
+    timer(tick);
+}

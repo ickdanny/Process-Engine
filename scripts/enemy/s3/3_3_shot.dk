@@ -1,0 +1,42 @@
+let maxTime = 180;
+let tick = diff(4, 3, 2, 1);
+let symmetry = 5;
+
+let baseDirection = angleToPlayer();
+let initAngle = baseDirection + 90.0;
+let offsetDist = 15.0;
+let angleOffset = 0.0;
+let angularVelocity = -10.42 * phi;
+let directionAmplitude = 20.43;
+let initSpeed = 0.0;
+
+func spawnBullet(position, velocity){
+    spawn("sharpYellow", position, velocity, "3_3_bullet");
+}
+
+let basePosition = entityPosition();
+func spawnSpecialRing(spawnOffsetBaseAngle, directionBaseAngle, symmetry){
+    let angleIncrement = 360.0 / symmetry;
+    for(let i = 0; i < symmetry; i = i + 1){
+        spawnBullet(
+            basePosition + makePolar(offsetDist, spawnOffsetBaseAngle + angleIncrement * i),
+            makePolar(initSpeed, directionBaseAngle + angleIncrement * i)
+        );
+    }
+}
+
+let angle;
+let direction;
+for(let t = 0; t < maxTime; t = t + tick){
+    angleOffset = angleOffset + angularVelocity;
+    if(angleOffset < 360.0){
+        angleOffset = angleOffset + 360.0;
+    }
+    if(angleOffset > 360.0){
+        angleOffset = angleOffset - 360.0;
+    }
+    angle = initAngle + angleOffset;
+    direction = baseDirection + directionAmplitude * cos(toRadians(angleOffset));
+    spawnSpecialRing(angle, direction, symmetry);
+    timer(tick);
+}

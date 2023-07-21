@@ -1,5 +1,11 @@
-timer(630);
-addSpawn("3_1_spawner"); # wave 1  =
+timer(230);
+addSpawn("3_1_spawner"); # wave 1  = aimed arc automatons from top in groups
+timer(845);
+addSpawn("3_2_spawner"); # wave 2  = crossing flamethrowers
+timer(140);
+addSpawn("3_3_spawner"); # wave 3  = expanding helices
+timer(380);
+addSpawn("3_4_spawner"); # wave 4  = flamethrowers up
 
 timer(1200);
 #spawn("boss3", getTopSpawnLeft(gameWidth / 2.0), zeroPolar, "b3_master");

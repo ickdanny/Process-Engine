@@ -43,6 +43,7 @@ namespace process::game::systems{
 		constexpr float wingHitbox{ 11.0f };
 		constexpr float cloudHitbox{ 9.5f };
 		constexpr float crystalHitbox{ 6.0f };
+		constexpr float automatonHitbox{ 5.0f };
 		constexpr float bossHitbox{ 13.0f };
 		
 		constexpr float trapSpin{ -2.342f };
@@ -750,6 +751,62 @@ namespace process::game::systems{
 			DeathCommand{ DeathCommand::Commands::deathSpawn },
 			DeathSpawn{ ScriptList{} }
 		).heapClone());
+		add("automatonBlue", EntityBuilder::makeVisibleCollidablePrototype(
+			AABB{ enemy::automatonHitbox },
+			PlayerCollisions::Source{},
+			EnemyCollisions::Target{ components::CollisionCommands::damage },
+			SpriteInstruction{
+				spriteStorage.get(L"automatonBlue1")->sprite,
+				config::enemyDepth
+			},
+			game::AnimationList{
+				components::Animation {
+					{
+						L"automatonBlue1",
+						L"automatonBlue2",
+						L"automatonBlue3",
+						L"automatonBlue4"
+					},
+					true
+				},
+				enemy::bossAnimationTick
+			},
+			Health{ enemy::spawnHealth },
+			Outbound{ enemy::outbound },
+			DeathCommand{ DeathCommand::Commands::deathSpawn },
+			DeathSpawn{ ScriptList{ {
+				scriptStorage.get(L"enemyExplode"),
+				std::string{ ScriptList::spawnString } + "enemyExplode"
+			} } }
+		).heapClone());
+		add("automatonRed", EntityBuilder::makeVisibleCollidablePrototype(
+			AABB{ enemy::automatonHitbox },
+			PlayerCollisions::Source{},
+			EnemyCollisions::Target{ components::CollisionCommands::damage },
+			SpriteInstruction{
+				spriteStorage.get(L"automatonRed1")->sprite,
+				config::enemyDepth
+			},
+			game::AnimationList{
+				components::Animation {
+					{
+						L"automatonRed1",
+						L"automatonRed2",
+						L"automatonRed3",
+						L"automatonRed4"
+					},
+					true
+				},
+				enemy::bossAnimationTick
+			},
+			Health{ enemy::spawnHealth },
+			Outbound{ enemy::outbound },
+			DeathCommand{ DeathCommand::Commands::deathSpawn },
+			DeathSpawn{ ScriptList{ {
+				scriptStorage.get(L"enemyExplode"),
+				std::string{ ScriptList::spawnString } + "enemyExplode"
+			} } }
+		).heapClone());
 		
 		//bosses
 		add("boss1", EntityBuilder::makeVisiblePrototype(
@@ -823,6 +880,34 @@ namespace process::game::systems{
 						L"b3Idle2",
 						L"b3Idle3",
 						L"b3Idle4"
+					},
+					true
+				},
+				enemy::bossAnimationTick
+			},
+			Health{ enemy::spawnHealth },
+			DeathCommand{ DeathCommand::Commands::bossDeath },
+			DeathSpawn{ ScriptList{ {
+				scriptStorage.get(L"clearBullets"),
+				"clearBullets"
+			} } }
+		).heapClone());
+		
+		add("boss4", EntityBuilder::makeVisiblePrototype(
+			Hitbox{ enemy::bossHitbox },
+			PlayerCollisions::Source{},
+			EnemyCollisions::Target{ components::CollisionCommands::damage },
+			SpriteInstruction{
+				spriteStorage.get(L"b4Idle1")->sprite,
+				config::enemyDepth + 100
+			},
+			game::AnimationList{
+				components::Animation {
+					{
+						L"b4Idle1",
+						L"b4Idle2",
+						L"b4Idle3",
+						L"b4Idle4"
 					},
 					true
 				},

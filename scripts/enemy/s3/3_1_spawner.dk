@@ -1,0 +1,43 @@
+let numSpawns1 = 5;
+let numSpawns2 = 7;
+let numSpawns3 = 9;
+let timeBetweenSpawns1 = 27;
+let timeBetweenSpawns2 = 25;
+let timeBetweenSpawns3 = 20;
+let xDistLow = 15.0;
+let xDistHigh = 60.0;
+let initSpeedLow = 1.0;
+let initSpeedHigh = 2.0;
+
+let timeBeforeGroup2 = 60;
+let timeBeforeGroup3 = 50;
+
+func spawnEnemy(position, velocity){
+    spawn("automatonBlue", position, velocity, "3_1_enemy");
+}
+
+let xDist;
+let initSpeed;
+
+for(let i = 0; i < numSpawns1; i = i + 1){
+    xDist = random(xDistLow, xDistHigh);
+    initSpeed = random(initSpeedLow, initSpeedHigh);
+    spawnEnemy(getTopSpawnRight(xDist), makePolar(initSpeed, -90.0));
+    timer(timeBetweenSpawns1);
+}
+
+timer(timeBeforeGroup2);
+for(let i = 0; i < numSpawns2; i = i + 1){
+    xDist = random(xDistLow, xDistHigh);
+    initSpeed = random(initSpeedLow, initSpeedHigh);
+    spawnEnemy(getTopSpawnLeft(xDist), makePolar(initSpeed, -90.0));
+    timer(timeBetweenSpawns2);
+}
+
+timer(timeBeforeGroup3);
+for(let i = 0; i < numSpawns3; i = i + 1){
+    xDist = random(xDistLow, xDistHigh);
+    initSpeed = random(initSpeedLow, initSpeedHigh);
+    spawnEnemy(getTopSpawnRight(xDist), makePolar(initSpeed, -90.0));
+    timer(timeBetweenSpawns3);
+}

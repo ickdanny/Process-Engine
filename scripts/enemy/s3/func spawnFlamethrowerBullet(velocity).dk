@@ -1,0 +1,22 @@
+# func spawnFlamethrowerBullet(velocity)
+
+let mediumChance = 0.5;
+let orangeChance = 0.25;
+
+let typeID;
+let colorID;
+
+if(chance(mediumChance)){
+    typeID = "medium";
+}
+else{
+    typeID = "small";
+}
+if(chance(orangeChance)){
+    colorID = "Orange";
+}
+else{
+    colorID = "LRed";
+}
+
+spawn(typeID + colorID, entityPosition(), velocity, "flamethrowerBullet");

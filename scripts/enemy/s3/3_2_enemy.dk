@@ -1,0 +1,22 @@
+let health = 100;
+let slowTime = 65;
+let finalWaitTime = 20;
+let finalSpeed = 0.5;
+let finalAngle = 90.0;
+let finalAngleRand = 15.0;
+let finalSpeedTime = 45;
+
+setHealth(health);
+addDeathSpawn("smallPower2");
+
+shiftSpeedPeriod(0.0, slowTime);
+addSpawn("3_2_shot");
+
+stall();
+stallUntil(isNotSpawning);
+timer(finalWaitTime);
+shiftVelocityTurnPeriod(
+    finalSpeed,
+    finalAngle + random(-finalAngleRand, finalAngleRand),
+    finalSpeedTime
+);

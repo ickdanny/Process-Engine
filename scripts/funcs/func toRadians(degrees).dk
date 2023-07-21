@@ -1,0 +1,3 @@
+# func toRadians(degrees)
+
+return degrees * 2.0 * pi / 360.0;

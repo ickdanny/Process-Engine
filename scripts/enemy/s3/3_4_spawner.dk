@@ -1,0 +1,21 @@
+let numSpawns = 4;
+let timeBetweenSpawns = 20;
+let y = 110.0;
+let yOffset = -27.0;
+let initSpeed = 1.3;
+let leftSideAngle = 15.0;
+let rightSideAngle = flipY(leftSideAngle);
+let leftSideVelocity = makePolar(initSpeed, leftSideAngle);
+let rightSideVelocity = makePolar(initSpeed, rightSideAngle);
+let topSpawnOffset = makeVector(0.0, 5.0);
+
+func spawnEnemy(position, velocity){
+    spawn("automatonRed", position, velocity, "3_4_enemy");
+}
+
+for(let i = 0; i < numSpawns; i = i + 1){
+    spawnEnemy(getLeftSpawn(y), leftSideVelocity);
+    spawnEnemy(getRightSpawn(y), rightSideVelocity);
+    y = y + yOffset;
+    timer(timeBetweenSpawns);
+}
