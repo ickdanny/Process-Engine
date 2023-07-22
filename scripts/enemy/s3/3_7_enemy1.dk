@@ -1,0 +1,22 @@
+let health = 800;
+let slowTime = 64;
+let waitTime = 10;
+let shootSpeed = 0.1;
+let shootSpeedTime = 35;
+let finalWaitTime = 20;
+let finalSpeed = 0.5;
+let finalAngle = 90.0;
+let finalSpeedTime = 81;
+
+setHealth(health);
+addDeathSpawn("largePower");
+
+shiftSpeedPeriod(0.0, slowTime);
+addSpawn("3_7_shot");
+
+timer(waitTime);
+shiftSpeedPeriod(shootSpeed, shootSpeedTime);
+
+stallUntil(isNotSpawning);
+timer(finalWaitTime);
+shiftVelocityTurnPeriod(finalSpeed, finalAngle, finalSpeedTime);

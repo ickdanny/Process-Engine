@@ -1,0 +1,25 @@
+func spawnEnemy(position, velocity){
+    spawn("automatonRed", position, velocity, "3_6_enemy");
+}
+
+spawnEnemy(
+    getTopSpawnLeft(43.3),
+    makePolar(2.5, -89.999)
+);
+
+spawnEnemy(
+    getTopSpawnRight(60.2),
+    makePolar(1.7, -90.001)
+);
+
+timer(585);
+
+spawnEnemy(
+    getTopSpawnLeft(56.3),
+    makePolar(1.8, -89.999)
+);
+
+spawnEnemy(
+    getTopSpawnRight(41.2),
+    makePolar(2.6, -90.001)
+);

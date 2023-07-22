@@ -8,6 +8,10 @@ timer(380);
 addSpawn("3_4_spawner"); # wave 4  = flamethrowers up
 timer(140);
 addSpawn("3_5_spawner"); # wave 5  = item dropper yellow polar attack
+timer(640);
+addSpawn("3_6_spawner"); # wave 6  = wigs
+timer(1170);
+addSpawn("3_7_spawner"); # wave 7  = flame spirals + yellow shot across top
 
 timer(1200);
 #spawn("boss3", getTopSpawnLeft(gameWidth / 2.0), zeroPolar, "b3_master");

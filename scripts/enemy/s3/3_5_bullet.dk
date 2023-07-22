@@ -2,7 +2,7 @@ let waitTime = 30;
 let speed1 = 1.04;
 let angleShift1 = 48.3;
 let shiftTime1 = 44;
-let speed2 = 1.64;
+let speed2 = diff(1.64, 1.74, 1.84, 1.94);
 let angleShift2 = -283.4;
 let shiftTime2 = 64;
 

@@ -1,0 +1,31 @@
+let maxTime = 300;
+let symmetry = 3;
+let arcSymmetry = 2;
+let arcIncrement = 10.0;
+let tick = diff(12, 9, 7, 5);
+let initSpeed = 1.0;
+let speedRand = 0.5;
+let angleRand = 2.0;
+let angle = 180.0;
+let angleIncrement = -tick * 2.0 * phi;
+
+if(entityX() > gameWidth / 2.0){
+    angle = flipY(angle);
+    angleIncrement = -angleIncrement;
+}
+
+func spawnBullet(velocity){
+    velocity = setR(velocity, getR(velocity) + random(-speedRand, speedRand));
+    velocity = setTheta(velocity, getTheta(velocity) + random(-angleRand, angleRand));
+    spawnFlamethrowerBullet(velocity);
+}
+
+func spawnArc(velocity){
+    arc(velocity, arcSymmetry, arcIncrement, spawnBullet);
+}
+
+for(let t = 0; t < maxTime; t = t + tick){
+    ring(makePolar(initSpeed, angle), symmetry, spawnArc);
+    angle = angle + angleIncrement;
+    timer(tick);
+}

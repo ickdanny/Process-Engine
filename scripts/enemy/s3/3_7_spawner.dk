@@ -1,0 +1,47 @@
+let redDist = 23.4;
+let redSpeed = 1.8;
+
+let timeBeforeBlue = 151;
+
+let timeBetweenBlue = 50;
+let numBlue = 4;
+let yDistLow = 13.5;
+let yDistHigh = 34.0;
+let initSpeedLow = 0.9;
+let initSpeedHigh = 1.3;
+
+let betweenTime = 220;
+
+func spawnRed(position, velocity){
+    spawn("automatonRed", position, velocity, "3_7_enemy1");
+}
+
+func spawnBlue(position, velocity){
+    spawn("automatonBlue", position, velocity, "3_7_enemy2");
+}
+
+spawnRed(getTopSpawnLeft(redDist), makePolar(redSpeed, -89.999));
+
+timer(timeBeforeBlue);
+
+let yDist;
+let initSpeed;
+for(let i = 0; i < numBlue; i = i + 1){
+    yDist = random(yDistLow, yDistHigh);
+    initSpeed = random(initSpeedLow, initSpeedHigh);
+    spawnBlue(getRightSpawn(yDist), makePolar(initSpeed, 180.0));
+    timer(timeBetweenBlue);
+}
+
+timer(betweenTime);
+
+spawnRed(getTopSpawnRight(redDist), makePolar(redSpeed, -90.001));
+
+timer(timeBeforeBlue);
+
+for(let i = 0; i < numBlue; i = i + 1){
+    yDist = random(yDistLow, yDistHigh);
+    initSpeed = random(initSpeedLow, initSpeedHigh);
+    spawnBlue(getLeftSpawn(yDist), makePolar(initSpeed, 0.0));
+    timer(timeBetweenBlue);
+}
