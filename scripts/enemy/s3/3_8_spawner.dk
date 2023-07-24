@@ -1,0 +1,33 @@
+let maxTime = 370;
+let tick = 9;
+let yLow = 15.0;
+let yHigh = 80.0;
+let speedLow = 0.3;
+let speedHigh = 0.4;
+let baseAngleRight = 180.0;
+let baseAngleLeft = flipY(baseAngleRight);
+let angleRand = 3.0;
+
+func spawnEnemy(position, velocity){
+    spawn("automatonBlue", position, velocity, "3_8_enemy");
+}
+
+let y;
+let speed;
+let angle;
+let side = true;
+for(let t = 0; t < maxTime; t = t + tick){
+    y = random(yLow, yHigh);
+    speed = random(speedLow, speedHigh);
+    if(side){
+        angle = baseAngleRight + random(-angleRand, angleRand);
+        spawnEnemy(getRightSpawn(y), makePolar(speed, angle));
+        side = false;
+    }
+    else{
+        angle = baseAngleLeft + random(-angleRand, angleRand);
+        spawnEnemy(getLeftSpawn(y), makePolar(speed, angle));
+        side = true;
+    }
+    timer(tick);
+}

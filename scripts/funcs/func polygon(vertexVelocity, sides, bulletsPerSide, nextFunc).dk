@@ -1,0 +1,29 @@
+# func polygon(vertexVelocity, sides, bulletsPerSide, nextFunc)
+
+if(sides < 3){
+    error("polygon requires at least 3 sides!");
+}
+if(bulletsPerSide < 1){
+    error("polygon requires at least 1 bullet per side!");
+}
+
+let vertexAngle = getTheta(vertexVelocity);
+let vertexSpeed = getR(vertexVelocity);
+let subtendedAngle = 360.0 / sides;
+let angleDecrement = subtendedAngle / bulletsPerSide;
+let halfAngle = subtendedAngle / 2.0;
+let midSpeed = vertexSpeed * cos(toRadians(halfAngle));
+
+#spawn the vertex first
+ring(vertexVelocity, sides, nextFunc);
+
+#spawn in the rest of the bullets; r = sec(theta)
+let angle = vertexAngle;
+let speed;
+let theta = halfAngle - angleDecrement;  #theta at the first non-vertex angle
+for(let i = 1; i < bulletsPerSide; i = i + 1){
+    angle = angle - angleDecrement;
+    speed = sec(toRadians(theta)) * midSpeed;
+    ring(makePolar(speed, angle), sides, nextFunc);
+    theta = theta - angleDecrement;
+}

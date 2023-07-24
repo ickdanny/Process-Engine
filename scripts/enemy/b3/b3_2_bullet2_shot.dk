@@ -1,0 +1,13 @@
+let tick = 8 - getDifficulty();
+
+func spawnBullet(velocity){
+    spawn("sharpDPurple", entityPosition(), velocity, "b3_2_bullet3");
+}
+
+let baseAngle;
+while(true){
+    timer(tick);
+    baseAngle = entityAngle();
+    spawnBullet(makePolar(0.0, baseAngle + 90.0));
+    spawnBullet(makePolar(0.0, baseAngle - 90.0));
+}

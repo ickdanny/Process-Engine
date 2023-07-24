@@ -23,15 +23,15 @@ namespace process::game::config {
 		gameHeight - 25.0f
 	} + gameOffset;
 	
-	constexpr wasp::math::AABB playerHitbox{ 2.0f };
+	constexpr wasp::math::AABB playerHitbox{ 1.5f };
 	
-	constexpr float playerSpeed{ 3.0f };
+	constexpr float playerSpeed{ 2.8f };
 	constexpr float focusSpeedMulti{ 0.4f };
 	constexpr float focusedSpeed{ playerSpeed * focusSpeedMulti };
 	constexpr float playerInbound{ 5.0f };
 	
 	constexpr int deathBombPeriod{ 15 };
-	constexpr int bombInvulnerabilityPeriod{ 4 * 60 };
+	constexpr int bombInvulnerabilityPeriod{ 4 * 60 + 30};
 	constexpr int deathPeriod{ 30 };
 	constexpr int respawnPeriod{ 20 };
 	constexpr int respawnInvulnerabilityPeriod{ 3 * 60 };

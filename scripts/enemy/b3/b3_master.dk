@@ -1,0 +1,63 @@
+gotoDecelerating(bossMidpoint, 1.9);
+clearBullets();
+isBossDead(); #use the side effect to clear the boss deaths channel just in case
+showDialogue("3_1");
+
+stallUntil(isDialogueOver);
+setCollidable();
+
+#addSpawn("b3_1_attack"); # rotating squares top
+#stallUntil(isBossDead);
+#clearSpawns();
+#stall();
+#setVelocity(zeroPolar);
+#clearBullets();
+#
+#timer(50);
+addSpawn("b3_2_attack"); # flower
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+addSpawn("largePower");
+
+timer(50);
+addSpawn("b2_3_attack"); # plane 2
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+
+gotoDecelerating(bossMidpoint, 1.0);
+timer(50);
+addSpawn("b2_4_attack"); # lightning
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+addSpawn("largePower");
+
+gotoDecelerating(bossMidpoint, 1.0);
+timer(50);
+addSpawn("b2_5_attack"); # crystals
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+
+gotoDecelerating(bossMidpoint, 1.0);
+timer(50);
+addSpawn("b2_6_attack"); # crazy rings
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+
+win();
+spawn("bossExplode", entityPosition(), zeroPolar);
+removeEntity();

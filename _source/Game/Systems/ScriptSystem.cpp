@@ -224,6 +224,9 @@ namespace process::game::systems {
 		addNativeFunction("sin", sin);
 		addNativeFunction("cos", cos);
 		addNativeFunction("tan", tan);
+		addNativeFunction("sec", sec);
+		addNativeFunction("csc", csc);
+		addNativeFunction("cot", cot);
 		addNativeFunction("arcsin", arcsin);
 		addNativeFunction("arccos", arccos);
 		addNativeFunction("arctan", arctan);
@@ -1343,6 +1346,30 @@ namespace process::game::systems {
 	ScriptSystem::DataType ScriptSystem::tan(const std::vector<DataType>& parameters){
 		throwIfNativeFunctionWrongArity(1, parameters, "tan");
 		return std::tan(getAsFloat(parameters[0]));
+	}
+	
+	/**
+ 	* float radians
+ 	*/
+	ScriptSystem::DataType ScriptSystem::sec(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(1, parameters, "sec");
+		return 1.0f / std::cos(getAsFloat(parameters[0]));
+	}
+	
+	/**
+ 	* float radians
+ 	*/
+	ScriptSystem::DataType ScriptSystem::csc(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(1, parameters, "csc");
+		return 1.0f / std::sin(getAsFloat(parameters[0]));
+	}
+	
+	/**
+ 	* float radians
+ 	*/
+	ScriptSystem::DataType ScriptSystem::cot(const std::vector<DataType>& parameters){
+		throwIfNativeFunctionWrongArity(1, parameters, "cot");
+		return 1.0f / std::tan(getAsFloat(parameters[0]));
 	}
 	
 	/**

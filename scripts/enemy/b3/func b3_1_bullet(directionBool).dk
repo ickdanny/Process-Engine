@@ -1,0 +1,20 @@
+# func b3_1_bullet(directionBool)
+
+let slowTime = 45;
+let waitTime = 6;
+let speedTime = 154;
+let angleShift = 300.0;
+let finalSpeed = entitySpeed();
+let finalAngleShift = diff(0.0, 30.0, 60.0, 90.0);
+let finalAngleShiftTime = 20 * getDifficulty();
+if(directionBool){
+    angleShift = -angleShift;
+    finalAngleShift = -finalAngleShift;
+}
+
+setOutbound(-30.0);
+
+shiftSpeedPeriod(0.0, slowTime);
+timer(waitTime);
+shiftVelocityLongTurnPeriod(finalSpeed, entityAngle() + angleShift, speedTime);
+shiftAnglePeriod(entityAngle() + finalAngleShift, finalAngleShiftTime);

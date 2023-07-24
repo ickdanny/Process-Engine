@@ -1,0 +1,36 @@
+let tick = 35;
+let sides = 4;
+let vertexSpeed = 2.0;
+let baseAngle = -90.0;
+let angleIncrement = 18.75;
+let numShots = 8;
+let initBullets = diff(6, 8, 10, 12);
+let bulletIncrement = 1;
+
+if(!directionBool){
+    angleIncrement = -angleIncrement;
+}
+
+let position = entityPosition();
+func spawnBullet1(velocity){
+    spawn("sharpLBlue", position, velocity, "b3_1_bullet1");
+}
+func spawnBullet2(velocity){
+    spawn("sharpYellow", position, velocity, "b3_1_bullet2");
+}
+
+let angle = baseAngle;
+let bullets = initBullets;
+let spawnFuncBool = directionBool;
+for(let i = 0; i < numShots; i = i + 1){
+    if(spawnFuncBool){
+        polygon(makePolar(vertexSpeed, angle), sides, bullets, spawnBullet1);
+    }
+    else{
+        polygon(makePolar(vertexSpeed, angle), sides, bullets, spawnBullet2);
+    }
+    angle = angle + angleIncrement;
+    bullets = bullets + bulletIncrement;
+    spawnFuncBool = !spawnFuncBool;
+    timer(tick);
+}

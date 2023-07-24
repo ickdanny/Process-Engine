@@ -1,0 +1,11 @@
+let flyTime = 35;
+let turnTime = 60;
+let finalWaitTime = 30;
+let angleShift = 225.0;
+
+addSpawn("b3_2_bullet2_shot");
+
+timer(flyTime);
+shiftAngleLongPeriod(entityAngle() + angleShift, turnTime);
+timer(finalWaitTime);
+die();

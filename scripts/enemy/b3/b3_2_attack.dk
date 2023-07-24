@@ -1,0 +1,26 @@
+let health = 3100;
+let bulletSpeedLow = 1.7;
+let bulletSpeedHigh = 2.05;
+let angleRand = 2.0;
+let waitTime = 53;
+let waitTimeAfter = 24;
+let rLow = 25.0;
+let rHigh = 30.0;
+let maxSpeed = 0.4;
+
+setHealth(health);
+
+func spawnBullet1(velocity){
+    spawn("largeYellow", entityPosition(), velocity, "b3_2_bullet1");
+}
+
+timer(waitTime);
+while(true){
+    spawnBullet1(makePolar(
+        random(bulletSpeedLow, bulletSpeedHigh),
+        angleToPlayer() + random(-angleRand, angleRand)
+    ));
+    timer(waitTime);
+    boundGotoDecelerating(bossXLow, bossXHigh, bossYLow, bossYHigh, rLow, rHigh, maxSpeed);
+    timer(waitTimeAfter);
+}

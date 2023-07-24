@@ -1,0 +1,15 @@
+let slowTime = 49;
+let bulletInitSpeed = 1.1;
+let symmetry = diff(3, 4, 5, 6);
+let finalWaitTime = 125;
+
+let position;
+func spawnBullet(velocity){
+    spawn("mediumYellow", position, velocity, "b3_2_bullet2");
+}
+
+shiftSpeedPeriod(0.0, slowTime);
+position = entityPosition();
+ring(makePolar(bulletInitSpeed, random(0.0, 360.0)), symmetry, spawnBullet);
+timer(finalWaitTime);
+die();

@@ -165,6 +165,9 @@ namespace process::game::systems {
 		static DataType sin(const std::vector<DataType>& parameters);
 		static DataType cos(const std::vector<DataType>& parameters);
 		static DataType tan(const std::vector<DataType>& parameters);
+		static DataType sec(const std::vector<DataType>& parameters);
+		static DataType csc(const std::vector<DataType>& parameters);
+		static DataType cot(const std::vector<DataType>& parameters);
 		static DataType arcsin(const std::vector<DataType>& parameters);
 		static DataType arccos(const std::vector<DataType>& parameters);
 		static DataType arctan(const std::vector<DataType>& parameters);

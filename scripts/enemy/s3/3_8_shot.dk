@@ -1,0 +1,36 @@
+let timeBetweenLow = diff(120, 110, 100, 90);
+let timeBetweenHigh = timeBetweenLow + 20;
+let timeBetween = random(timeBetweenLow, timeBetweenHigh);
+let numSpawns = diff(4, 6, 8, 10);
+let tick = diff(4, 3, 3, 3);
+let angleIncrement = 10.5 * phi;
+let speedIncrement = 0.09;
+let speedLow = diff(1.0, 0.9, 0.8, 0.7);
+let boundaryLeft = getX(gameOffset);
+let boundaryRight = getX(gameOffset) + gameWidth;
+
+let position;
+func spawnBullet(velocity){
+    spawn("mediumYellow", position, velocity, "3_8_bullet");
+}
+
+timer(random(0, timeBetween));
+
+let i;
+let angle;
+let speed;
+while(true){
+    if(!isXBelow(boundaryLeft) & !isXAbove(boundaryRight)){
+        angle = random(0.0, 360.0);
+        speed = speedLow;
+        position = entityPosition();
+        for(i = 0; i < numSpawns; i = i + 1){
+            spawnBullet(makePolar(speed, angle));
+            angle = angle + angleIncrement;
+            speed = speed + speedIncrement;
+            timer(tick);
+        }
+    }
+
+    timer(timeBetween);
+}
