@@ -1,7 +1,7 @@
 let tick = 8 - getDifficulty();
 
 func spawnBullet(velocity){
-    spawn("sharpDPurple", entityPosition(), velocity, "b3_2_bullet3");
+    spawn("sharpOrange", entityPosition(), velocity, "b3_2_bullet3");
 }
 
 let baseAngle;

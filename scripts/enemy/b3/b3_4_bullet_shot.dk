@@ -1,0 +1,17 @@
+let tick = diff(20, 16, 13, 10);
+let speed = 0.7;
+let angle = random(0.0, 360.0);
+let angleIncrement = diff(13.0, 11.1, 9.9, 8.8) * phi;
+if(chance(0.5)){
+    angleIncrement = -angleIncrement;
+}
+
+func spawnBullet(velocity){
+    spawn("mediumLBlue", entityPosition(), velocity);
+}
+
+while(true){
+    spawnBullet(makePolar(speed, angle));
+    angle = angle + angleIncrement;
+    timer(tick);
+}

@@ -13,14 +13,14 @@ let xLow = bossXLow + specialXBound;
 let xHigh = bossXHigh - specialXBound;
 
 while(true){
-    addSpawn("b3_1_shot1");
+    addSpawn("b3_3_shot1");
     timer(shotTime);
 
     timer(timeBeforeMove);
     boundGotoDecelerating(xLow, xHigh, bossYLow, bossYHigh - 15.0, rLow, rHigh, maxSpeed);
     timer(timeAfterMove);
 
-    addSpawn("b3_1_shot2");
+    addSpawn("b3_3_shot2");
     timer(shotTime);
 
     timer(timeBeforeMove);

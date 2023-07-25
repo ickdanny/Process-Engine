@@ -6,14 +6,14 @@ showDialogue("3_1");
 stallUntil(isDialogueOver);
 setCollidable();
 
-#addSpawn("b3_1_attack"); # rotating squares top
-#stallUntil(isBossDead);
-#clearSpawns();
-#stall();
-#setVelocity(zeroPolar);
-#clearBullets();
-#
-#timer(50);
+addSpawn("b3_1_attack"); # rotating squares top
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+
+timer(50);
 addSpawn("b3_2_attack"); # flower
 stallUntil(isBossDead);
 clearSpawns();
@@ -22,17 +22,17 @@ setVelocity(zeroPolar);
 clearBullets();
 addSpawn("largePower");
 
+gotoDecelerating(bossMidpoint, 0.8);
 timer(50);
-addSpawn("b2_3_attack"); # plane 2
+addSpawn("b3_3_attack"); # rotating squares in player zone
 stallUntil(isBossDead);
 clearSpawns();
 stall();
 setVelocity(zeroPolar);
 clearBullets();
 
-gotoDecelerating(bossMidpoint, 1.0);
 timer(50);
-addSpawn("b2_4_attack"); # lightning
+addSpawn("b3_4_attack"); # yoyo with diamond walls
 stallUntil(isBossDead);
 clearSpawns();
 stall();

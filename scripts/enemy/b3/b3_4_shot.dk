@@ -1,0 +1,15 @@
+let tick = 30;
+let angleRand = 20.0;
+let speedLow = 1.0;
+let speedHigh = 2.0;
+
+func spawnBullet(velocity){
+    spawn("largeClear", entityPosition(), velocity, "b3_4_bullet");
+}
+
+while(true){
+    spawnBullet(
+        makePolar(random(speedLow, speedHigh), angleToPlayer() + random(-angleRand, angleRand))
+    );
+    timer(tick);
+}
