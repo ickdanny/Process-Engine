@@ -40,18 +40,26 @@ setVelocity(zeroPolar);
 clearBullets();
 addSpawn("largePower");
 
-gotoDecelerating(bossMidpoint, 1.0);
 timer(50);
-addSpawn("b2_5_attack"); # crystals
+addSpawn("b3_5_attack"); # diamond walls
 stallUntil(isBossDead);
 clearSpawns();
 stall();
 setVelocity(zeroPolar);
 clearBullets();
 
-gotoDecelerating(bossMidpoint, 1.0);
+gotoDecelerating(bossMidpoint, 0.8);
 timer(50);
-addSpawn("b2_6_attack"); # crazy rings
+addSpawn("b3_6_attack"); # binary tree
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+
+gotoDecelerating(bossMidpoint, 0.8);
+timer(50);
+addSpawn("b3_7_attack"); # diamond rain
 stallUntil(isBossDead);
 clearSpawns();
 stall();

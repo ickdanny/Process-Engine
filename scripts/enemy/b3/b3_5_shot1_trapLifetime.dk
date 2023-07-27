@@ -1,0 +1,20 @@
+let numBulletsPerSide = diff(3, 4, 5, 6);
+let bulletOffsetDist = diff(10.0, 12.0, 14.0, 16.0);
+
+setClearMarker();
+timer(trapLifetime);
+
+let position = entityPosition();
+let facingDirection = 0.0; #cheat by altering this
+func spawnBullet(offset){
+    spawn("sharpLGray", position + offset, makePolar(0.0, facingDirection), "b3_5_bullet");
+    facingDirection = facingDirection + 90.0;
+    if(facingDirection >= 360.0){
+        facingDirection = facingDirection - 360.0;
+        stall(); #for visual interest
+    }
+}
+
+polygon(makePolar(bulletOffsetDist, 0.0), 4, numBulletsPerSide, spawnBullet);
+
+removeEntity();

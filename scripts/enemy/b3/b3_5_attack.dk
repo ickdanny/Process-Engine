@@ -1,0 +1,18 @@
+let health = 4100;
+let timeBeforeMove = 242;
+let timeAfterMove = 32;
+let rLow = 25.0;
+let rHigh = 35.0;
+let maxSpeed = 0.8;
+
+setHealth(health);
+
+# spawn diamonds around player
+addSpawn("b3_5_shot1");
+
+while(true){
+    addSpawn("b3_5_shot2");
+    timer(timeBeforeMove);
+    boundGotoDecelerating(bossXLow, bossXHigh, bossYLow, bossYHigh, rLow, rHigh, maxSpeed);
+    timer(timeAfterMove);
+}

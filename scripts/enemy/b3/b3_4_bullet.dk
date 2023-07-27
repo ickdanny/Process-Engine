@@ -16,23 +16,3 @@ if(getDifficulty() > 0){
 }
 
 shiftSpeedPeriod(-speed, shiftTime);
-
-#let numBulletsPerSide = diff(1, 3, 5, 7);
-#let bulletOffsetDist = diff(3.0, 6.0, 9.0, 12.0);
-#
-#shiftSpeedPeriod(0.0, slowTime);
-#
-##spawn diamond walls
-#let position = entityPosition();
-#let facingDirection = 0.0; #cheat by altering this
-#func spawnBullet(offset){
-#    spawn("sharpLGray", position + offset, makePolar(0.0, facingDirection), "b3_4_bullet2");
-#    facingDirection = facingDirection + 90.0;
-#    if(facingDirection >= 360.0){
-#        facingDirection = facingDirection - 360.0;
-#    }
-#}
-#
-#polygon(makePolar(bulletOffsetDist, 0.0), 4, numBulletsPerSide, spawnBullet);
-#
-#shiftSpeedPeriod(-originalSpeed, slowTime);

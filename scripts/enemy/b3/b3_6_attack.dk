@@ -1,0 +1,25 @@
+let health = 3800;
+
+let symmetry = diff(5, 5, 6, 6);
+let speed = 1.1;
+
+let timeBeforeMove = 242;
+let timeAfterMove = 32;
+let rLow = 29.0;
+let rHigh = 38.0;
+let maxSpeed = 0.8;
+
+setHealth(health);
+
+let position;
+func spawnBullet(velocity){
+    spawn("sharpLGreen", position, velocity, "b3_6_bullet1");
+}
+
+while(true){
+    position = entityPosition();
+    ring(makePolar(speed, random(0.0, 360.0)), symmetry, spawnBullet);
+    timer(timeBeforeMove);
+    boundGotoDecelerating(bossXLow, bossXHigh, bossYLow, bossYHigh, rLow, rHigh, maxSpeed);
+    timer(timeAfterMove);
+}

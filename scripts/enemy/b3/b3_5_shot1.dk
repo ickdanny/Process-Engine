@@ -1,0 +1,24 @@
+let tick = diff(30, 25, 20, 15);
+let minDistFromPlayer = 53.3;
+let minDistFromEdge = 5.0;
+
+let xMin = minDistFromEdge + getX(gameOffset);
+let xMax = gameWidth - minDistFromEdge + getX(gameOffset);
+let yMin = minDistFromEdge + getY(gameOffset);
+let yMax = gameHeight - minDistFromEdge + getY(gameOffset);
+func getSpawnPoint(){
+    let invalidSpawn = true;
+    let spawnPoint;
+    let distToPlayer;
+    while(invalidSpawn){
+        spawnPoint = makePoint(random(xMin, xMax), random(yMin, yMax));
+        distToPlayer = pointDist(spawnPoint, getPlayerPos());
+        invalidSpawn = distToPlayer <= minDistFromPlayer;
+    }
+    return spawnPoint;
+}
+
+while(true){
+    spawn("trap", getSpawnPoint(), zeroPolar, "b3_5_shot1_trapLifetime");
+    timer(tick);
+}

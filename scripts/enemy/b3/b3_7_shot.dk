@@ -1,0 +1,57 @@
+let tick = 61;
+let tickDecrement = 2;
+let minTick = 15;
+let bulletsLow = diff(5, 8, 11, 14);
+let bulletsHigh = bulletsLow + 3;
+let speedLow = 0.5;
+let speedHigh = 1.5;
+let centerSpeed = 1.0;
+let minDistFromBoss = 15.0;
+let minDistFromEdge = 13.0;
+let maxY = 50.0;
+
+func spawnBullet1(velocity){
+    spawn("sharpLBlue", entityPosition(), velocity);
+}
+
+let bullet2Pos;
+func spawnBullet2(velocity){
+    spawn("sharpYellow", bullet2Pos, velocity);
+}
+
+func spawnPolygon1(){
+    polygon(makePolar(centerSpeed, 0.0), 4, random(bulletsLow, bulletsHigh), spawnBullet1);
+}
+
+let minY = minDistFromEdge + getY(gameOffset);
+let minX = minDistFromEdge + getX(gameOffset);
+func spawnPolygonLeft(){
+    let maxX = entityX() - minDistFromBoss; # no problem to shadow maxX below
+    bullet2Pos = makePoint(random(minX, maxX), random(minY, maxY));
+    polygon(makePolar(centerSpeed, 0.0), 4, random(bulletsLow, bulletsHigh), spawnBullet2);
+}
+
+let maxX = gameWidth - minDistFromEdge + getX(gameOffset);
+func spawnPolygonRight(){
+    let minX = entityX() + minDistFromBoss; # no problem to shadow minX above
+    bullet2Pos = makePoint(random(minX, maxX), random(minY, maxY));
+    polygon(makePolar(centerSpeed, 0.0), 4, random(bulletsLow, bulletsHigh), spawnBullet2);
+}
+
+func timerAndDecrementTickIfPossible(){
+    timer(tick);
+    if(tick > minTick){
+        tick = tick - tickDecrement;
+    }
+}
+
+while(true){
+    spawnPolygon1();
+    timerAndDecrementTickIfPossible();
+    spawnPolygonLeft();
+    timerAndDecrementTickIfPossible();
+    spawnPolygon1();
+    timerAndDecrementTickIfPossible();
+    spawnPolygonRight();
+    timerAndDecrementTickIfPossible();
+}

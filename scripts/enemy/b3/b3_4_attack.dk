@@ -1,4 +1,4 @@
-let health = 4100;
+let health = 5100;
 let timeBeforeMove = 61;
 let timeAfterMove = 53;
 let rLow = 19.0;

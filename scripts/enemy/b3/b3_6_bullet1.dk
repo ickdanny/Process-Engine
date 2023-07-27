@@ -1,0 +1,41 @@
+let lifetime = diff(55, 50, 45, 40);
+let spawnChildrenSpeedCutoff = 0.15;
+let childSpeedMulti = 0.72;
+let childAngleOffset = 28.3;
+let backBulletSpeed = 0.1;
+let spawnBackSpeedCutoff = 0.35;
+let activeColor = "LGreen";
+let inactiveColor = "DGreen";
+
+timer(lifetime);
+
+let originalSpeed = entitySpeed();
+let originalAngle = entityAngle();
+let position = entityPosition();
+let childColor = activeColor;
+
+if(originalSpeed > spawnBackSpeedCutoff){
+    spawn(
+        "smallYellow",
+        position,
+        makePolar(backBulletSpeed, originalAngle - 180.0),
+        "b3_6_bullet2"
+    );
+}
+else{
+    childColor = inactiveColor;
+}
+
+if(originalSpeed > spawnChildrenSpeedCutoff){
+    func spawnChildBullet(velocity){
+        spawn("sharp" + childColor, position, velocity, "b3_6_bullet1");
+    }
+    let childSpeed = originalSpeed * childSpeedMulti;
+    let originalAngle = entityAngle();
+    spawnChildBullet(makePolar(childSpeed, originalAngle + childAngleOffset));
+    stall();
+    spawnChildBullet(makePolar(childSpeed, originalAngle - childAngleOffset));
+    die();
+}
+
+#if speed is below the cutoff point, do not spawn children and keep flying

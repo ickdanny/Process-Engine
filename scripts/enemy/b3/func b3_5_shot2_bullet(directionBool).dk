@@ -1,0 +1,16 @@
+# func b3_5_shot2_bullet(directionBool)
+
+let flyTime = 175;
+let turnTime = 90;
+let finalWaitTime = 160;
+let angleShift = 195.0;
+if(directionBool){
+    angleShift = -angleShift;
+}
+
+removeOutbound();
+
+timer(flyTime);
+shiftAngleLongPeriod(entityAngle() + angleShift, turnTime);
+timer(finalWaitTime);
+die();

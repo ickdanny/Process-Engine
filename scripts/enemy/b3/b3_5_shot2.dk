@@ -1,0 +1,15 @@
+let timeBetween = 211;
+let symmetry = diff(8, 12, 16, 20);
+let bulletInitSpeed = 0.8;
+
+let position = entityPosition();
+func spawnBullet1(velocity){
+    spawn("largeClear", position, velocity, "b3_5_shot2_bullet2"); # rhyme = white goes right
+}
+func spawnBullet2(velocity){
+    spawn("largeBlack", position, velocity, "b3_5_shot2_bullet1"); # and black goes left
+}
+
+ring(makePolar(bulletInitSpeed, random(0.0, 360.0)), symmetry, spawnBullet1);
+timer(timeBetween);
+ring(makePolar(bulletInitSpeed, random(0.0, 360.0)), symmetry, spawnBullet2);
