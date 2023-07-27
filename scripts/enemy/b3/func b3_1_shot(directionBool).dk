@@ -4,7 +4,7 @@ let vertexSpeed = 2.0;
 let baseAngle = -90.0;
 let angleIncrement = 18.75;
 let numShots = 8;
-let initBullets = diff(6, 8, 10, 12);
+let initBullets = diff(5, 7, 9, 11);
 let bulletIncrement = 1;
 
 if(!directionBool){

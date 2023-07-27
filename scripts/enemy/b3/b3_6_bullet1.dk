@@ -1,4 +1,4 @@
-let lifetime = diff(55, 50, 45, 40);
+let lifetime = diff(55, 49, 49, 43); #from normal -> hard increases sym by 1
 let spawnChildrenSpeedCutoff = 0.15;
 let childSpeedMulti = 0.72;
 let childAngleOffset = 28.3;
