@@ -1,0 +1,9 @@
+let waitTime = 60;
+let slowTime = 60;
+let finalSpeed = 0.47;
+
+setOutbound(-100.0);
+timer(waitTime);
+shiftSpeedPeriod(0.0, slowTime);
+setSprite("smallLRed");
+setVelocity(makePolar(finalSpeed, angleToPlayer()));

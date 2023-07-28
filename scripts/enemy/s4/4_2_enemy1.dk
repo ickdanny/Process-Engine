@@ -1,0 +1,17 @@
+let health = 500;
+let slowTime = 65;
+let beforeFireTime = 1;
+let waitTime = 90;
+let finalSpeed = -0.8;
+let speedTime = 70;
+
+setHealth(health);
+addDeathSpawn("smallPower");
+
+shiftSpeedPeriod(0.0, slowTime);
+timer(beforeFireTime);
+addSpawn("4_2_shot1");
+stall();
+stallUntil(isNotSpawning);
+timer(waitTime);
+shiftSpeedPeriod(finalSpeed, speedTime);

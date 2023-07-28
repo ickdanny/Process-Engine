@@ -4,7 +4,7 @@ namespace process::game::systems {
 	
 	namespace{
 		constexpr int textHorizontalDistance{ 7 };
-		constexpr int textVerticalDistance{ 10 };
+		constexpr int textVerticalDistance{ 11 };
 	}
 
 	//beginDraw and endDraw are called in the RenderScheduler

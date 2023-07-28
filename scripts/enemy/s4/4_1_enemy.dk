@@ -1,0 +1,5 @@
+let health = 30;
+
+setHealth(health);
+addDeathSpawn("smallPower3");
+addSpawn("4_1_shot");

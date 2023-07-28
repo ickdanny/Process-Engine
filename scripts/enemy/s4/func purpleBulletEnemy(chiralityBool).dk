@@ -1,0 +1,24 @@
+# func purpleBulletEnemy(chiralityBool)
+
+let health = 800;
+let slowTime = 65;
+let beforeFireTime = 30;
+let waitTime = 90;
+let finalSpeed = -0.8;
+let speedTime = 70;
+
+setHealth(health);
+addDeathSpawn("largePower");
+
+shiftSpeedPeriod(0.0, slowTime);
+timer(beforeFireTime);
+if(chiralityBool){
+    addSpawn("4_2_shot2");
+}
+else{
+    addSpawn("4_3_shot");
+}
+stall();
+stallUntil(isNotSpawning);
+timer(waitTime);
+shiftSpeedPeriod(finalSpeed, speedTime);

@@ -1,0 +1,38 @@
+let timeBetweenNewWave = 200;
+let maxTime = 4 * timeBetweenNewWave;
+let tick = timeBetweenNewWave / 10;
+let speed = 0.5;
+let yLow = 25.0;
+let yOffset = 18.0;
+
+func spawnEnemy(position, velocity){
+    spawn("shadowMaid", position, velocity, "4_1_enemy");
+}
+
+let rightVel = makePolar(speed, 180.0);
+let leftVel = makePolar(speed, 0.0);
+let cutoff1 = timeBetweenNewWave;
+let cutoff2 = 2 * timeBetweenNewWave;
+let cutoff3 = 3 * timeBetweenNewWave + tick; #timing correction
+let y;
+func spawnEnemies(t){
+    y = yLow;
+    spawnEnemy(getRightSpawn(y), rightVel);
+    if(t > cutoff1){
+        y = y + yOffset;
+        spawnEnemy(getLeftSpawn(y), leftVel);
+        if(t > cutoff2){
+            y = y + yOffset;
+            spawnEnemy(getRightSpawn(y), rightVel);
+            if(t > cutoff3){
+                y = y + yOffset;
+                spawnEnemy(getLeftSpawn(y), leftVel);
+            }
+        }
+    }
+}
+
+for(let t = 0; t < maxTime; t = t + tick){
+    spawnEnemies(t);
+    timer(tick);
+}

@@ -5,7 +5,7 @@ let maxTimeBeforeWrapping = 1000;
 let spawnChance = 0.7;
 let speed = 1.8;
 let angle = -90.0;
-let accel0 = 0.0;
+let accel0 = 1.0;
 let accel1 = 0.0;
 let accel2 = 0.0;
 

@@ -1,0 +1,23 @@
+let maxTime = 400;
+let tick = 40;
+let symmetry = 5 * diff(8, 10, 12, 14);
+let speed = 0.65;
+let prototypeID = "smallBlue";
+
+let position = entityPosition();
+let typeFlipBool = true;
+func spawnBullet(velocity){
+    if(typeFlipBool){
+        spawn(prototypeID, position, velocity, "4_2_bullet1");
+        typeFlipBool = false;
+    }
+    else{
+        spawn(prototypeID, position, velocity);
+        typeFlipBool = true;
+    }
+}
+
+for(let t = 0; t < maxTime; t = t + tick){
+    ring(makePolar(speed, random(0.0, 360.0)), symmetry, spawnBullet);
+    timer(tick);
+}

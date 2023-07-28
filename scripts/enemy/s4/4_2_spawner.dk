@@ -1,0 +1,20 @@
+let timeBetween = 205;
+let distFromEdge = 44.0;
+let speed1 = 1.7;
+let speed2 = 1.45;
+let velocity1 = makePolar(speed1, -90.0);
+let velocity2 = makePolar(speed2, -90.0);
+
+func spawnEnemy1(position, velocity){
+    spawn("shadowMaid", position, velocity, "4_2_enemy1");
+}
+
+func spawnEnemy2(position, velocity){
+    spawn("shadowMaid", position, velocity, "4_2_enemy2");
+}
+
+spawnEnemy1(getTopSpawnLeft(distFromEdge), velocity1);
+timer(timeBetween);
+spawnEnemy1(getTopSpawnRight(distFromEdge), velocity1);
+timer(timeBetween);
+spawnEnemy2(getTopSpawnLeft(gameWidth / 2.0), velocity2);

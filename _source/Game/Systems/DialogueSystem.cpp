@@ -4,10 +4,10 @@ namespace process::game::systems {
 
     namespace {
         constexpr float portraitY{ 170.0f };
-        constexpr float leftX{ 45.0f };
-        constexpr float rightX{ 270.0f };
+        constexpr float leftX{ 35.0f };
+        constexpr float rightX{ 280.0f };
 
-        constexpr wasp::math::Point2 textPos{ 85.0f, 170.0f };
+        constexpr wasp::math::Point2 textPos{ 70.0f, 172.0f };
 
         constexpr int textRightBound{ 250 };
     }

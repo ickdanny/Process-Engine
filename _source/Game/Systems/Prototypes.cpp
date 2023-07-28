@@ -807,6 +807,34 @@ namespace process::game::systems{
 				std::string{ ScriptList::spawnString } + "enemyExplode"
 			} } }
 		).heapClone());
+		add("shadowMaid", EntityBuilder::makeVisibleCollidablePrototype(
+			AABB{ enemy::automatonHitbox },
+			PlayerCollisions::Source{},
+			EnemyCollisions::Target{ components::CollisionCommands::damage },
+			SpriteInstruction{
+				spriteStorage.get(L"shadowMaid1")->sprite,
+				config::enemyDepth
+			},
+			game::AnimationList{
+				components::Animation {
+					{
+						L"shadowMaid1",
+						L"shadowMaid2",
+						L"shadowMaid3",
+						L"shadowMaid4"
+					},
+					true
+				},
+				enemy::bossAnimationTick
+			},
+			Health{ enemy::spawnHealth },
+			Outbound{ enemy::outbound },
+			DeathCommand{ DeathCommand::Commands::deathSpawn },
+			DeathSpawn{ ScriptList{ {
+				scriptStorage.get(L"enemyExplode"),
+				std::string{ ScriptList::spawnString } + "enemyExplode"
+			} } }
+		).heapClone());
 		
 		//bosses
 		add("boss1", EntityBuilder::makeVisiblePrototype(
@@ -908,6 +936,34 @@ namespace process::game::systems{
 						L"b4Idle2",
 						L"b4Idle3",
 						L"b4Idle4"
+					},
+					true
+				},
+				enemy::bossAnimationTick
+			},
+			Health{ enemy::spawnHealth },
+			DeathCommand{ DeathCommand::Commands::bossDeath },
+			DeathSpawn{ ScriptList{ {
+				scriptStorage.get(L"clearBullets"),
+				"clearBullets"
+			} } }
+		).heapClone());
+		
+		add("boss5", EntityBuilder::makeVisiblePrototype(
+			Hitbox{ enemy::bossHitbox },
+			PlayerCollisions::Source{},
+			EnemyCollisions::Target{ components::CollisionCommands::damage },
+			SpriteInstruction{
+				spriteStorage.get(L"b5Idle1")->sprite,
+				config::enemyDepth + 100
+			},
+			game::AnimationList{
+				components::Animation {
+					{
+						L"b5Idle1",
+						L"b5Idle2",
+						L"b5Idle3",
+						L"b5Idle4"
 					},
 					true
 				},

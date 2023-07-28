@@ -1,0 +1,23 @@
+let maxTime = 200;
+let tick = 40;
+let symmetry = diff(6, 8, 10, 12);
+let speed = 0.513;
+let angleIncrement = 5.0 * phi;
+let bulletScriptID = "4_2_bullet2";
+
+if(!chiralityBool){
+    angleIncrement = -angleIncrement;
+    bulletScriptID = "4_3_bullet";
+}
+
+let position = entityPosition();
+func spawnBullet(velocity){
+    spawn("smallDPurple", position, velocity, bulletScriptID);
+}
+
+let angle = random(0.0, 360.0);
+for(let t = 0; t < maxTime; t = t + tick){
+    ring(makePolar(speed, angle), symmetry, spawnBullet);
+    angle = angle + angleIncrement;
+    timer(tick);
+}

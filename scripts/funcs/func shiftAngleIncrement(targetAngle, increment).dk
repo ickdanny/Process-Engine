@@ -1,0 +1,19 @@
+#func shiftAngleIncrement(targetAngle, increment)
+
+let currentAngle = entityAngle();
+
+while(currentAngle != targetAngle){
+    currentAngle = currentAngle + increment;
+    if(increment >= 0 & currentAngle >= targetAngle){
+        setAngle(targetAngle);
+        return false;
+    }
+    else if(increment <= 0 & currentAngle <= targetAngle){
+        setAngle(targetAngle);
+        return false;
+    }
+    else{
+        setAngle(currentAngle);
+        stall();
+    }
+}

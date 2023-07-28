@@ -1,0 +1,30 @@
+let numSpawns = diff(8, 10, 12, 14);
+let angleIncrement = -1.1;
+let initWaitTime = 28;
+let turnTime = 15;
+
+if(!chiralityBool){
+    angleIncrement = -angleIncrement;
+}
+
+setOutbound(-50.0);
+
+timer(initWaitTime);
+
+func incrementAngle(duration){
+    let currentAngle = entityAngle();
+    for(let t = 0; t < duration; t = t + 1){
+        currentAngle = currentAngle + angleIncrement;
+        setAngle(currentAngle);
+        stall();
+    }
+}
+
+func spawnBullet(){
+    spawn("smallDPurple", entityPosition(), entityVelocity());
+}
+
+for(let i = 0; i < numSpawns; i = i + 1){
+    spawnBullet();
+    incrementAngle(turnTime);
+}

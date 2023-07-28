@@ -1,4 +1,4 @@
-let maxTime = 760;
+let maxTime = 730;
 let tick = 25;
 let yLow = 10.0;
 let yHigh = 60.0;

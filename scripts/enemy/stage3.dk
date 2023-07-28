@@ -1,21 +1,21 @@
-#timer(230);
-#addSpawn("3_1_spawner"); # wave 1  = aimed arc automatons from top in groups
-#timer(845);
-#addSpawn("3_2_spawner"); # wave 2  = crossing flamethrowers
-#timer(140);
-#addSpawn("3_3_spawner"); # wave 3  = expanding helices
-#timer(380);
-#addSpawn("3_4_spawner"); # wave 4  = flamethrowers up
-#timer(140);
-#addSpawn("3_5_spawner"); # wave 5  = item dropper yellow polar attack
-#timer(640);
-#addSpawn("3_6_spawner"); # wave 6  = wigs
-#timer(1170);
-#addSpawn("3_7_spawner"); # wave 7  = flame spirals + yellow shot across top
-#timer(1160);
-#addSpawn("3_8_spawner"); # wave 8  = yellow medium rain
-#
-#timer(1440);
+timer(230);
+addSpawn("3_1_spawner"); # wave 1  = aimed arc automatons from top in groups
+timer(845);
+addSpawn("3_2_spawner"); # wave 2  = crossing flamethrowers
+timer(140);
+addSpawn("3_3_spawner"); # wave 3  = expanding helices
+timer(380);
+addSpawn("3_4_spawner"); # wave 4  = flamethrowers up
+timer(140);
+addSpawn("3_5_spawner"); # wave 5  = item dropper yellow polar attack
+timer(640);
+addSpawn("3_6_spawner"); # wave 6  = wigs
+timer(1170);
+addSpawn("3_7_spawner"); # wave 7  = flame spirals + yellow shot across top
+timer(1160);
+addSpawn("3_8_spawner"); # wave 8  = yellow medium rain
+
+timer(1440);
 spawn("boss3", getTopSpawnLeft(gameWidth / 2.0), zeroPolar, "b3_master");
 
 stallUntil(isWin);

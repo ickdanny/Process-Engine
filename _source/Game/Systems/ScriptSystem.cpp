@@ -91,6 +91,7 @@ namespace process::game::systems {
 		addNativeFunction("removeVisible",
 			std::bind(&ScriptSystem::removeComponent<VisibleMarker>, this, "removeVisible", _1)
 		);
+		addNativeFunction("setSprite", std::bind(&ScriptSystem::setSprite, this, _1));
 		addNativeFunction("setSpriteInstruction",
 			std::bind(&ScriptSystem::setSpriteInstruction, this, _1)
 		);
@@ -745,6 +746,29 @@ namespace process::game::systems {
 		throwIfNativeFunctionWrongArity(0, parameters, "setVisible");
 		EntityHandle entityHandle{ makeCurrentEntityHandle() };
 		componentOrderQueue.queueSetComponent<VisibleMarker>(entityHandle, {});
+		return false;
+	}
+	
+	/**
+	 * string spriteID
+	 */
+	ScriptSystem::DataType ScriptSystem::setSprite(
+		const std::vector<DataType>& parameters
+	) {
+		throwIfNativeFunctionWrongArity(1, parameters, "setSprite");
+		const std::string& spriteID{ std::get<std::string>(parameters[0]) };
+		const auto& sprite{ spriteStoragePointer->get(convertToWideString(spriteID))->sprite };
+		EntityHandle entityHandle{ makeCurrentEntityHandle() };
+		auto& dataStorage{ currentScenePointer->getDataStorage() };
+		if(dataStorage.containsComponent<SpriteInstruction>(entityHandle)){
+			auto& spriteInstruction{
+				dataStorage.getComponent<SpriteInstruction>(entityHandle)
+			};
+			spriteInstruction.setSprite(sprite);
+		}
+		else{
+			throw std::runtime_error{ "native func setSprite no sprite instruction!" };
+		}
 		return false;
 	}
 	

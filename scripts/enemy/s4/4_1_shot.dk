@@ -1,0 +1,22 @@
+let tick = diff(70, 50, 35, 25);
+let symmetry = 3;
+let speedLow = 0.3;
+let speedHigh = 0.5;
+
+timer(random(0, tick));
+
+func spawnBullet(velocity){
+    spawn("smallBlue", entityPosition(), velocity);
+}
+
+let xOffset = getX(gameOffset);
+func isInBounds(x){
+    return x > xOffset & x < gameWidth + xOffset;
+}
+
+while(true){
+    if(isInBounds(entityX())){
+        ring(makePolar(random(speedLow, speedHigh), random(0.0, 360.0)), symmetry, spawnBullet);
+    }
+    timer(tick);
+}
