@@ -1,0 +1,71 @@
+gotoDecelerating(bossMidpoint, 1.4);
+clearBullets();
+isBossDead(); #use the side effect to clear the boss deaths channel just in case
+showDialogue("4_1");
+
+stallUntil(isDialogueOver);
+setCollidable();
+
+addSpawn("b3_1_attack"); # rotating squares top
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+
+timer(50);
+addSpawn("b3_2_attack"); # flower
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+addSpawn("largePower");
+
+gotoDecelerating(bossMidpoint, 0.8);
+timer(50);
+addSpawn("b3_3_attack"); # rotating squares in player zone
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+
+timer(50);
+addSpawn("b3_4_attack"); # yoyo with diamond walls
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+addSpawn("largePower");
+
+timer(50);
+addSpawn("b3_5_attack"); # diamond walls
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+
+gotoDecelerating(bossMidpoint, 0.8);
+timer(50);
+addSpawn("b3_6_attack"); # binary tree
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+
+gotoDecelerating(bossMidpoint, 0.8);
+timer(50);
+addSpawn("b3_7_attack"); # diamond rain
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+
+win();
+spawn("bossExplode", entityPosition(), zeroPolar);
+removeEntity();

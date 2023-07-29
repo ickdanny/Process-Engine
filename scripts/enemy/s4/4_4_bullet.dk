@@ -1,0 +1,4 @@
+let finalSpeed = 0.6;
+let speedTime = 75;
+
+shiftSpeedPeriod(finalSpeed, speedTime);

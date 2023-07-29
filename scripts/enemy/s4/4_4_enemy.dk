@@ -1,0 +1,21 @@
+let health = 2100;
+let gotoMaxSpeed = 1.3;
+let waitTime = 10;
+let finalWaitTime = 59;
+let finalSpeed = 0.5;
+let finalAngle = 90.0;
+let finalSpeedTime = 45;
+
+let midPoint = makePoint((gameWidth / 2.0) + getX(gameOffset), 85.0);
+
+gotoDecelerating(midPoint, gotoMaxSpeed);
+timer(waitTime);
+
+addDeathSpawn("life");
+setHealth(health);
+addSpawn("4_4_shot");
+
+stall();
+stallUntil(isNotSpawning);
+timer(finalWaitTime);
+shiftVelocityPeriod(finalSpeed, finalAngle, finalSpeedTime);

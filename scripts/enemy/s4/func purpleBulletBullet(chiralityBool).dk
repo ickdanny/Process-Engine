@@ -1,4 +1,4 @@
-let numSpawns = diff(8, 10, 12, 14);
+let numSpawns = diff(6, 8, 10, 12);
 let angleIncrement = -1.1;
 let initWaitTime = 28;
 let turnTime = 15;

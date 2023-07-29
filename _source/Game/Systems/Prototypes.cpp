@@ -835,6 +835,34 @@ namespace process::game::systems{
 				std::string{ ScriptList::spawnString } + "enemyExplode"
 			} } }
 		).heapClone());
+		add("shadowBoss", EntityBuilder::makeVisibleCollidablePrototype(
+			AABB{ enemy::bossHitbox },
+			PlayerCollisions::Source{},
+			EnemyCollisions::Target{ components::CollisionCommands::damage },
+			SpriteInstruction{
+				spriteStorage.get(L"shadowBoss1")->sprite,
+				config::enemyDepth
+			},
+			game::AnimationList{
+				components::Animation {
+					{
+						L"shadowBoss1",
+						L"shadowBoss2",
+						L"shadowBoss3",
+						L"shadowBoss4"
+					},
+					true
+				},
+				enemy::bossAnimationTick
+			},
+			Health{ enemy::spawnHealth },
+			Outbound{ enemy::outbound },
+			DeathCommand{ DeathCommand::Commands::deathSpawn },
+			DeathSpawn{ ScriptList{ {
+				scriptStorage.get(L"bossExplode"),	//enemy is big so use boss explode
+				std::string{ ScriptList::spawnString } + "bossExplode"
+			} } }
+		).heapClone());
 		
 		//bosses
 		add("boss1", EntityBuilder::makeVisiblePrototype(

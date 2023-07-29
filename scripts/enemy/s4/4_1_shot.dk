@@ -10,12 +10,13 @@ func spawnBullet(velocity){
 }
 
 let xOffset = getX(gameOffset);
-func isInBounds(x){
-    return x > xOffset & x < gameWidth + xOffset;
+let yOffset = getY(gameOffset);
+func isInBounds(x, y){
+    return x > xOffset & x < gameWidth + xOffset & y < gameHeight + yOffset; # y for 4_5
 }
 
 while(true){
-    if(isInBounds(entityX())){
+    if(isInBounds(entityX(), entityY())){
         ring(makePolar(random(speedLow, speedHigh), random(0.0, 360.0)), symmetry, spawnBullet);
     }
     timer(tick);

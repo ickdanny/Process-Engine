@@ -1,0 +1,13 @@
+let symmetry = 6;
+
+timer(trapLifetime);
+
+let position = entityPosition();
+func spawnBullet(velocity){
+    spawn("smallLBlue", position, velocity, "4_4_bullet");
+}
+
+let angle = (entityX() + entityY()) * 2.0;
+ring(makePolar(0.0, angle), symmetry, spawnBullet);
+
+die();

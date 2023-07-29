@@ -1,0 +1,21 @@
+let maxTime = 700;
+let tick = diff(24, 22, 20, 18);
+let symmetry = diff(3, 4, 5, 6);
+let initAngle = random(0.0, 360.0);
+let angleIncrement = -7.5 * phi;
+let initDist = 13.5;
+let distIncrement = 0.89;
+
+let basePos = entityPosition();
+func spawnTrap(offset){
+    spawn("trap", basePos + offset, zeroPolar, "4_4_trapLifetime");
+}
+
+let dist = initDist;
+let angle = initAngle;
+for(let t = 0; t < maxTime; t = t + tick){
+    ring(makePolar(dist, angle), symmetry, spawnTrap);
+    dist = dist + distIncrement;
+    angle = angle + angleIncrement;
+    timer(tick);
+}

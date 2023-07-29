@@ -1,0 +1,8 @@
+let initSpeed = 1.5;
+let initVelocity = makePolar(initSpeed, -90.0);
+
+func spawnEnemy(position, velocity){
+    spawn("shadowBoss", position, velocity, "4_4_enemy");
+}
+
+spawnEnemy(getTopSpawnLeft(gameWidth / 2.0), initVelocity);

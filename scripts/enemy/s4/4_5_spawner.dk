@@ -1,0 +1,21 @@
+let maxTime = 440;
+let tick = 20;
+let speed = 0.7;
+let distFromEdge = 13;
+
+func spawnEnemy(position, velocity){
+    spawn("shadowMaid", position, velocity, "4_1_enemy");
+}
+
+let velocity = makePolar(speed, -90.0);
+let leftPos = getTopSpawnLeft(distFromEdge);
+let rightPos = getTopSpawnRight(distFromEdge);
+func spawnEnemies(){
+    spawnEnemy(leftPos, velocity);
+    spawnEnemy(rightPos, velocity);
+}
+
+for(let t = 0; t < maxTime; t = t + tick){
+    spawnEnemies();
+    timer(tick);
+}

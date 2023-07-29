@@ -1,6 +1,6 @@
 let maxTime = 400;
 let tick = 40;
-let symmetry = 5 * diff(8, 10, 12, 14);
+let symmetry = 5 * diff(6, 8, 10, 12);
 let speed = 0.65;
 let prototypeID = "smallBlue";
 
