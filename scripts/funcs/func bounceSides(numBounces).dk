@@ -1,0 +1,35 @@
+# func bounceSides(numBounces)
+
+let border = 0.0;
+let xLow = border + getX(gameOffset);
+let xHigh = border + gameWidth + getX(gameOffset);
+
+func isAngleRight(angle){
+    return angle <= 90.0 | angle >= 270.0;
+}
+func isAngleLeft(angle){
+    return angle >= 90.0 & angle <= 270.0;
+}
+
+func flipVelocityX(){
+    let oldVelocity = entityVelocity();
+    let newVelocity = setTheta(oldVelocity, flipY(getTheta(oldVelocity))); #flip across y axis
+    setVelocity(newVelocity);
+}
+
+let x;
+let angle;
+while(numBounces > 0){
+    x = entityX();
+    angle = entityAngle();
+
+    if(x < xLow & isAngleLeft(angle)){
+        flipVelocityX();
+        numBounces = numBounces - 1;
+    }
+    else if(x > xHigh & isAngleRight(angle)){
+        flipVelocityX();
+        numBounces = numBounces - 1;
+    }
+    stall();
+}

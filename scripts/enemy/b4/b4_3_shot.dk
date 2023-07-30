@@ -1,0 +1,34 @@
+let tick = diff(19, 17, 15, 13);
+let arcSymmetry = diff(6, 7, 8, 9);
+let arcIncrement = diff(14.0, 13.0, 12.0, 11.0);
+let arcSpeed = 0.81;
+let arcAngle = angleToPlayer();
+let arcAngleIncrement = -arcIncrement * 1.7 * phi;
+let ringSymmetry = diff(3, 3, 4, 4);
+let ringSpeed = 1.23;
+let ringAngle = arcAngle + 30.0;
+let ringAngleIncrement = 5.34 * phi;
+
+let position;
+
+func spawnArcBullet(velocity){
+    spawn("sharpDPurple", position, velocity, "bounceOnce");
+}
+func spawnRingBullet(velocity){
+    spawn("sharpLRed", position, velocity, "bounceOnce");
+}
+
+let spawnArcBool = true;
+while(true){
+    position = entityPosition();
+    if(spawnArcBool){
+        arc(makePolar(arcSpeed, arcAngle), arcSymmetry, arcIncrement, spawnArcBullet);
+        arc(makePolar(arcSpeed, arcAngle + 180.0), arcSymmetry, arcIncrement, spawnArcBullet);
+        arcAngle = arcAngle + arcAngleIncrement;
+    }
+    ring(makePolar(ringSpeed, ringAngle), ringSymmetry, spawnRingBullet);
+    ringAngle = ringAngle + ringAngleIncrement;
+
+    spawnArcBool = !spawnArcBool;
+    timer(tick);
+}

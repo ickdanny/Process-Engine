@@ -1,0 +1,15 @@
+let health = 3600;
+let timeBeforeMove = 82;
+let timeAfterMove = 64;
+let rLow = 15.0;
+let rHigh = 25.0;
+let maxSpeed = 0.4;
+
+setHealth(health);
+addSpawn("b4_1_shot");
+
+while(true){
+    timer(timeBeforeMove);
+    boundGotoDecelerating(bossXLow, bossXHigh, bossYLow, bossYHigh, rLow, rHigh, maxSpeed);
+    timer(timeAfterMove);
+}

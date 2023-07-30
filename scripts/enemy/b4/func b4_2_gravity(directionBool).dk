@@ -1,0 +1,15 @@
+# func b4_2_gravity(directionBool)
+
+let acceleration = 0.08;
+let drag = 0.001;
+let accelerationRand = acceleration / 10.0;
+let dragRand = drag / 10.0;
+acceleration = acceleration + random(-accelerationRand, accelerationRand);
+drag = drag + random(-dragRand, dragRand);
+
+let direction = 0.0;
+if(directionBool){
+    direction = 180.0;
+}
+
+gravity(direction, acceleration, drag);

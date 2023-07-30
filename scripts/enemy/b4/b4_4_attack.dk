@@ -1,0 +1,4 @@
+let health = 4600;
+
+setHealth(health);
+addSpawn("b4_4_shot");

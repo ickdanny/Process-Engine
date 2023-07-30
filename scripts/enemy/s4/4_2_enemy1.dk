@@ -1,4 +1,4 @@
-let health = 500;
+let health = 600;
 let slowTime = 65;
 let beforeFireTime = 1;
 let waitTime = 90;

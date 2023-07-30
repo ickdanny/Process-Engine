@@ -6,15 +6,16 @@ showDialogue("4_1");
 stallUntil(isDialogueOver);
 setCollidable();
 
-addSpawn("b3_1_attack"); # rotating squares top
+addSpawn("b4_1_attack"); # rings of bounce
 stallUntil(isBossDead);
 clearSpawns();
 stall();
 setVelocity(zeroPolar);
 clearBullets();
 
+gotoDecelerating(bossMidpoint, 0.8);
 timer(50);
-addSpawn("b3_2_attack"); # flower
+addSpawn("b4_2_attack"); # side bouncing
 stallUntil(isBossDead);
 clearSpawns();
 stall();
@@ -22,17 +23,17 @@ setVelocity(zeroPolar);
 clearBullets();
 addSpawn("largePower");
 
-gotoDecelerating(bossMidpoint, 0.8);
 timer(50);
-addSpawn("b3_3_attack"); # rotating squares in player zone
+addSpawn("b4_3_attack"); # arc and windmill bounce
 stallUntil(isBossDead);
 clearSpawns();
 stall();
 setVelocity(zeroPolar);
 clearBullets();
 
+gotoDecelerating(bossMidpoint, 0.8);
 timer(50);
-addSpawn("b3_4_attack"); # yoyo with diamond walls
+addSpawn("b4_4_attack"); # big explode to walls bouncing spiral thing
 stallUntil(isBossDead);
 clearSpawns();
 stall();

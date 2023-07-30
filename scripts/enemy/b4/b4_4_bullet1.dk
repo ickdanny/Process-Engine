@@ -1,0 +1,42 @@
+let slowTime = 60;
+
+let colCount = diff(2, 2, 3, 3);
+let colIncrement = 8.0;
+let arcSymmetry = diff(2, 2, 3, 3);
+let arcIncrement = 35.8;
+let arcDist = 9.3;
+let superArcSymmetry = 3;
+let superArcIncrement = 90.0;
+let speed = 1.1;
+let baseAngleRand = 1.0;
+func baseAngleFunc(){
+    return entityAngle() + random(-baseAngleRand, baseAngleRand);
+}
+
+addScript("bounceForever");
+shiftSpeedPeriod(0.0, slowTime);
+
+let position = entityPosition();
+let bulletInitVelocity;
+func spawnBullet1(offset){
+    spawn("smallBlue", position + offset, bulletInitVelocity, "b4_4_bullet2");
+}
+func spawnBullet2(offset){
+    spawn("sharpLRed", position + offset, bulletInitVelocity, "b4_4_bullet2");
+}
+
+let baseAngle = baseAngleFunc();
+
+#spawn column
+bulletInitVelocity = makePolar(speed, baseAngle);
+column(makePolar(0.0, baseAngle), colCount, colIncrement, spawnBullet2);
+
+#spawn wall behind
+func spawnArc(angleAsPolar){
+    let baseAngle = getTheta(angleAsPolar); #shadowing baseAngle
+    bulletInitVelocity = makePolar(speed, baseAngle);
+    arc(makePolar(arcDist, baseAngle), arcSymmetry, arcIncrement, spawnBullet1);
+}
+arc(makePolar(0.0, baseAngle + 180.0), superArcSymmetry, superArcIncrement, spawnArc);
+
+die();

@@ -1,6 +1,6 @@
 # func purpleBulletEnemy(chiralityBool)
 
-let health = 800;
+let health = 850;
 let slowTime = 65;
 let beforeFireTime = 30;
 let waitTime = 90;

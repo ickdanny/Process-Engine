@@ -4,6 +4,7 @@
 
 namespace process::game::systems{
 	
+	using AABB = wasp::math::AABB;
 	
 	namespace playerA{
 		constexpr float boomerangHitbox{ 9.0f };
@@ -44,7 +45,7 @@ namespace process::game::systems{
 		constexpr float cloudHitbox{ 9.5f };
 		constexpr float crystalHitbox{ 6.0f };
 		constexpr float automatonHitbox{ 5.0f };
-		constexpr float bossHitbox{ 13.0f };
+		constexpr AABB bossHitbox{ 7.0f, 13.0f };
 		
 		constexpr float trapSpin{ -2.342f };
 		constexpr int bossAnimationTick{ 6 };
@@ -57,8 +58,6 @@ namespace process::game::systems{
 		constexpr float sharpHitbox{ 1.5f };
 		constexpr float outbound{ -21.0f };
 	}
-	
-	using AABB = wasp::math::AABB;
 	
 	Prototypes::Prototypes(
 		resources::ScriptStorage& scriptStorage,

@@ -1,0 +1,16 @@
+let tick = 50;
+let symmetry = diff(3, 4, 5, 6);
+let initSpeed = 2.9;
+let angle = random(0.0, 360.0);
+let angleIncrement = symmetry * phi;
+
+let position = entityPosition();
+func spawnBullet(velocity){
+    spawn("largeClear", position, velocity, "b4_4_bullet1");
+}
+
+while(true){
+    ring(makePolar(initSpeed, angle), symmetry, spawnBullet);
+    angle = angle + angleIncrement;
+    timer(tick);
+}

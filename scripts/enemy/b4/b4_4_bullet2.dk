@@ -1,0 +1,8 @@
+let waitTime = 2;
+let speedTime = 50;
+let finalSpeed = entitySpeed();
+
+setSpeed(0.0);
+addScript("bounceOnce");
+timer(waitTime);
+shiftSpeedPeriod(finalSpeed, speedTime);

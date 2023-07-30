@@ -1,0 +1,12 @@
+let initSpeed = 0.5;
+let speedRand = 0.03;
+
+func getSpeed(){
+    return initSpeed + random(-speedRand, speedRand);
+}
+
+let position = entityPosition();
+spawn("largeLGreen", position, makePolar(getSpeed(), -90.0), "b4_2_bullet1");
+spawn("largeYellow", position, makePolar(getSpeed(), -90.0), "b4_2_bullet2");
+spawn("largeLGreen", position, makePolar(getSpeed(), 90.0), "b4_2_bullet1");
+spawn("largeYellow", position, makePolar(getSpeed(), 90.0), "b4_2_bullet2");
