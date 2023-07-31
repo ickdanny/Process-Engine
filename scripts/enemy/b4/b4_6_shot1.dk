@@ -1,0 +1,51 @@
+let tick = 30;
+let timeBetweenSpawns = 3;
+let numSpawns = diff(6, 8, 10, 12);
+let angle1 = diff(-45.0, -40.0, -35.0, -30.0);
+let angle2 = flipY(angle1);
+let speed = 1.0;
+let y = getY(gameOffset) - 10.0;
+
+let distBetweenSpawns = gameWidth / (numSpawns - 1);
+let initXRand = distBetweenSpawns / 2.0;
+let xOffset = getX(gameOffset);
+let initX = distBetweenSpawns + xOffset;
+
+func spawnBullet(position, velocity){
+    spawn("sharpLBlue", position, velocity, "bounceForever");
+    timer(timeBetweenSpawns);
+}
+
+let lowerBound = xOffset;
+let upperBound = xOffset + gameWidth;
+func isValidX(x){
+    return x > lowerBound & x < upperBound;
+}
+
+func spawnRow(typeBool){
+    let x = initX + random(-initXRand, initXRand);
+    if(!typeBool){
+        for(let i = 0; i < numSpawns; i = i + 1){
+            if(isValidX(x)){
+                spawnBullet(makePoint(x, y), makePolar(speed, angle2));
+            }
+            x = x + distBetweenSpawns;
+        }
+    }
+    else{
+        x = x + gameWidth;
+        for(let i = 0; i < numSpawns; i = i + 1){
+            if(isValidX(x)){
+                spawnBullet(makePoint(x, y), makePolar(speed, angle1));
+            }
+            x = x - distBetweenSpawns;
+        }
+    }
+}
+
+let typeBool = true;
+while(true){
+    spawnRow(typeBool);
+    timer(tick);
+    typeBool = !typeBool;
+}

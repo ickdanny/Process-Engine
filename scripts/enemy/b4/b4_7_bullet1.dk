@@ -1,0 +1,43 @@
+let colorFlipTime = 18;
+let colorFlipTimeDecrement = 2;
+let symmetry = diff(3, 4, 5, 6);
+let maxTime = 45;
+let tick = diff(15, 9, 5, 5);
+let speed = 1.5;
+let maxY = gameHeight + getY(gameOffset) + 8.0;
+
+embed();
+
+if(entityY() > maxY){
+    die();
+}
+
+let isBlue = true;
+func flipColor(){
+    if(isBlue){
+        setSprite("mediumLRed");
+    }
+    else{
+        setSprite("mediumBlue");
+    }
+    isBlue = !isBlue;
+}
+
+while(colorFlipTime > 0){
+    flipColor();
+    timer(colorFlipTime);
+    colorFlipTime = colorFlipTime - colorFlipTimeDecrement;
+}
+
+let position = entityPosition();
+func spawnBullet(velocity){
+    spawn("sharpLRed", position, velocity);
+}
+
+let angle = -entityAngle();
+for(let t = 0; t < maxTime; t = t + tick){
+    ring(makePolar(speed, angle), symmetry, spawnBullet);
+    timer(tick);
+}
+
+die();

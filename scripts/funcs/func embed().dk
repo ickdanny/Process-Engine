@@ -1,0 +1,31 @@
+# func embed()
+
+let border = 0.0;
+let xLow = border + getX(gameOffset);
+let xHigh = border + gameWidth + getX(gameOffset);
+let yLow = border + getY(gameOffset);
+
+let checkForEmbed = true;
+let x;
+let y;
+while(checkForEmbed){
+    x = entityX();
+    y = entityY();
+
+    if(x < xLow){
+        setPosition(makePoint(xLow, y));
+        setSpeed(0.0);
+        checkForEmbed = false;
+    }
+    else if(x > xHigh){
+        setPosition(makePoint(xHigh, y));
+        setSpeed(0.0);
+        checkForEmbed = false;
+    }
+    if(y < yLow){
+        setPosition(makePoint(entityX(), yLow));
+        setSpeed(0.0);
+        checkForEmbed = false;
+    }
+    stall();
+}

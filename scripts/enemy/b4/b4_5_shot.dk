@@ -1,0 +1,14 @@
+let tick = 50;
+let symmetry = diff(20, 25, 30, 35);
+let initSpeed = 1.5;
+
+let position;
+func spawnBullet(velocity){
+    spawn("sharpLRed", position, velocity, "b4_5_bullet");
+}
+
+while(true){
+    position = entityPosition();
+    ring(makePolar(initSpeed, random(0.0, 360.0)), symmetry, spawnBullet);
+    timer(tick);
+}

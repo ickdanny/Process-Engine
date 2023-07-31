@@ -1,0 +1,11 @@
+let arcSymmetry = diff(11, 15, 19, 23);
+let totalAngle = diff(290.0, 300.0, 310.0, 320.0);
+let arcIncrement = totalAngle / arcSymmetry;
+let speed = 1.0;
+
+let position = entityPosition();
+func spawnBullet(velocity){
+    spawn("mediumBlue", position, velocity, "b4_7_bullet1");
+}
+
+arc(makePolar(speed, 90.0), arcSymmetry, arcIncrement, spawnBullet);

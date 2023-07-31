@@ -1,0 +1,11 @@
+let waitTime = 40;
+let slowTime = 40;
+let slowSpeed = 0.5;
+let gAccel = 0.008;
+let gDrag = 0.003;
+
+addScript("bounceForever");
+
+timer(waitTime);
+shiftSpeedPeriod(slowSpeed, slowTime);
+gravity(-90.0, gAccel, gDrag);

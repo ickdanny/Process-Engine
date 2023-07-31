@@ -1,0 +1,13 @@
+let waitTime = 38;
+let speed = 0.4;
+let maxY = gameHeight + getY(gameOffset) + 5.0;
+
+embed();
+
+if(entityY() > maxY){
+    die();
+}
+
+timer(waitTime);
+setSprite("smallLPurple");
+setVelocity(makePolar(speed, angleToPlayer()));
