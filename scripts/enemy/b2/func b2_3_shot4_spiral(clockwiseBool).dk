@@ -1,5 +1,5 @@
 let maxTime = 24;
-let tick = diff(10, 8, 6, 4);
+let tick = diff(9, 7, 5, 4);
 let ringSymmetry = 3;
 let colCount = diff(2, 2, 3, 3);
 let colIncrement = -0.103;

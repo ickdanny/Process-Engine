@@ -25,7 +25,7 @@ addSpawn("2_13_spawner");# wave 13 = bunch of clouds
 
 timer(1200);
 timer(60);
-spawn("boss2", getTopSpawnLeft(gameWidth / 2.0), zeroPolar, "b2_master");
+spawn("boss2", getTopSpawnRight(41.4), zeroPolar, "b2_master");
 
 stallUntil(isWin);
 timer(timeBeforePostDialogue);

@@ -1,6 +1,6 @@
 let initAngle = 85.0;
 let endAngle = -250.0;
-let numSpawns = diff(13, 18, 23, 28);
+let numSpawns = diff(10, 14, 18, 22);
 let angleIncrement = (endAngle - initAngle) / (numSpawns - 1);
 let tick = 1;
 let speed = 1.45;

@@ -1,4 +1,4 @@
-let tick = diff(16, 14, 12, 10);
+let tick = diff(35, 25, 17, 10);
 let speed = 0.2;
 let dist = 5.0;
 let offsetRight = makeVector(dist, 0.0);

@@ -1,5 +1,5 @@
 let maxTime = 700;
-let tick = diff(24, 22, 20, 18);
+let tick = diff(26, 24, 22, 20);
 let symmetry = diff(3, 4, 5, 6);
 let initAngle = random(0.0, 360.0);
 let angleIncrement = -7.5 * phi;

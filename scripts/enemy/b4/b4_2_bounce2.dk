@@ -1,4 +1,4 @@
-let symmetry = diff(12, 15, 18, 21);
+let symmetry = diff(12, 15, 18, 21) + 1;
 let symmetryDecrement = 3;
 let initSpeed = symmetry * 0.068;
 let initSpeedDecrement = 0.1;

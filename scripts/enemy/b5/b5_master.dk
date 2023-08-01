@@ -1,0 +1,83 @@
+gotoDecelerating(bossMidpoint, 1.4);
+clearBullets();
+isBossDead(); #use the side effect to clear the boss deaths channel just in case
+showDialogue("5_1");
+
+stallUntil(isDialogueOver);
+setCollidable();
+
+addSpawn("b4_1_attack"); # rings of bounce
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+
+gotoDecelerating(bossMidpoint, 0.8);
+timer(50);
+addSpawn("b4_2_attack"); # side bouncing
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+addSpawn("largePower");
+
+timer(50);
+addSpawn("b4_3_attack"); # arc and windmill bounce
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+
+gotoDecelerating(bossMidpoint, 0.8);
+timer(50);
+addSpawn("b4_4_attack"); # big explode to walls
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+addSpawn("largePower");
+
+timer(50);
+addSpawn("b4_5_attack"); # bounce and gravity
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+
+gotoDecelerating(bossMidpoint, 0.8);
+timer(50);
+addSpawn("b4_6_attack"); # "columns" from top and large shower
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+
+gotoDecelerating(bossMidpoint, 0.8);
+timer(50);
+addSpawn("b4_7_attack"); # embed -> walls
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+
+let oppositePlayerSpawn = makePoint(gameWidth / 2.0, 25.0) + gameOffset;
+gotoDecelerating(oppositePlayerSpawn, 0.8);
+timer(50);
+addSpawn("b4_8_attack"); # shadow player
+stallUntil(isBossDead);
+broadcast("killShadowPlayer");
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+
+win();
+spawn("bossExplode", entityPosition(), zeroPolar);
+removeEntity();

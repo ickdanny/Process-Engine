@@ -36,7 +36,7 @@ namespace process::game::config {
 	constexpr int respawnPeriod{ 20 };
 	constexpr int respawnInvulnerabilityPeriod{ 3 * 60 };
 	
-	constexpr int initLives{ 2 };
+	constexpr int initLives{ 3 };
 	constexpr int initBombs{ 2 };
 	constexpr int initContinues{ 2 };
 	

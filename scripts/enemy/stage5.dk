@@ -1,2 +1,6 @@
 print("TO DO stage 5");
+
+spawn("boss5", getLeftSpawn(5.0), zeroPolar, "b5_master");
+
+timer(30);
 removeEntity();

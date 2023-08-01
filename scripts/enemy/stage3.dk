@@ -16,7 +16,7 @@ timer(1160);
 addSpawn("3_8_spawner"); # wave 8  = yellow medium rain
 
 timer(1440);
-spawn("boss3", getTopSpawnLeft(gameWidth / 2.0), zeroPolar, "b3_master");
+spawn("boss3", getTopSpawnLeft(50.0), zeroPolar, "b3_master");
 
 stallUntil(isWin);
 timer(timeBeforePostDialogue);

@@ -1,2 +1,2 @@
 timer(50);
-setVelocity(makePolar(1.7, -90));
+setVelocity(makePolar(1.4, -90));

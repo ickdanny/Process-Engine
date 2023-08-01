@@ -1,4 +1,4 @@
-let health = 4000;
+let health = 4300;
 
 let timeBeforeShot2 = 149;
 let timeBeforeShoot = 33;
