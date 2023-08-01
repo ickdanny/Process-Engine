@@ -13,8 +13,8 @@ namespace process::game::systems{
 		constexpr float boomerangSpin{ 21.728172f };
 		
 		constexpr float scytheHitbox{ 35.0f };
-		constexpr int scytheDamage{ 1 };//damage per tick
-		constexpr int scytheExplodeDamage{ 60 };
+		constexpr int scytheDamage{ 2 };//damage per tick
+		constexpr int scytheExplodeDamage{ 500 };
 		constexpr float scytheSpin{ 19.4892f };
 	}
 	
@@ -859,6 +859,39 @@ namespace process::game::systems{
 			DeathCommand{ DeathCommand::Commands::deathSpawn },
 			DeathSpawn{ ScriptList{ {
 				scriptStorage.get(L"bossExplode"),	//enemy is big so use boss explode
+				std::string{ ScriptList::spawnString } + "bossExplode"
+			} } }
+		).heapClone());
+		add("shadowPlayer", EntityBuilder::makeVisiblePrototype(
+			SpriteInstruction{
+				spriteStorage.get(L"shadowPlayerIdle")->sprite,
+				config::enemyDepth,
+				wasp::math::Vector2{ 0.0f, 4.0f }	//sprite offset
+			},
+			AnimationList{
+				{
+					components::Animation{ {
+						L"shadowPlayerLeft"
+					} },
+					components::Animation{ {
+						L"shadowPlayerLeftTurn"
+					} },
+					components::Animation{ {
+						L"shadowPlayerIdle"
+					} },
+					components::Animation{ {
+						L"shadowPlayerRightTurn"
+					} },
+					components::Animation{ {
+						L"shadowPlayerRight"
+					} }
+				},
+				2,	//idle index
+				4	//ticks
+			},
+			DeathCommand{ DeathCommand::Commands::deathSpawn },
+			DeathSpawn{ ScriptList{ {
+				scriptStorage.get(L"bossExplode"),
 				std::string{ ScriptList::spawnString } + "bossExplode"
 			} } }
 		).heapClone());

@@ -2,7 +2,7 @@ let alphaPowLow = 2.0;
 let alphaPowHigh = 3.0;
 let alphaInnerCoefficient = 1.0 / 15.0;
 let alphaMax = 30.0;
-let tick = diff(5, 4, 3, 2);
+let tick = diff(4, 4, 3, 2);
 
 let alphaPow = random(alphaPowLow, alphaPowHigh);
 func calculateAlpha(t){

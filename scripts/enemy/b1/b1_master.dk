@@ -30,7 +30,7 @@ stall();
 setVelocity(zeroPolar);
 clearBullets();
 
-gotoDecelerating(bossMidpoint, 1.0);
+gotoDecelerating(bossMidpoint, 0.8);
 timer(50);
 addSpawn("b1_4_attack"); # helix spirals
 stallUntil(isBossDead);

@@ -1,0 +1,5 @@
+while(!readFlag("killShadowPlayer")){
+    stall();
+}
+killMessage("killShadowPlayer");
+die();

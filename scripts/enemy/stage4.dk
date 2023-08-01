@@ -1,15 +1,15 @@
-#timer(72);
-#addSpawn("4_1_spawner"); # wave 1  = ribbon 1, slow field
-#timer(1600);
-#addSpawn("4_2_spawner"); # wave 2  = rings
-#timer(920);
-#addSpawn("4_3_spawner"); # wave 3  = rings pt 2
-#timer(1100);
-#addSpawn("4_4_spawner"); # wave 4  = item dropper, solar flare spiral
-#timer(1000);
-#addSpawn("4_5_spawner"); # wave 5  = maids down sides, slow field
-#
-#timer(1510);
+timer(72);
+addSpawn("4_1_spawner"); # wave 1  = ribbon 1, slow field
+timer(1600);
+addSpawn("4_2_spawner"); # wave 2  = rings
+timer(920);
+addSpawn("4_3_spawner"); # wave 3  = rings pt 2
+timer(1100);
+addSpawn("4_4_spawner"); # wave 4  = item dropper, solar flare spiral
+timer(1000);
+addSpawn("4_5_spawner"); # wave 5  = maids down sides, slow field
+
+timer(1510);
 spawn("boss4", getTopSpawnLeft(gameWidth / 2.0), zeroPolar, "b4_master");
 
 stallUntil(isWin);

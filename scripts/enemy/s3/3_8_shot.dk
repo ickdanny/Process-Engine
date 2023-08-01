@@ -1,4 +1,4 @@
-let timeBetweenLow = diff(120, 110, 100, 90);
+let timeBetweenLow = diff(140, 120, 110, 100);
 let timeBetweenHigh = timeBetweenLow + 20;
 let timeBetween = random(timeBetweenLow, timeBetweenHigh);
 let numSpawns = diff(4, 6, 8, 10);

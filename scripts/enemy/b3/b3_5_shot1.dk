@@ -1,4 +1,4 @@
-let tick = diff(30, 25, 20, 15);
+let tick = diff(35, 27, 20, 15);
 let minDistFromPlayer = 53.3;
 let minDistFromEdge = 5.0;
 

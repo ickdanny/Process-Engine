@@ -1,0 +1,5 @@
+timer(trapLifetime);
+
+spawn("shadowPlayer", entityPosition(), zeroPolar, "b4_8_shadowPlayer");
+
+removeEntity();

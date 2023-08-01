@@ -1,5 +1,5 @@
 let tick = 50;
-let symmetry = diff(20, 25, 30, 35);
+let symmetry = diff(15, 20, 25, 30);
 let initSpeed = 1.5;
 
 let position;

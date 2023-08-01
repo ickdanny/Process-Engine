@@ -1,3 +1,2 @@
 print("TO DO stage 5");
-error("test error: stage 5");
 removeEntity();

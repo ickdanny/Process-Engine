@@ -32,7 +32,7 @@ setVelocity(zeroPolar);
 clearBullets();
 
 timer(50);
-addSpawn("b3_4_attack"); # yoyo with diamond walls
+addSpawn("b3_4_attack"); # yoyo whites
 stallUntil(isBossDead);
 clearSpawns();
 stall();
@@ -41,7 +41,7 @@ clearBullets();
 addSpawn("largePower");
 
 timer(50);
-addSpawn("b3_5_attack"); # diamond walls
+addSpawn("b3_5_attack"); # diamond walls white black
 stallUntil(isBossDead);
 clearSpawns();
 stall();

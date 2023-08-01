@@ -1,0 +1,10 @@
+let symmetry = diff(8, 11, 14, 17);
+let speed = 0.3;
+let angle = angleToPlayer();
+
+let position = entityPosition();
+func spawnBullet(velocity){
+    spawn("mediumBlue", position, velocity);
+}
+
+ring(makePolar(speed, angle), symmetry, spawnBullet);

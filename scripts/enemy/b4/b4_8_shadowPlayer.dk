@@ -1,0 +1,25 @@
+let initWaitTime = 11;
+let waitTime = diff(141, 131, 121, 111);
+let minWaitTime = waitTime - 60;
+let waitTimeDecrement = 6;
+
+func distToPlayer(){
+    return pointDist(entityPosition(), getPlayerPos());
+}
+func calculateSpeed(){
+    return distToPlayer() / 100.0;
+}
+
+addScript("killShadowPlayer");
+
+timer(initWaitTime);
+addSpawn("b4_8_shot1");
+
+while(true){
+    timer(waitTime);
+    gotoDecelerating(getPlayerPos(), calculateSpeed());
+    addSpawn("b4_8_shot2");
+    if(waitTime > minWaitTime){
+        waitTime = waitTime - waitTimeDecrement;
+    }
+}

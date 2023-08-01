@@ -1,0 +1,22 @@
+let tick = diff(20, 18, 16, 14);
+let speed = 0.4;
+let symmetry = 4;
+let angle1 = 45.0;
+let angle2 = 45.0;
+let angleIncrement = 3.0;
+let entityVelocityCoefficient = 0.1;
+
+let position;
+func spawnBullet(velocity){
+    velocity = velocity + (entityVelocity() * entityVelocityCoefficient);
+    spawn("sharpBlue", position, velocity);
+}
+
+while(true){
+    position = entityPosition();
+    ring(makePolar(speed, angle1), symmetry, spawnBullet);
+    ring(makePolar(speed, angle2), symmetry, spawnBullet);
+    angle1 = angle1 + angleIncrement;
+    angle2 = angle2 - angleIncrement;
+    timer(tick);
+}

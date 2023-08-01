@@ -190,6 +190,7 @@ namespace process::game::systems {
 		DataType endStage(const std::vector<DataType>& parameters);
 		DataType broadcast(const std::vector<DataType>& parameters);
 		DataType readPoint(const std::vector<DataType>& parameters);
+		DataType readFlag(const std::vector<DataType>& parameters);
 		DataType killMessage(const std::vector<DataType>& parameters);
 		
 		//spawning

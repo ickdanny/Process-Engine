@@ -108,5 +108,6 @@ namespace process::game {
 		
 		//topics for scripts
 		static const Topic<std::tuple<wasp::math::Point2, std::string>> points;
+		static const Topic<std::string> flags;
 	};
 }

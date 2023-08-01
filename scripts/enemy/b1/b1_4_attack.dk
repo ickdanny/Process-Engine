@@ -1,4 +1,4 @@
-let health = 2400;
+let health = 2500;
 let initWaitTime = 42;
 let timeBetweenSpawns = 99;
 let baseAngle = angleToPlayer();

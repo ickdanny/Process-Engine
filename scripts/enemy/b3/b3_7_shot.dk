@@ -1,7 +1,7 @@
 let tick = 61;
 let tickDecrement = 2;
 let minTick = 15;
-let bulletsLow = diff(5, 8, 10, 12);
+let bulletsLow = diff(4, 7, 9, 11);
 let bulletsHigh = bulletsLow + 3;
 let speedLow = 0.5;
 let speedHigh = 1.5;

@@ -4,7 +4,7 @@ let betweenWaitTime = 106;
 let afterWaitTime = 135;
 let rLow = 50;
 let rHigh = 60;
-let maxSpeed = 1.2;
+let maxSpeed = 0.8;
 
 setHealth(health);
 

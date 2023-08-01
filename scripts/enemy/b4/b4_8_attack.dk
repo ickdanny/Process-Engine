@@ -1,0 +1,35 @@
+let health = 6000;
+let initWaitTime = 11;
+let waitTime = diff(141, 131, 121, 111);
+let minWaitTime = waitTime - 60;
+let waitTimeDecrement = 6;
+
+setHealth(health);
+
+let playerSpawn = makePoint(gameWidth / 2.0, gameHeight - 25.0) + gameOffset;
+spawn("trap", playerSpawn, zeroPolar, "b4_8_trapLifetime");
+
+func calculateSpeed(targetPoint){
+    return pointDist(entityPosition(), targetPoint) / 100.0;
+}
+let midPoint = makePoint(gameWidth / 2.0, gameHeight / 2.0) + gameOffset;
+func getTarget(){
+    let playerPos = getPlayerPos();
+    let x = getX(playerPos);
+    let y = 2 * getY(midPoint) - getY(playerPos);
+    return makePoint(x, y);
+}
+
+timer(trapLifetime + initWaitTime + 1);
+addSpawn("b4_8_shot3");
+
+let targetPoint;
+while(true){
+    timer(waitTime);
+    targetPoint = getTarget();
+    gotoDecelerating(targetPoint, calculateSpeed(targetPoint));
+    addSpawn("b4_8_shot4");
+    if(waitTime > minWaitTime){
+        waitTime = waitTime - waitTimeDecrement;
+    }
+}

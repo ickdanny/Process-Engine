@@ -1,10 +1,10 @@
-let health = 1400;
+let health = 1500;
 let initWaitTime = 35;
 let betweenWaitTime = 149;
 let afterWaitTime = 115;
 let rLow = 50;
 let rHigh = 60;
-let maxSpeed = 1.2;
+let maxSpeed = 0.8;
 
 setHealth(health);
 

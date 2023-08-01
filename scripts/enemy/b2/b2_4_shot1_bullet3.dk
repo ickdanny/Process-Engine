@@ -1,6 +1,6 @@
 let lifetimeMax = 10;
 let dieChance = 0.12;
-let tick = diff(5, 4, 3, 2);
+let tick = diff(7, 5, 3, 2);
 let initAngle = entityAngle();
 let angleRand = 20.5;
 let angleRandomChance = 0.2;
