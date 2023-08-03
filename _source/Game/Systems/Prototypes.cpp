@@ -45,6 +45,7 @@ namespace process::game::systems{
 		constexpr float cloudHitbox{ 9.5f };
 		constexpr float crystalHitbox{ 6.0f };
 		constexpr float automatonHitbox{ 5.0f };
+		constexpr float flameHitbox{ 7.0 };
 		constexpr AABB bossHitbox{ 7.0f, 13.0f };
 		
 		constexpr float trapSpin{ -2.342f };
@@ -893,6 +894,35 @@ namespace process::game::systems{
 			DeathSpawn{ ScriptList{ {
 				scriptStorage.get(L"bossExplode"),
 				std::string{ ScriptList::spawnString } + "bossExplode"
+			} } }
+		).heapClone());
+		add("flame", EntityBuilder::makeVisibleCollidablePrototype(
+			AABB{ enemy::flameHitbox },
+			PlayerCollisions::Source{},
+			EnemyCollisions::Target{ components::CollisionCommands::damage },
+			SpriteInstruction{
+				spriteStorage.get(L"flame1")->sprite,
+				config::enemyDepth,
+				{ 0.0, -4.0 }
+			},
+			game::AnimationList{
+				components::Animation {
+					{
+						L"flame1",
+						L"flame2",
+						L"flame3",
+						L"flame4"
+					},
+					true
+				},
+				5
+			},
+			Health{ enemy::spawnHealth },
+			Outbound{ enemy::outbound },
+			DeathCommand{ DeathCommand::Commands::deathSpawn },
+			DeathSpawn{ ScriptList{ {
+				scriptStorage.get(L"enemyExplode"),
+				std::string{ ScriptList::spawnString } + "enemyExplode"
 			} } }
 		).heapClone());
 		

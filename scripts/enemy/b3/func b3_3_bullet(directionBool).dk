@@ -3,7 +3,7 @@
 let slowTime = 120;
 let waitTime = 6;
 let speedTime = 154;
-let angleShift = diff(90.0, 105.0, 120.0, 135.0);
+let angleShift = diff(70.0, 100.0, 120.0, 135.0);
 let finalSpeed = entitySpeed();
 if(directionBool){
     angleShift = -angleShift;

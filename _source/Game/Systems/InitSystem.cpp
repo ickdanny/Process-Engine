@@ -867,7 +867,7 @@ namespace process::game::systems {
 				break;
 			case 5:
 				backgroundID = L"tile5";
-				pixelScrollPerTick = 1.0f;
+				pixelScrollPerTick = 0.5f;
 				break;
 			default:
 				throw std::runtime_error{ "unexpected default case " };

@@ -1,0 +1,17 @@
+let health = 100;
+let waitTime = 5;
+let speedTime = 90;
+let finalSpeedLow = 0.5;
+let finalSpeedHigh = 0.6;
+let angleRand = 5.0;
+
+setHealth(health);
+addDeathSpawn("smallPower");
+
+timer(waitTime);
+setAngle(-45.0 + random(-angleRand, angleRand));
+if(entityX() > gameWidth / 2.0 + getX(gameOffset)){
+    setAngle(entityAngle() - 90.0);
+}
+addSpawn("5_2_shot");
+shiftSpeedPeriod(random(finalSpeedLow, finalSpeedHigh), speedTime);

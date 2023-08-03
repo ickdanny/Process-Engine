@@ -1,0 +1,24 @@
+let tick = diff(45, 35, 25, 20);
+let symmetry = 3;
+let offsetDist = 5.0;
+let initWaitTime = 30;
+
+timer(initWaitTime);
+
+let position;
+func spawnBullet(offset){
+    spawn("sharpLRed", position + offset, makePolar(0.0, getTheta(offset)), "5_1_bullet");
+}
+
+let bound = gameHeight + getY(gameOffset);
+func isInBound(){
+    return getY(position) < bound;
+}
+
+while(true){
+    position = entityPosition();
+    if(isInBound()){
+        ring(makePolar(offsetDist, random(0.0, 360.0)), symmetry, spawnBullet);
+    }
+    timer(tick);
+}

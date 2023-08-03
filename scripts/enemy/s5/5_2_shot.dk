@@ -1,0 +1,27 @@
+let tick = diff(45, 35, 25, 20) + 5;
+let symmetry = 5;
+let offsetDist = 7.0;
+let initWaitTime = 30;
+
+timer(initWaitTime);
+
+let position;
+func spawnBullet(offset){
+    spawn("smallOrange", position + offset, makePolar(0.0, getTheta(offset)), "5_2_bullet");
+}
+
+let xLow = getX(gameOffset);
+let xHigh = gameWidth + getX(gameOffset);
+let yHigh = gameHeight + getY(gameOffset);
+func isInBound(){
+    let x = entityX();
+    return x > xLow & x < xHigh & getY(position) < yHigh;
+}
+
+while(true){
+    position = entityPosition();
+    if(isInBound()){
+        ring(makePolar(offsetDist, random(0.0, 360.0)), symmetry, spawnBullet);
+    }
+    timer(tick);
+}

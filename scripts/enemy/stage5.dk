@@ -1,6 +1,16 @@
-print("TO DO stage 5");
+timer(310);
+addSpawn("5_1_spawner"); # wave 1  = red flames leaving trail
+timer(870);
+addSpawn("5_2_spawner"); # wave 2  = orange flames leaving trail from top left
+timer(650);
+addSpawn("5_3_spawner"); # wave 3  = then from top right
 
-spawn("boss5", getLeftSpawn(5.0), zeroPolar, "b5_master");
+timer(1510);
+#spawn("boss5", getTopSpawnLeft(gameWidth / 2.0), zeroPolar, "b5_master");
 
-timer(30);
-removeEntity();
+stallUntil(isWin);
+timer(timeBeforePostDialogue);
+
+showDialogue("5_2");
+stallUntil(isDialogueOver);
+endStage();
