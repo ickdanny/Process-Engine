@@ -1,0 +1,10 @@
+# func randomFireColor()
+
+let randFloat = random(0.0, 1.0);
+if(randFloat < 0.6){
+    return "LRed";
+}
+if(randFloat < 0.85){
+    return "Orange";
+}
+return "Yellow";

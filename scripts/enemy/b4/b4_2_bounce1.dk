@@ -12,7 +12,7 @@ func spawnBullet(velocity){
 func spawnRing(){
     if(symmetry > 2 & entityY() < yHigh){
         position = entityPosition();
-        ring(makePolar(initSpeed, random(0.0, 360.0)), symmetry, spawnBullet);
+        ring(makePolar(initSpeed, randomAngle()), symmetry, spawnBullet);
         symmetry = symmetry - symmetryDecrement;
         initSpeed = initSpeed - initSpeedDecrement;
     }

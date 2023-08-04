@@ -1,0 +1,3 @@
+timer(trapLifetime);
+spawn("flame", entityPosition(), zeroPolar, "5_5_enemy");
+die();

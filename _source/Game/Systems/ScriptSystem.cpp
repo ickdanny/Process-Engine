@@ -20,6 +20,8 @@ namespace process::game::systems {
 		constexpr float bossYLow{ bossInbound + config::gameOffset.y };
 		constexpr float bossYHigh{ (config::gameHeight * 0.28f) + config::gameOffset.y };
 		
+		constexpr float bossHealthGlobalMultiplier{ 0.93f };
+		
 		constexpr int trapLifetime{ 36 };
 		constexpr int crystalEmergeLifetime{ 35 };
 		constexpr int timeBeforePostDialogue{ 80 };
@@ -58,6 +60,7 @@ namespace process::game::systems {
 		addNativeVariable("bossXHigh", bossXHigh);
 		addNativeVariable("bossYLow", bossYLow);
 		addNativeVariable("bossYHigh", bossYHigh);
+		addNativeVariable("bossHealthMulti", bossHealthGlobalMultiplier);
 		addNativeVariable("timeBeforePostDialogue", timeBeforePostDialogue);
 		addNativeVariable("trapLifetime", trapLifetime);
 		addNativeVariable("crystalEmergeLifetime", crystalEmergeLifetime);
@@ -978,11 +981,18 @@ namespace process::game::systems {
 	}
 	
 	/**
-	 * int health
+	 * int health (OR float health which will be cast to int)
 	 */
 	ScriptSystem::DataType ScriptSystem::setHealth(const std::vector<DataType>& parameters) {
 		throwIfNativeFunctionWrongArity(1, parameters, "setHealth");
-		int health{ std::get<int>(parameters[0]) };
+		int health{};
+		auto& dataType{ parameters[0] };
+		if(std::holds_alternative<int>(dataType)){
+			health = std::get<int>(dataType);
+		}
+		else if(std::holds_alternative<float>(dataType)){
+			health = static_cast<int>(std::get<float>(dataType));
+		}
 		EntityHandle entityHandle{ makeCurrentEntityHandle() };
 		componentOrderQueue.queueSetComponent<Health>(entityHandle, { health });
 		return false;

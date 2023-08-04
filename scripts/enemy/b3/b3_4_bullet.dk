@@ -10,7 +10,7 @@ if(getDifficulty() > 0){
         spawn("smallLRed", position, velocity);
     }
 
-    let angle = random(0.0, 360.0);
+    let angle = randomAngle();
     let speed = 0.46;
     ring(makePolar(speed, angle), getDifficulty() * 3, spawnBullet);
 }

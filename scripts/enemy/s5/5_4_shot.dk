@@ -1,0 +1,41 @@
+let maxTime = 600;
+let tick = diff(35, 28, 24, 20);
+let symmetry = diff(10, 12, 14, 15);
+let angle1 = randomAngle();
+let angle2 = randomAngle();
+let angle3 = randomAngle();
+let angle4 = randomAngle();
+let angleIncrement1 = tick * 0.15 * phi;
+let angleIncrement2 = -angleIncrement1;
+let angleIncrement3 = tick * 0.25 * phi;
+let angleIncrement4 = -angleIncrement2;
+let speed1 = 1.4;
+let speed2 = speed1;
+let speed3 = 0.87;
+let speed4 = speed3;
+
+let position = entityPosition();
+func spawnBullet1(velocity){
+    spawn("mediumDRed", position, velocity, "5_4_bullet1");
+}
+func spawnBullet2(velocity){
+    spawn("mediumLRed", position, velocity, "5_4_bullet2");
+}
+func spawnBullet3(velocity){
+    spawn("smallOrange", position, velocity);
+}
+func spawnBullet4(velocity){
+    spawn("smallYellow", position, velocity);
+}
+
+for(let t = 0; t < maxTime; t = t + tick){
+    ring(makePolar(speed1, angle1), symmetry, spawnBullet1);
+    ring(makePolar(speed2, angle2), symmetry, spawnBullet2);
+    ring(makePolar(speed3, angle3), symmetry, spawnBullet3);
+    ring(makePolar(speed4, angle4), symmetry, spawnBullet4);
+    angle1 = angle1 + angleIncrement1;
+    angle2 = angle2 + angleIncrement2;
+    angle3 = angle3 + angleIncrement3;
+    angle4 = angle4 + angleIncrement4;
+    timer(tick);
+}

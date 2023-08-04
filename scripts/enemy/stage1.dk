@@ -23,7 +23,8 @@ addSpawn("1_11_spawner");# wave 11 = red spiky robot in center, dropping bomb
 timer(550);
 addSpawn("1_12_spawner");# wave 12 = red robots from top left to top right, aimed explode
 
-timer(560);
+timer(760);
+clearBullets();
 spawn("boss1", getLeftSpawn(5.0), zeroPolar, "b1_master");
 
 stallUntil(isWin);

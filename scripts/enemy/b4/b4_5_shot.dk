@@ -9,6 +9,6 @@ func spawnBullet(velocity){
 
 while(true){
     position = entityPosition();
-    ring(makePolar(initSpeed, random(0.0, 360.0)), symmetry, spawnBullet);
+    ring(makePolar(initSpeed, randomAngle()), symmetry, spawnBullet);
     timer(tick);
 }

@@ -1,4 +1,4 @@
-let health = 6000;
+let health = 6000 * bossHealthMulti;
 let timeBeforeMove = 52;
 let timeAfterMove = 52;
 let specialXBound = 30.0;

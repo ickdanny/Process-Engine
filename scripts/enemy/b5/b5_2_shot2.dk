@@ -1,0 +1,36 @@
+let tick = diff(13, 10, 8, 6);
+let offsetMax = 10.0;
+let initSpeed = 0.1;
+let initAngle = 90.0;
+let initAngleRand = 10.0;
+let yHigh = gameHeight + 5.0 + getY(gameOffset);
+
+func randomType(){
+    if(chance(0.5)){
+        return "medium";
+    }
+    return "small";
+}
+
+func randomOffset(){
+    let offset = max(random(0.0, offsetMax), random(0.0, offsetMax));
+    let angle = randomAngle();
+    return makePolar(offset, angle);
+}
+
+func spawnBullet(velocity){
+    let spawnPos = entityPosition() + randomOffset();
+    if(getY(spawnPos) < yHigh){
+        spawn(
+            randomType() + randomFireColor(),
+            spawnPos,
+            velocity,
+            "b5_2_bullet2"
+        );
+    }
+}
+
+while(true){
+    spawnBullet(makePolar(initSpeed, initAngle + random(-initAngleRand, initAngleRand)));
+    timer(tick);
+}

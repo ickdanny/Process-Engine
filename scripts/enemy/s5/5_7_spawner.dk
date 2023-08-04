@@ -1,0 +1,16 @@
+let tick = 7 * 2;
+let numSpawns = 8;
+let xOffset = getX(gameOffset);
+let xLow = gameWidth * 0.4 + xOffset;
+let xHigh = gameWidth * 0.6 + xOffset;
+let yLow = 10.0 + getY(gameOffset);
+let yHigh = 35.0 + getY(gameOffset);
+
+func spawnTrap(position){
+    spawn("trap", position, zeroPolar, "5_5_trapLifetime");
+}
+
+for(let i = 0; i < numSpawns; i = i + 1){
+    spawnTrap(makePoint(random(xLow, xHigh), random(yLow, yHigh)));
+    timer(tick);
+}

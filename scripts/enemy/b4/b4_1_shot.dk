@@ -17,10 +17,10 @@ func spawnColumn(baseVelocity){
 while(true){
     position = entityPosition();
     color = "DPurple";
-    ring(makePolar(speedLow, random(0.0, 360.0)), symmetry, spawnColumn);
+    ring(makePolar(speedLow, randomAngle()), symmetry, spawnColumn);
     timer(tick);
     position = entityPosition();
     color = "Blue";
-    ring(makePolar(speedLow, random(0.0, 360.0)), symmetry, spawnColumn);
+    ring(makePolar(speedLow, randomAngle()), symmetry, spawnColumn);
     timer(tick);
 }

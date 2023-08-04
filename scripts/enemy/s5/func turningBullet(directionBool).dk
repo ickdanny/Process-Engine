@@ -1,0 +1,10 @@
+# func turningBullet(directionBool)
+
+let angleShift = diff(30.0, 60.0, 90.0, 120.0);
+let turnTime = 80;
+
+if(directionBool){
+    angleShift = -angleShift;
+}
+
+shiftAnglePeriod(entityAngle() + angleShift, turnTime);

@@ -1,6 +1,6 @@
 let maxTime = 810;
 let tick = diff(30, 25, 21, 17);
-let angle = random(0.0, 360.0);
+let angle = randomAngle();
 let angleIncrement = -22.0 * phi;
 let offsetDist = 34.0;
 let position = entityPosition();

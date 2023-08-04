@@ -1,4 +1,4 @@
-let health = 4750;
+let health = 4750 * bossHealthMulti;
 
 let symmetry = diff(5, 5, 6, 6);
 let speed = 1.1;
@@ -18,7 +18,7 @@ func spawnBullet(velocity){
 
 while(true){
     position = entityPosition();
-    ring(makePolar(speed, random(0.0, 360.0)), symmetry, spawnBullet);
+    ring(makePolar(speed, randomAngle()), symmetry, spawnBullet);
     timer(timeBeforeMove);
     boundGotoDecelerating(bossXLow, bossXHigh, bossYLow, bossYHigh, rLow, rHigh, maxSpeed);
     timer(timeAfterMove);

@@ -18,6 +18,6 @@ func spawnBullet(velocity){
 }
 
 for(let t = 0; t < maxTime; t = t + tick){
-    ring(makePolar(speed, random(0.0, 360.0)), symmetry, spawnBullet);
+    ring(makePolar(speed, randomAngle()), symmetry, spawnBullet);
     timer(tick);
 }

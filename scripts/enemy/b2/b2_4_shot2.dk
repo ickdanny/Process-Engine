@@ -1,7 +1,7 @@
 let maxTime = 48;
 let symmetry = 7;
 let tick = diff(4, 3, 2, 1);
-let angle = random(0.0, 360.0);
+let angle = randomAngle();
 let angleRand = 2.0;
 let angleIncrement = tick * -6.234;
 let initSpeed = 2.0;

@@ -1,7 +1,7 @@
 let maxTime = 200;
 let tick = 1;
 let symmetry = diff(3, 4, 5, 6);
-let baseAngle = random(0.0, 360.0);
+let baseAngle = randomAngle();
 let angleIncrement = 2.5 * phi;
 let initSpeed = 0.0;
 let spawnThetaCoefficient = 0.85;

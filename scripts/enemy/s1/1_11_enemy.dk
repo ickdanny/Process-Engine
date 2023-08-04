@@ -1,4 +1,4 @@
-let health = 420;
+let health = 420 * bossHealthMulti;
 let initWaitTime = 25;
 let slowTime = 30;
 let standStillTime = 30;

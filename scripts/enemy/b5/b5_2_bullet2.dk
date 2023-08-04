@@ -1,0 +1,11 @@
+let waitTime = 40;
+let accelTime = 40;
+let roughFinalSpeed = 1.0;
+let accelPolar = makePolar(roughFinalSpeed / accelTime, randomAngle());
+
+timer(waitTime);
+
+for(let t = 0; t < accelTime; t = t + 1){
+    setVelocity(entityVelocity() + accelPolar);
+    stall();
+}

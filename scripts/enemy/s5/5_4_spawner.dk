@@ -1,0 +1,4 @@
+let x = gameWidth / 2.0 + getX(gameOffset);
+let y = gameHeight / 5.0 + getY(gameOffset);
+
+spawn("trap", makePoint(x, y), zeroPolar, "5_4_trapLifetime");

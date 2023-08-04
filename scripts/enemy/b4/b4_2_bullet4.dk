@@ -5,7 +5,7 @@ let speedTime = 49;
 
 shiftSpeedPeriod(0.0, slowTime);
 timer(waitTime);
-setAngle(random(0.0, 360.0));
+setAngle(randomAngle());
 if(entityY() > gameHeight + getY(gameOffset) & entityAngle() < 180.0){ # stop bullets from below
     setAngle(entityAngle() + 180.0);
 }

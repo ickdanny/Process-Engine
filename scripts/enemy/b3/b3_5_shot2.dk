@@ -10,6 +10,6 @@ func spawnBullet2(velocity){
     spawn("largeBlack", position, velocity, "b3_5_shot2_bullet1"); # and black goes left
 }
 
-ring(makePolar(bulletInitSpeed, random(0.0, 360.0)), symmetry, spawnBullet1);
+ring(makePolar(bulletInitSpeed, randomAngle()), symmetry, spawnBullet1);
 timer(timeBetween);
-ring(makePolar(bulletInitSpeed, random(0.0, 360.0)), symmetry, spawnBullet2);
+ring(makePolar(bulletInitSpeed, randomAngle()), symmetry, spawnBullet2);

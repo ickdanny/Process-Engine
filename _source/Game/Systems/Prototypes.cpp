@@ -20,7 +20,7 @@ namespace process::game::systems{
 	
 	namespace playerB{
 		constexpr float laserHitbox{ 10.0f };
-		constexpr int laserDamage{ 7 };
+		constexpr int laserDamage{ 6 };
 		constexpr float laserOutbound{ -70.0f };
 		
 		constexpr float laserPartHitbox{ 15.0f };
@@ -55,7 +55,7 @@ namespace process::game::systems{
 	namespace enemyProjectile{
 		constexpr float smallHitbox{ 2.5f };
 		constexpr float mediumHitbox{ 3.5f };
-		constexpr float largeHitbox{ 7.5f };
+		constexpr float largeHitbox{ 7.0f };
 		constexpr float sharpHitbox{ 1.5f };
 		constexpr float outbound{ -21.0f };
 	}

@@ -21,7 +21,7 @@ let angle;
 let speed;
 while(true){
     if(!isXBelow(boundaryLeft) & !isXAbove(boundaryRight)){
-        angle = random(0.0, 360.0);
+        angle = randomAngle();
         speed = speedLow;
         position = entityPosition();
         for(i = 0; i < numSpawns; i = i + 1){

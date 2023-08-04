@@ -6,4 +6,4 @@ func spawnBullet(velocity){
     spawn("largeLRed", position, velocity);
 }
 
-ring(makePolar(speed, random(0.0, 360.0)), symmetry, spawnBullet);
+ring(makePolar(speed, randomAngle()), symmetry, spawnBullet);

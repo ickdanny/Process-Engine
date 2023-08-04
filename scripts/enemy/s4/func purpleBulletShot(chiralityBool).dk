@@ -15,7 +15,7 @@ func spawnBullet(velocity){
     spawn("smallDPurple", position, velocity, bulletScriptID);
 }
 
-let angle = random(0.0, 360.0);
+let angle = randomAngle();
 for(let t = 0; t < maxTime; t = t + tick){
     ring(makePolar(speed, angle), symmetry, spawnBullet);
     angle = angle + angleIncrement;

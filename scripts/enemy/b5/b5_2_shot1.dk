@@ -1,0 +1,9 @@
+let symmetry = 5;
+let initSpeed = 1.43;
+
+let position = entityPosition();
+func spawnBullet(velocity){
+    spawn("largeBlack", position, velocity, "b5_2_bullet1");
+}
+
+ring(makePolar(initSpeed, randomAngle()), symmetry, spawnBullet);

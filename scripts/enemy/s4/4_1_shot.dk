@@ -17,7 +17,7 @@ func isInBounds(x, y){
 
 while(true){
     if(isInBounds(entityX(), entityY())){
-        ring(makePolar(random(speedLow, speedHigh), random(0.0, 360.0)), symmetry, spawnBullet);
+        ring(makePolar(random(speedLow, speedHigh), randomAngle()), symmetry, spawnBullet);
     }
     timer(tick);
 }

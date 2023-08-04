@@ -1,4 +1,4 @@
-let health = 5000;
+let health = 5000 * bossHealthMulti;
 let bulletSpeedLow = 1.7;
 let bulletSpeedHigh = 2.05;
 let angleRand = 2.0;

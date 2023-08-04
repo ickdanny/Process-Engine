@@ -23,7 +23,7 @@ func randomizeAngle(){
 let t = 0;
 while(entityY() < lowerBound){
     if(t == 0){
-        spawnBullet(makePolar(0.0, random(0.0, 360.0)));
+        spawnBullet(makePolar(0.0, randomAngle()));
         t = tick - 1;
     }
     else{

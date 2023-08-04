@@ -1,0 +1,87 @@
+let tick = diff(16, 16, 13, 13);
+let masterSymmetry = 5;
+let offsetDist = 44.8;
+let offsetAngle = 90.0;
+let offsetAngleIncrement = 3.5 * phi;
+let speedLow1 = diff(1.11, 0.99, 0.99, 0.89) - 0.1;
+let angleOffset1 = 18;
+let colCount1 = diff(1, 2, 2, 3);
+let colIncrement1 = 0.2;
+let speed2 = 0.93;
+let arcSymmetry2 = diff(1, 2, 4, 6);
+let arcIncrement2 = 14.8;
+let speed3 = 1.35;
+let angleOffset3 = 0.0;
+let angleOffsetIncrement3 = 5 * phi;
+let maxAngleOffset3 = 135.0;
+let angleOffsetMaxDecrement3 = 270.0;
+
+# part 1: red sharps
+let spawnPosition;
+func spawnBullet1(velocity){
+    spawn("sharpLRed", spawnPosition, velocity);
+}
+
+func spawnColumn1(baseVelocity){
+    column(baseVelocity, colCount1, colIncrement1, spawnBullet1);
+}
+
+# part 2: orange mediums
+func spawnBullet2(velocity){
+    spawn("mediumOrange", spawnPosition, velocity);
+}
+
+func spawnArc2(baseVelocity){
+    arc(baseVelocity, arcSymmetry2, arcIncrement2, spawnBullet2);
+}
+
+# part 3: large
+func spawnBullet3(velocity){
+    spawn("largeBlack", spawnPosition, velocity);
+}
+
+let ticker2 = 0;
+let next2 = 0;
+let position;
+func spawningPoint(offset){
+    spawnPosition = position + offset;
+    let angleFromBoss = getTheta(offset);
+    let angleToBoss = angleFromBoss + 180.0;
+    spawnColumn1(makePolar(speedLow1, angleToBoss + angleOffset1));
+    spawnColumn1(makePolar(speedLow1, angleToBoss - angleOffset1));
+
+    if(ticker2 > 4){
+        ticker2 = 0;
+    }
+    if(ticker2 == next2){
+        spawnArc2(makePolar(speed2, angleFromBoss));
+    }
+    ticker2 = ticker2 + 1;
+
+    spawnBullet3(makePolar(speed3, angleFromBoss + angleOffset3));
+}
+
+func step(){
+    offsetAngle = offsetAngle + offsetAngleIncrement;
+    if(offsetAngle > 360.0){
+        offsetAngle = offsetAngle - 360.0;
+    }
+
+    next2 = next2 - 1;
+    if(next2 < 0){
+        next2 = 4;
+    }
+
+    angleOffset3 = angleOffset3 + angleOffsetIncrement3;
+    if(angleOffset3 > maxAngleOffset3){
+        angleOffset3 = angleOffset3 - angleOffsetMaxDecrement3;
+    }
+}
+
+while(true){
+    position = entityPosition();
+    ring(makePolar(offsetDist, offsetAngle), masterSymmetry, spawningPoint);
+
+    step();
+    timer(tick);
+}

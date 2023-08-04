@@ -1,0 +1,18 @@
+let health = 2000 * bossHealthMulti;
+let waitTime = 10;
+let finalWaitTime = 120;
+let finalSpeed = 0.3;
+let finalSpeedTime = 55;
+
+setHealth(health);
+addDeathSpawn("bomb");
+
+timer(waitTime);
+addSpawn("5_4_shot");
+stall();
+stallUntil(isNotSpawning);
+
+timer(finalWaitTime);
+setAngle(90.0);
+shiftSpeedPeriod(finalSpeed, finalSpeedTime);
+

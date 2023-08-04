@@ -18,7 +18,7 @@ func isInBound(){
 while(true){
     position = entityPosition();
     if(isInBound()){
-        ring(makePolar(offsetDist, random(0.0, 360.0)), symmetry, spawnBullet);
+        ring(makePolar(offsetDist, randomAngle()), symmetry, spawnBullet);
     }
     timer(tick);
 }

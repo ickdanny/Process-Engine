@@ -1,0 +1,14 @@
+let slowTime = 48;
+let timeBeforeShot = 1;
+let timeAfterShot = 40;
+let finalSpeed = 1.6;
+let speedTime = 100;
+
+shiftSpeedPeriod(0.0, slowTime);
+
+timer(timeBeforeShot);
+addSpawn("b5_2_shot2");
+timer(timeAfterShot);
+
+setAngle(angleToPlayer());
+shiftSpeedPeriod(finalSpeed, speedTime);

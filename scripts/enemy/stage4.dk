@@ -10,6 +10,7 @@ timer(1000);
 addSpawn("4_5_spawner"); # wave 5  = maids down sides, slow field
 
 timer(1510);
+clearBullets();
 spawn("boss4", getTopSpawnLeft(gameWidth / 2.0), zeroPolar, "b4_master");
 
 stallUntil(isWin);

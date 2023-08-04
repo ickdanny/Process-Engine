@@ -6,16 +6,16 @@ showDialogue("5_1");
 stallUntil(isDialogueOver);
 setCollidable();
 
-addSpawn("b4_1_attack"); # rings of bounce
-stallUntil(isBossDead);
-clearSpawns();
-stall();
-setVelocity(zeroPolar);
-clearBullets();
-
-gotoDecelerating(bossMidpoint, 0.8);
-timer(50);
-addSpawn("b4_2_attack"); # side bouncing
+#addSpawn("b5_1_attack"); # pentagram sharps
+#stallUntil(isBossDead);
+#clearSpawns();
+#stall();
+#setVelocity(zeroPolar);
+#clearBullets();
+#
+#gotoDecelerating(bossMidpoint, 0.8);
+#timer(50);
+addSpawn("b5_2_attack"); # homing coals
 stallUntil(isBossDead);
 clearSpawns();
 stall();

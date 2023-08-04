@@ -1,16 +1,22 @@
-timer(310);
-addSpawn("5_1_spawner"); # wave 1  = red flames leaving trail
-timer(870);
-addSpawn("5_2_spawner"); # wave 2  = orange flames leaving trail from top left
-timer(650);
-addSpawn("5_3_spawner"); # wave 3  = then from top right
-
-timer(1510);
-#spawn("boss5", getTopSpawnLeft(gameWidth / 2.0), zeroPolar, "b5_master");
+#timer(310);
+#addSpawn("5_1_spawner"); # wave 1  = red flames leaving trail
+#timer(870);
+#addSpawn("5_2_spawner"); # wave 2  = orange flames leaving trail from top left
+#timer(650);
+#addSpawn("5_3_spawner"); # wave 3  = then from top right
+#timer(650);
+#addSpawn("5_4_spawner"); # wave 4  = flame dropper in middle - counter spirals
+#timer(1000);
+#addSpawn("5_5_spawner"); # wave 5  = red flames 1/5ths
+#timer(200);
+#addSpawn("5_6_spawner"); # wave 6  = red flames 2/5ths
+#timer(200);
+#addSpawn("5_7_spawner"); # wave 7  = red flames center 5th
+#
+#timer(1010);
+#clearBullets();
+spawn("boss5", getTopSpawnLeft(gameWidth / 2.0), zeroPolar, "b5_master");
 
 stallUntil(isWin);
-timer(timeBeforePostDialogue);
-
-showDialogue("5_2");
-stallUntil(isDialogueOver);
+timer(300);
 endStage();

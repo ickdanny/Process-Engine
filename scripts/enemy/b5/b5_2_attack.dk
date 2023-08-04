@@ -1,0 +1,20 @@
+let health = 3500 * bossHealthMulti;
+let numAttacksBeforeMove = 3;
+let timeBetweenAttacks = 103;
+let timeBeforeMove = 150;
+let timeAfterMove = 50;
+let rLow = 25.0;
+let rHigh = 35.0;
+let maxSpeed = 0.6;
+
+setHealth(health);
+
+while(true){
+    for(let i = 0; i < numAttacksBeforeMove; i = i + 1){
+        addSpawn("b5_2_shot1");
+        timer(timeBetweenAttacks);
+    }
+    timer(timeBeforeMove);
+    boundGotoDecelerating(bossXLow, bossXHigh, bossYLow, bossYHigh, rLow, rHigh, maxSpeed);
+    timer(timeAfterMove);
+}
