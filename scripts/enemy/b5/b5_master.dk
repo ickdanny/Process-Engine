@@ -6,6 +6,8 @@ showDialogue("5_1");
 stallUntil(isDialogueOver);
 setCollidable();
 
+#timer(120 - trapLifetime);
+#
 #addSpawn("b5_1_attack"); # pentagram sharps
 #stallUntil(isBossDead);
 #clearSpawns();
@@ -15,48 +17,50 @@ setCollidable();
 #
 #gotoDecelerating(bossMidpoint, 0.8);
 #timer(50);
-addSpawn("b5_2_attack"); # homing coals
+#addSpawn("b5_2_attack"); # homing coals
+#stallUntil(isBossDead);
+#clearSpawns();
+#stall();
+#setVelocity(zeroPolar);
+#clearBullets();
+#addSpawn("largePower");
+#
+#gotoDecelerating(bossMidpoint, 0.8);
+#timer(50);
+#addSpawn("b5_3_attack"); # twin pentagrams + orange columns
+#stallUntil(isBossDead);
+#clearSpawns();
+#stall();
+#setVelocity(zeroPolar);
+#clearBullets();
+#
+#timer(20);
+#addSpawn("b5_4_attack"); # triangle trail
+#stallUntil(isBossDead);
+#clearSpawns();
+#stall();
+#setVelocity(zeroPolar);
+#clearBullets();
+#addSpawn("largePower");
+#
+#gotoDecelerating(bossMidpoint, 0.8);
+#timer(50);
+#addSpawn("b5_5_attack"); # moving traps -> rings
+#stallUntil(isBossDead);
+#clearSpawns();
+#stall();
+#setVelocity(zeroPolar);
+#clearBullets();
+#
+#gotoDecelerating(bossMidpoint, 0.8);
+#timer(50);
+addSpawn("b5_6_attack"); # counter spirals into columns static
 stallUntil(isBossDead);
 clearSpawns();
 stall();
 setVelocity(zeroPolar);
 clearBullets();
 addSpawn("largePower");
-
-timer(50);
-addSpawn("b4_3_attack"); # arc and windmill bounce
-stallUntil(isBossDead);
-clearSpawns();
-stall();
-setVelocity(zeroPolar);
-clearBullets();
-
-gotoDecelerating(bossMidpoint, 0.8);
-timer(50);
-addSpawn("b4_4_attack"); # big explode to walls
-stallUntil(isBossDead);
-clearSpawns();
-stall();
-setVelocity(zeroPolar);
-clearBullets();
-addSpawn("largePower");
-
-timer(50);
-addSpawn("b4_5_attack"); # bounce and gravity
-stallUntil(isBossDead);
-clearSpawns();
-stall();
-setVelocity(zeroPolar);
-clearBullets();
-
-gotoDecelerating(bossMidpoint, 0.8);
-timer(50);
-addSpawn("b4_6_attack"); # "columns" from top and large shower
-stallUntil(isBossDead);
-clearSpawns();
-stall();
-setVelocity(zeroPolar);
-clearBullets();
 
 gotoDecelerating(bossMidpoint, 0.8);
 timer(50);
@@ -77,6 +81,7 @@ clearSpawns();
 stall();
 setVelocity(zeroPolar);
 clearBullets();
+addSpawn("largePower");
 
 win();
 spawn("bossExplode", entityPosition(), zeroPolar);

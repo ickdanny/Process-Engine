@@ -1,0 +1,31 @@
+let tick = diff(25, 21, 17, 14);
+let sides = 3;
+let bullets = 2;
+let vertexSpeed = 1.0;
+let angle = randomAngle();
+let angleIncrement = 15.0 * phi;
+
+if(chance(0.5)){
+    angleIncrement = -angleIncrement;
+}
+
+let position;
+func spawnBullet(velocity){
+    spawn("smallDPurple", position, velocity, "b5_4_bullet2");
+}
+
+timer(random(0, tick / 2));
+
+while(true){
+    position = entityPosition();
+    polygon(makePolar(vertexSpeed, angle), sides, bullets, spawnBullet);
+    angle = angle + angleIncrement;
+    if(angle > 360.0){
+        angle = angle - 360.0;
+    }
+    else if(angle < 0.0){
+        angle = angle + 360.0;
+    }
+    timer(tick);
+}
+

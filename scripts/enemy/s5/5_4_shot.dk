@@ -25,7 +25,7 @@ func spawnBullet3(velocity){
     spawn("smallOrange", position, velocity);
 }
 func spawnBullet4(velocity){
-    spawn("smallYellow", position, velocity);
+    spawn("smallOrange", position, velocity);
 }
 
 for(let t = 0; t < maxTime; t = t + tick){

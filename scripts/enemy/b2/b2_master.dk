@@ -6,6 +6,8 @@ showDialogue("2_1");
 stallUntil(isDialogueOver);
 setCollidable();
 
+timer(80);
+
 addSpawn("b2_1_attack"); # plane 1
 stallUntil(isBossDead);
 clearSpawns();

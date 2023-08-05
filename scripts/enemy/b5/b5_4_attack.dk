@@ -1,0 +1,61 @@
+let health = 3800 * bossHealthMulti;
+
+let xOffset = getX(gameOffset);
+let yOffset = getY(gameOffset);
+let distX = 10.0;
+let distY = 20.0;
+let upperLeftCorner = makePoint(distX + xOffset, distY + yOffset);
+let upperRightCorner = makePoint(gameWidth - distX + xOffset, distY + yOffset);
+
+let distX2 = 60.0;
+let distY2 = 35.0;
+let insideLeftCorner = makePoint(distX2 + xOffset, distY2 + yOffset);
+let insideRightCorner = makePoint(gameWidth - distX2 + xOffset, distY2 + yOffset);
+
+let midY = 40.0;
+let middle = makePoint(gameWidth / 2.0 + xOffset, midY);
+
+let shootingSpeed = 0.75;
+let travelSpeed1 = 1.8;
+let travelSpeed2 = 1.4;
+let travelSpeed3 = 0.7;
+let waitTimeBeforeTravel = 2;
+let waitTimeBeforeShot2 = 30;
+let shot2Time = 150;
+let waitTimeAfter = 120;
+
+setHealth(health);
+
+while(true){
+    gotoDecelerating(upperLeftCorner, travelSpeed2);
+    addSpawn("b5_4_shot1");
+    gotoDecelerating(insideLeftCorner, shootingSpeed);
+    timer(waitTimeBeforeTravel);
+
+    gotoDecelerating(upperRightCorner, travelSpeed1);
+    addSpawn("b5_4_shot1");
+    gotoDecelerating(insideRightCorner, shootingSpeed);
+    timer(waitTimeBeforeTravel);
+
+    gotoDecelerating(middle, travelSpeed3);
+    timer(waitTimeBeforeShot2);
+    addSpawn("b5_4_shot2");
+    timer(shot2Time);
+    timer(waitTimeAfter);
+
+    gotoDecelerating(upperRightCorner, travelSpeed2);
+    addSpawn("b5_4_shot1");
+    gotoDecelerating(insideRightCorner, shootingSpeed);
+    timer(waitTimeBeforeTravel);
+
+    gotoDecelerating(upperLeftCorner, travelSpeed1);
+    addSpawn("b5_4_shot1");
+    gotoDecelerating(insideLeftCorner, shootingSpeed);
+    timer(waitTimeBeforeTravel);
+
+    gotoDecelerating(middle, travelSpeed3);
+    timer(waitTimeBeforeShot2);
+    addSpawn("b5_4_shot2");
+    timer(shot2Time);
+    timer(waitTimeAfter);
+}

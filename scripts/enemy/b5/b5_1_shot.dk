@@ -1,4 +1,4 @@
-let tick = diff(16, 16, 13, 13);
+let tick = diff(18, 18, 14, 14);
 let masterSymmetry = 5;
 let offsetDist = 44.8;
 let offsetAngle = 90.0;
@@ -8,13 +8,20 @@ let angleOffset1 = 18;
 let colCount1 = diff(1, 2, 2, 3);
 let colIncrement1 = 0.2;
 let speed2 = 0.93;
-let arcSymmetry2 = diff(1, 2, 4, 6);
+let arcSymmetry2 = diff(1, 2, 4, 5);
 let arcIncrement2 = 14.8;
 let speed3 = 1.35;
 let angleOffset3 = 0.0;
 let angleOffsetIncrement3 = 5 * phi;
 let maxAngleOffset3 = 135.0;
 let angleOffsetMaxDecrement3 = 270.0;
+
+# first, spawn 5 traps for visual purposes
+func spawnTrap(offset){
+    spawn("trap", entityPosition() + offset, zeroPolar, "doNothingTrapLifetime");
+}
+ring(makePolar(offsetDist, offsetAngle), masterSymmetry, spawnTrap);
+timer(trapLifetime);
 
 # part 1: red sharps
 let spawnPosition;

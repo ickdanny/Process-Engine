@@ -751,6 +751,35 @@ namespace process::game::systems{
 			DeathCommand{ DeathCommand::Commands::deathSpawn },
 			DeathSpawn{ ScriptList{} }
 		).heapClone());
+		add("slowTrap", EntityBuilder::makeVisiblePrototype(
+			SpriteInstruction{
+				spriteStorage.get(L"trap1")->sprite,
+				config::enemyBulletDepth - 1
+			},
+			game::AnimationList{
+				components::Animation {
+					{
+						L"trap1",
+						L"trap2",
+						L"trap3",
+						L"trap4",
+						L"trap5",
+						L"trap6",
+						L"trap7",
+						L"trap8",
+						L"trap9",
+						L"trap10",
+						L"trap11",
+						L"trap12"
+					},
+					false
+				},
+				6
+			},
+			SpriteSpin{ enemy::trapSpin / 2.0f },
+			DeathCommand{ DeathCommand::Commands::deathSpawn },
+			DeathSpawn{ ScriptList{} }
+		).heapClone());
 		add("automatonBlue", EntityBuilder::makeVisibleCollidablePrototype(
 			AABB{ enemy::automatonHitbox },
 			PlayerCollisions::Source{},

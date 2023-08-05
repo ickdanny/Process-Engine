@@ -6,6 +6,8 @@ showDialogue("3_1");
 stallUntil(isDialogueOver);
 setCollidable();
 
+timer(60);
+
 addSpawn("b3_1_attack"); # rotating squares top
 stallUntil(isBossDead);
 clearSpawns();

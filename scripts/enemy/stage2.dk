@@ -23,8 +23,7 @@ addSpawn("2_12_spawner");# wave 12 = crystal row + bat lights
 timer(1040);
 addSpawn("2_13_spawner");# wave 13 = bunch of clouds
 
-timer(1200);
-timer(60);
+timer(1260);
 clearBullets();
 spawn("boss2", getTopSpawnRight(41.4), zeroPolar, "b2_master");
 

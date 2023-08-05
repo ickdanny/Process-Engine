@@ -1,0 +1,14 @@
+let symmetry = diff(6, 8, 10, 12);
+let speed = 0.186;
+let angle = randomAngle();
+
+timer(slowTrapLifetime);
+
+let position = entityPosition();
+func spawnBullet(velocity){
+    spawn("largeBlack", position, velocity);
+}
+
+ring(makePolar(speed, angle), symmetry, spawnBullet);
+
+die();

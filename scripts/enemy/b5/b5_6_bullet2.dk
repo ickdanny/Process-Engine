@@ -1,0 +1,7 @@
+let slowTime = 90;
+let waitTime = 20;
+let finalSpeed = 1.05;
+
+shiftSpeedPeriod(0.0, slowTime);
+timer(waitTime);
+setVelocity(makePolar(finalSpeed, angleToPlayer()));

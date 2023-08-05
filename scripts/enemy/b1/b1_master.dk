@@ -6,6 +6,8 @@ showDialogue("1_1");
 stallUntil(isDialogueOver);
 setCollidable();
 
+timer(28);
+
 addSpawn("b1_1_attack"); # grenades + dual curving spiral
 stallUntil(isBossDead);
 clearSpawns();

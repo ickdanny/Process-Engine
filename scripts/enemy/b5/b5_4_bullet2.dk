@@ -1,0 +1,16 @@
+let slowTime = 20;
+let waitTime = 100;
+let speed = entitySpeed();
+let speedTime = 67;
+let maxY = gameHeight + 10.0 + getY(gameOffset);
+
+shiftSpeedPeriod(0.0, slowTime);
+
+if(entityY() > maxY){
+    removeEntity();
+}
+
+setSpeed(0.0);
+
+timer(waitTime);
+shiftSpeedPeriod(-speed, speedTime);

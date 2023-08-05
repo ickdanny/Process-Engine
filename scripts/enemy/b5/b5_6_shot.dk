@@ -1,0 +1,51 @@
+let symmetry = 3;
+let tick = 90;
+let maxSpeed = 4.5;
+let colCount = diff(4, 5, 6, 7);
+let minSpeed = maxSpeed / colCount;
+let colIncrement = (maxSpeed - minSpeed) / colCount;
+let angle1 = 60.0;
+let angle2 = 0.0;
+let angleIncrement1 = 10.0 * phi;
+let angleIncrement2 = -angleIncrement1;
+
+let bullet2InitSpeed = 1.45;
+
+let position = entityPosition();
+func spawnBullet(velocity){
+    spawn("mediumBlack", position, velocity, "b5_6_bullet1");
+}
+
+func spawnColumn(baseVelocity){
+    column(baseVelocity, colCount, colIncrement, spawnBullet);
+}
+
+func step(){
+    angle1 = angle1 + angleIncrement1;
+    angle2 = angle2 + angleIncrement2;
+    if(angle1 > 360.0){
+        angle1 = angle1 - 360.0;
+    }
+    else if(angle1 < 0.0){
+        angle1 = angle1 + 360.0;
+    }
+    if(angle2 > 360.0){
+        angle2 = angle2 - 360.0;
+    }
+    else if(angle2 < 0.0){
+        angle2 = angle2 + 360.0;
+    }
+}
+
+func spawnBullet2(velocity){
+    spawn("smallOrange", position, velocity, "b5_6_bullet2");
+}
+
+while(true){
+    ring(makePolar(minSpeed, angle1), symmetry, spawnColumn);
+    ring(makePolar(minSpeed, angle2), symmetry, spawnColumn);
+    spawnBullet2(makePolar(bullet2InitSpeed, 0.0));
+    spawnBullet2(makePolar(bullet2InitSpeed, 180.0));
+    step();
+    timer(tick);
+}

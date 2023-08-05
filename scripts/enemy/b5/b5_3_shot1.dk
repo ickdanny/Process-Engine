@@ -1,0 +1,67 @@
+let tick = diff(25, 20, 20, 15);
+let masterSymmetry = 5;
+let offsetDist = 34.8;
+let offsetAngle1 = 90.0;
+let offsetAngle2 = 90.0;
+let offsetAngleIncrement1 = 7.0 * phi;
+let offsetAngleIncrement2 = -offsetAngleIncrement1;
+let speedLow = 0.75;
+let angleOffset = 18;
+let colCount = diff(1, 1, 2, 2);
+let colIncrement = 0.3;
+let distX = 40.0;
+let centerX1 = distX + getX(gameOffset);
+let centerX2 = gameWidth - distX + getX(gameOffset);
+let y = 45.0 + getY(gameOffset);
+let center1 = makePoint(centerX1, y);
+let center2 = makePoint(centerX2, y);
+
+# first, spawn traps for visual purposes
+let center;
+func spawnTrap(offset){
+    spawn("trap", center + offset, zeroPolar, "doNothingTrapLifetime");
+}
+center = center1;
+ring(makePolar(offsetDist, offsetAngle1), masterSymmetry, spawnTrap);
+center = center2;
+ring(makePolar(offsetDist, offsetAngle2), masterSymmetry, spawnTrap);
+timer(trapLifetime);
+
+let spawnPosition;
+func spawnBullet(velocity){
+    spawn("sharpLRed", spawnPosition, velocity);
+}
+
+func spawnColumn(baseVelocity){
+    column(baseVelocity, colCount, colIncrement, spawnBullet);
+}
+
+let position;
+func spawningPoint(offset){
+    spawnPosition = position + offset;
+    let angleFromBoss = getTheta(offset);
+    let angleToBoss = angleFromBoss + 180.0;
+    spawnColumn(makePolar(speedLow, angleToBoss + angleOffset));
+    spawnColumn(makePolar(speedLow, angleToBoss - angleOffset));
+}
+
+func step(){
+    offsetAngle1 = offsetAngle1 + offsetAngleIncrement1;
+    if(offsetAngle1 > 360.0){
+        offsetAngle1 = offsetAngle1 - 360.0;
+    }
+    offsetAngle2 = offsetAngle2 + offsetAngleIncrement2;
+    if(offsetAngle2 < 0.0){
+        offsetAngle2 = offsetAngle2 + 360.0;
+    }
+}
+
+while(true){
+    position = center1;
+    ring(makePolar(offsetDist, offsetAngle1), masterSymmetry, spawningPoint);
+    position = center2;
+    ring(makePolar(offsetDist, offsetAngle2), masterSymmetry, spawningPoint);
+
+    step();
+    timer(tick);
+}

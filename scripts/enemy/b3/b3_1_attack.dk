@@ -1,4 +1,4 @@
-let health = 3300 * bossHealthMulti;
+let health = 2300 * bossHealthMulti;
 let shotTime = 35 * 8;
 let timeBeforeMove = 42;
 let timeAfterMove = 34;

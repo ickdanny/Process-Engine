@@ -1,4 +1,4 @@
-let health = 3500 * bossHealthMulti;
+let health = 2800 * bossHealthMulti;
 let numAttacksBeforeMove = 3;
 let timeBetweenAttacks = 103;
 let timeBeforeMove = 150;

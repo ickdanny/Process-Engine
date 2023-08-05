@@ -1,0 +1,38 @@
+let maxTime = 150;
+let tick = 30;
+let arcSymmetryHighDown = diff(9, 11, 13, 15);
+let arcSymmetryLowDown = arcSymmetryHighDown - 1;
+let totalArcDown = 120.0;
+let arcIncrementDown = totalArcDown / arcSymmetryHighDown;
+let speedDown = 0.9;
+let arcSymmetryHighUp = arcSymmetryHighDown + 10;
+let arcSymmetryLowUp = arcSymmetryHighUp - 1;
+let totalArcUp = 360.0 - totalArcDown;
+let arcIncrementUp = totalArcUp / arcSymmetryHighUp;
+let speedUp = 2.0;
+
+let position = entityPosition();
+func spawnBullet(velocity){
+    spawn("mediumLRed", position, velocity);
+}
+
+let baseVelocityDown = makePolar(speedDown, -90.0);
+let baseVelocityUp = makePolar(speedUp, 90.0);
+
+let typeBool = false;
+let arcSymmetryDown;
+let arcSymmetryUp;
+for(let t = 0; t < maxTime; t = t + tick){
+    if(typeBool){
+        arcSymmetryDown = arcSymmetryHighDown;
+        arcSymmetryUp = arcSymmetryHighUp;
+    }
+    else{
+        arcSymmetryDown = arcSymmetryLowDown;
+        arcSymmetryUp = arcSymmetryLowUp;
+    }
+    typeBool = !typeBool;
+    arc(baseVelocityDown, arcSymmetryDown, arcIncrementDown, spawnBullet);
+    arc(baseVelocityUp, arcSymmetryUp, arcIncrementUp, spawnBullet);
+    timer(tick);
+}

@@ -1,0 +1,13 @@
+let speed = 2.05;
+let symmetry = 3;
+let tick = 30;
+let numSpawns = 3;
+
+func spawnBullet(velocity){
+    spawn("mediumBlack", entityPosition(), velocity, "b5_4_bullet1");
+}
+
+for(let i = 0; i < numSpawns; i = i + 1){
+    ring(makePolar(speed, -90.0), symmetry, spawnBullet);
+    timer(tick);
+}

@@ -23,6 +23,7 @@ namespace process::game::systems {
 		constexpr float bossHealthGlobalMultiplier{ 0.93f };
 		
 		constexpr int trapLifetime{ 36 };
+		constexpr int slowTrapLifetime{ trapLifetime * 2 };
 		constexpr int crystalEmergeLifetime{ 35 };
 		constexpr int timeBeforePostDialogue{ 80 };
 	}
@@ -63,6 +64,7 @@ namespace process::game::systems {
 		addNativeVariable("bossHealthMulti", bossHealthGlobalMultiplier);
 		addNativeVariable("timeBeforePostDialogue", timeBeforePostDialogue);
 		addNativeVariable("trapLifetime", trapLifetime);
+		addNativeVariable("slowTrapLifetime", slowTrapLifetime);
 		addNativeVariable("crystalEmergeLifetime", crystalEmergeLifetime);
 		addNativeVariable("pi", wasp::math::pi);
 		addNativeVariable("phi", wasp::math::phi);

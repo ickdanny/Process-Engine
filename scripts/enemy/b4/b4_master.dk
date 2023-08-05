@@ -6,6 +6,8 @@ showDialogue("4_1");
 stallUntil(isDialogueOver);
 setCollidable();
 
+timer(60);
+
 addSpawn("b4_1_attack"); # rings of bounce
 stallUntil(isBossDead);
 clearSpawns();
@@ -57,6 +59,7 @@ clearSpawns();
 stall();
 setVelocity(zeroPolar);
 clearBullets();
+addSpawn("largePower");
 
 gotoDecelerating(bossMidpoint, 0.8);
 timer(50);
