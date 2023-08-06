@@ -1,0 +1,37 @@
+let health = 3800 * bossHealthMulti;
+
+let initWaitTime = 150;
+let timeBetweenShots = 50;
+let timeBeforeMove = 120;
+let timeAfterMove = 60;
+let rLow = 15.0;
+let rHigh = 20.0;
+let maxSpeed = 0.4;
+let xBound = 29.4;
+let xLow = bossXLow + xBound;
+let xHigh = bossXHigh - xBound;
+
+setHealth(health);
+addSpawn("b5_7_shot1");
+timer(initWaitTime);
+
+while(true){
+    addSpawn("b5_7_shot2");
+    timer(timeBetweenShots);
+    addSpawn("b5_7_shot3");
+    timer(timeBeforeMove);
+    boundGotoDecelerating(xLow, xHigh, bossYLow, bossYHigh - 15.0, rLow, rHigh, maxSpeed);
+    timer(timeAfterMove);
+
+    addSpawn("b5_7_shot2");
+    timer(timeBetweenShots);
+    addSpawn("b5_7_shot3");
+    timer(timeBeforeMove);
+    boundGotoDecelerating(xLow, xHigh, bossYLow, bossYHigh - 15.0, rLow, rHigh, maxSpeed);
+    timer(timeAfterMove);
+
+    addSpawn("b5_7_shot4");
+    timer(timeBetweenShots + timeBeforeMove);
+    boundGotoDecelerating(xLow, xHigh, bossYLow, bossYHigh - 15.0, rLow, rHigh, maxSpeed);
+    timer(timeAfterMove);
+}

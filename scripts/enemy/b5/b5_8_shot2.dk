@@ -1,0 +1,18 @@
+let tick = diff(50, 50, 40, 40);
+let symmetry = diff(10, 14, 18, 22);
+let speed = 0.6;
+
+let position = entityPosition();
+func spawnBullet1(velocity){
+    spawn("mediumDRed", position, velocity, "b5_8_bullet1");
+}
+func spawnBullet2(velocity){
+    spawn("mediumDRed", position, velocity, "b5_8_bullet2");
+}
+
+while(true){
+    ring(makePolar(speed, randomAngle()), symmetry, spawnBullet1);
+    timer(tick);
+    ring(makePolar(speed, randomAngle()), symmetry, spawnBullet2);
+    timer(tick);
+}

@@ -1,0 +1,21 @@
+let tick = diff(4, 3, 2, 1);
+let chanceToSpawnExtraBullet = diff(0.0, 0.0, 0.5, 0.0);
+let y = getY(gameOffset) - 9.0;
+let xOffset = getX(gameOffset);
+let speedLow = 0.6;
+let speedHigh = speedLow * 2.0;
+let angleRand = 5.0;
+
+func spawnBullet(){
+    let position = makePoint(xOffset + random(0.0, gameWidth), y);
+    let velocity = makePolar(random(speedLow, speedHigh), -90.0 + random(-angleRand, angleRand));
+    spawn("sharpDGray", position, velocity, "b5_7_bullet1");
+}
+
+while(true){
+    spawnBullet();
+    if(chance(chanceToSpawnExtraBullet)){
+        spawnBullet();
+    }
+    timer(tick);
+}

@@ -1,4 +1,4 @@
-let health = 3500 * bossHealthMulti;
+let health = 3000 * bossHealthMulti;
 let timeBeforeMove = 3;
 let timeAfterMove = 14;
 let rLow = 20.0;

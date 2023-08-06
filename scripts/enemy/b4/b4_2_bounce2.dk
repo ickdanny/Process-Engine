@@ -1,4 +1,4 @@
-let symmetry = diff(12, 15, 18, 21) + 1;
+let symmetry = diff(11, 14, 18, 22);
 let symmetryDecrement = 3;
 let initSpeed = symmetry * 0.068;
 let initSpeedDecrement = 0.1;
@@ -10,7 +10,7 @@ func spawnBullet(velocity){
 }
 
 func spawnRing(){
-    if(symmetry > 2 & entityY() < yHigh){
+    if(symmetry > 0 & entityY() < yHigh){
         position = entityPosition();
         ring(makePolar(initSpeed, randomAngle()), symmetry, spawnBullet);
         symmetry = symmetry - symmetryDecrement;

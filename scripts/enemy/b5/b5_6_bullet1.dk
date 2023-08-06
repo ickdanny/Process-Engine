@@ -1,10 +1,9 @@
 let slowTime = 90;
 let waitTime = 30;
 let shootTime = 30;
-let speedTime = 90;
-let finalSpeed = entitySpeed();
+let finalWaitTime = 66;
 
-let bulletSpeed = 1.1;
+let bulletSpeed = diff(0.7, 0.8, 0.9, 1.0);
 let tick = diff(15, 15, 10, 10);
 
 shiftSpeedPeriod(0.0, slowTime);
@@ -22,5 +21,5 @@ for(let t = 0; t < shootTime; t = t + tick){
     timer(tick);
 }
 
-timer(waitTime);
-shiftSpeedPeriod(finalSpeed, speedTime);
+timer(finalWaitTime);
+die();

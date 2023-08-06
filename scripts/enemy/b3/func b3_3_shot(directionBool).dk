@@ -7,7 +7,7 @@ let vertexSpeedDecrement = 0.25;
 let baseAngle = -90.0;
 let angleIncrement = 18.75;
 let numShots = 7;
-let initBullets = diff(5, 6, 7, 8);
+let initBullets = diff(4, 5, 7, 8);
 let bulletIncrement = 1;
 
 if(!directionBool){
@@ -22,9 +22,11 @@ func spawnBullet2(velocity){
     spawn("sharpYellow", position, velocity, "b3_3_bullet2");
 }
 
+let difficulty = getDifficulty();
 let angle = baseAngle;
 let bullets = initBullets;
 let spawnFuncBool = directionBool;
+let easyBool = false;
 for(let i = 0; i < numShots; i = i + 1){
     if(spawnFuncBool){
         polygon(makePolar(vertexSpeed, angle), sides, bullets, spawnBullet1);
@@ -34,7 +36,10 @@ for(let i = 0; i < numShots; i = i + 1){
     }
     angle = angle + angleIncrement;
     vertexSpeed = vertexSpeed - vertexSpeedDecrement;
-    bullets = bullets + bulletIncrement;
+    if(difficulty > 1 | easyBool){
+        bullets = bullets + bulletIncrement;
+    }
     spawnFuncBool = !spawnFuncBool;
+    easyBool = !easyBool;
     timer(tick);
 }

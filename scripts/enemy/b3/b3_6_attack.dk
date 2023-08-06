@@ -1,4 +1,4 @@
-let health = 4750 * bossHealthMulti;
+let health = 4450 * bossHealthMulti;
 
 let symmetry = diff(5, 5, 6, 6);
 let speed = 1.1;

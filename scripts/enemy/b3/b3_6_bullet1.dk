@@ -1,9 +1,9 @@
 let lifetime = diff(55, 49, 49, 43); #from normal -> hard increases sym by 1
-let spawnChildrenSpeedCutoff = 0.15;
+let spawnChildrenSpeedCutoff = diff(0.22, 0.22, 0.15, 0.15);
 let childSpeedMulti = 0.72;
 let childAngleOffset = 28.3;
 let backBulletSpeed = 0.1;
-let spawnBackSpeedCutoff = 0.35;
+let spawnBackSpeedCutoff = diff(0.48, 0.48, 0.35, 0.35);
 let activeColor = "LGreen";
 let inactiveColor = "DGreen";
 

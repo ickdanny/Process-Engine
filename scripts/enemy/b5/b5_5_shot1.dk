@@ -1,0 +1,18 @@
+let dist = pointDist(entityPosition(), getPlayerPos());
+let speed = dist / slowTrapLifetime;
+let sideSpeed = speed * 0.75;
+let angleOffset = 25.0;
+
+let position = entityPosition();
+func spawnTrap1(velocity){
+    spawn("slowTrap", position, velocity, "b5_5_trapLifetime1");
+}
+
+func spawnTrap2(velocity){
+    spawn("slowTrap", position, velocity, "b5_5_trapLifetime2");
+}
+
+let baseAngle = angleToPlayer();
+spawnTrap1(makePolar(speed, baseAngle));
+spawnTrap2(makePolar(sideSpeed, baseAngle + angleOffset));
+spawnTrap2(makePolar(sideSpeed, baseAngle - angleOffset));

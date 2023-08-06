@@ -1,15 +1,15 @@
 let symmetry = 3;
-let tick = 90;
+let tick = diff(110, 110, 100, 100);
 let maxSpeed = 4.5;
 let colCount = diff(4, 5, 6, 7);
 let minSpeed = maxSpeed / colCount;
 let colIncrement = (maxSpeed - minSpeed) / colCount;
 let angle1 = 60.0;
 let angle2 = 0.0;
-let angleIncrement1 = 10.0 * phi;
+let angleIncrement1 = 5.0 * phi;
 let angleIncrement2 = -angleIncrement1;
 
-let bullet2InitSpeed = 1.45;
+let bullet2InitSpeed = diff(0.6, 0.8, 1.0, 1.2);
 
 let position = entityPosition();
 func spawnBullet(velocity){

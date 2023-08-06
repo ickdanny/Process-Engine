@@ -1,7 +1,7 @@
-let tick = diff(25, 21, 17, 14);
+let tick = diff(31, 24, 19, 15);
 let sides = 3;
 let bullets = 2;
-let vertexSpeed = 1.0;
+let vertexSpeed = diff(0.6, 0.68, 0.76, 0.84);
 let angle = randomAngle();
 let angleIncrement = 15.0 * phi;
 

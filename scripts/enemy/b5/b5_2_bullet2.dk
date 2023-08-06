@@ -1,6 +1,6 @@
 let waitTime = 40;
 let accelTime = 40;
-let roughFinalSpeed = 1.0;
+let roughFinalSpeed = diff(0.7, 0.8, 0.9, 1.0);
 let accelPolar = makePolar(roughFinalSpeed / accelTime, randomAngle());
 
 timer(waitTime);

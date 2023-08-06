@@ -1,4 +1,4 @@
-let symmetry = diff(8, 11, 14, 17);
+let symmetry = diff(0, 0, 8, 16);
 let speed = 0.3;
 let angle = angleToPlayer();
 
@@ -7,4 +7,7 @@ func spawnBullet(velocity){
     spawn("mediumYellow", position, velocity);
 }
 
-ring(makePolar(speed, angle), symmetry, spawnBullet);
+let difficulty = getDifficulty();
+if(difficulty >= 2){
+    ring(makePolar(speed, angle), symmetry, spawnBullet);
+}

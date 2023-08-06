@@ -1,0 +1,18 @@
+# func b5_7_largeShot(directionBool)
+
+let initSpeedLow = diff(1.1, 1.3, 1.5, 1.7);
+let initSpeedHigh = initSpeedLow + 0.3;
+let angleRand = 5.0;
+
+let position = entityPosition();
+func spawnBullet(velocity){
+    spawn("largeLRed", position, velocity, "b5_7_bullet2");
+}
+
+let initSpeed = random(initSpeedLow, initSpeedHigh);
+let angle = random(-angleRand, angleRand);
+if(directionBool){
+    angle = angle + 180.0;
+}
+
+spawnBullet(makePolar(initSpeed, angle));

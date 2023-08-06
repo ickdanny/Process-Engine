@@ -1,6 +1,6 @@
 let maxTime = 150;
 let tick = 30;
-let arcSymmetryHighDown = diff(9, 11, 13, 15);
+let arcSymmetryHighDown = diff(6, 9, 12, 15);
 let arcSymmetryLowDown = arcSymmetryHighDown - 1;
 let totalArcDown = 120.0;
 let arcIncrementDown = totalArcDown / arcSymmetryHighDown;

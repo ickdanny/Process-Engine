@@ -42,6 +42,8 @@ namespace process::game::systems{
 			resources::SpriteStorage& spriteStorage
 		);
 		
+		void addCreditsPrototypes(resources::SpriteStorage& spriteStorage);
+		
 		void addEnemyProjectile(
 			resources::ScriptStorage& scriptStorage,
 			resources::SpriteStorage& spriteStorage,

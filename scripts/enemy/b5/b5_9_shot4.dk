@@ -1,0 +1,29 @@
+let tick = diff(70, 52, 40, 32);
+let symmetry = 3;
+let sides = 3;
+let bullets = 2;
+let vertexOffsetDist = 23.0;
+let bulletSpeed = 0.6;
+let angle = angleToPlayer();
+let angleIncrement = -tick * 0.5 * phi;
+
+let position;
+let bulletVelocity;
+func spawnBullet(offset){
+    spawn("smallYellow", position + offset, bulletVelocity);
+}
+
+func spawnPolygon(vertexOffset){
+    bulletVelocity = setR(vertexOffset, bulletSpeed);
+    polygon(vertexOffset, sides, bullets, spawnBullet);
+}
+
+while(true){
+    position = entityPosition();
+    ring(makePolar(vertexOffsetDist, angle), symmetry, spawnPolygon);
+    angle = angle + angleIncrement;
+    if(angle < 0.0){
+        angle = angle + 360.0;
+    }
+    timer(tick);
+}

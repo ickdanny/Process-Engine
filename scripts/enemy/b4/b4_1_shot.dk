@@ -1,5 +1,5 @@
 let tick = 87;
-let symmetry = diff(13, 19, 19, 26);
+let symmetry = diff(13, 19, 19, 24);
 let colCount = diff(2, 2, 3, 3);
 let speedLow = diff(0.5, 0.5, 0.4, 0.4);
 let speedIncrement = diff(0.2, 0.2, 0.15, 0.15);

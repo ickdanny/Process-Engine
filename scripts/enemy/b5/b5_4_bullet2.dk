@@ -1,4 +1,4 @@
-let slowTime = 20;
+let slowTime = 23;
 let waitTime = 100;
 let speed = entitySpeed();
 let speedTime = 67;

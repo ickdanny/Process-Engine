@@ -1,0 +1,46 @@
+let tick = diff(15, 12, 10, 8);
+let symmetry = 5;
+let offsetDist = diff(45.0, 50.0, 55.0, 60.0);
+let offsetAngle = 90.0;
+let offsetAngleIncrement = -0.7 * phi * 0.2 * tick;
+let speedLow = 0.1;
+let speedHigh = 1.3;
+let angleOffset = 18;
+
+let position = entityPosition();
+
+# first, spawn 5 traps for visual purposes
+func spawnTrap(offset){
+    spawn("trap", entityPosition() + offset, zeroPolar, "doNothingTrapLifetime");
+}
+ring(makePolar(offsetDist, offsetAngle), symmetry, spawnTrap);
+timer(trapLifetime);
+
+let spawnPosition;
+func spawnBullet(velocity){
+    spawn("smallLRed", spawnPosition, velocity);
+}
+
+func spawningPoint(offset){
+    spawnPosition = position + offset;
+    let angleFromBoss = getTheta(offset);
+    let angleToBoss = angleFromBoss + 180.0;
+    spawnBullet(makePolar(random(speedLow, speedHigh), angleToBoss + angleOffset));
+    spawnBullet(makePolar(random(speedLow, speedHigh), angleToBoss - angleOffset));
+}
+
+func step(){
+    offsetAngle = offsetAngle + offsetAngleIncrement;
+    if(offsetAngle > 360.0){
+        offsetAngle = offsetAngle - 360.0;
+    }
+    else if(offsetAngle < 0.0){
+        offsetAngle = offsetAngle + 360.0;
+    }
+}
+
+while(true){
+    ring(makePolar(offsetDist, offsetAngle), symmetry, spawningPoint);
+    step();
+    timer(tick);
+}

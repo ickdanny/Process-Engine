@@ -3,7 +3,7 @@
 namespace process::game::systems {
 
 	namespace {
-		constexpr int waitTime{ 60 * 40 };
+		constexpr int waitTime{ 60 * 43 };
 	}
 
 	CreditsSystem::CreditsSystem(wasp::channel::ChannelSet* globalChannelSetPointer)

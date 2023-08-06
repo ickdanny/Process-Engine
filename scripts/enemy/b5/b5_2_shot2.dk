@@ -1,4 +1,4 @@
-let tick = diff(13, 10, 8, 6);
+let tick = diff(15, 12, 9, 7);
 let offsetMax = 10.0;
 let initSpeed = 0.1;
 let initAngle = 90.0;

@@ -1,0 +1,10 @@
+let midPoint = makePoint(320.0 / 2.0, 240.0 / 2.0);
+let gotoSpeed = 1.5;
+let waitTime = 70;
+let finalSpeed = 2.0;
+let speedTime = 60;
+
+gotoDecelerating(midPoint, gotoSpeed);
+timer(waitTime);
+setAngle(90.0);
+shiftSpeedPeriod(finalSpeed, speedTime);

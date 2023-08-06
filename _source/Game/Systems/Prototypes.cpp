@@ -89,6 +89,7 @@ namespace process::game::systems{
 		addPlayerPrototypes(scriptStorage, spriteStorage);
 		addPickupPrototypes(scriptStorage, spriteStorage);
 		addEnemyPrototypes(scriptStorage, spriteStorage);
+		addCreditsPrototypes(spriteStorage);
 	}
 	
 	void Prototypes::addPlayerPrototypes(
@@ -1174,5 +1175,56 @@ namespace process::game::systems{
 			throw std::runtime_error{ "try to add pre-existing prototypeID: " + prototypeID };
 		}
 		prototypeMap[prototypeID] = prototypePointer;
+	}
+	
+	void Prototypes::addCreditsPrototypes(resources::SpriteStorage& spriteStorage) {
+		add("credits1", EntityBuilder::makeVisiblePrototype(
+			SpriteInstruction{
+				spriteStorage.get(L"credits1")->sprite,
+				config::playerDepth
+			}
+		).heapClone());
+		add("credits2", EntityBuilder::makeVisiblePrototype(
+			SpriteInstruction{
+				spriteStorage.get(L"credits2")->sprite,
+				config::playerDepth
+			}
+		).heapClone());
+		add("credits3", EntityBuilder::makeVisiblePrototype(
+			SpriteInstruction{
+				spriteStorage.get(L"credits3")->sprite,
+				config::playerDepth
+			}
+		).heapClone());
+		add("credits4", EntityBuilder::makeVisiblePrototype(
+			SpriteInstruction{
+				spriteStorage.get(L"credits4")->sprite,
+				config::playerDepth
+			}
+		).heapClone());
+		add("credits5", EntityBuilder::makeVisiblePrototype(
+			SpriteInstruction{
+				spriteStorage.get(L"credits5")->sprite,
+				config::playerDepth
+			}
+		).heapClone());
+		add("credits6", EntityBuilder::makeVisiblePrototype(
+			SpriteInstruction{
+				spriteStorage.get(L"credits6")->sprite,
+				config::playerDepth
+			}
+		).heapClone());
+		add("credits7", EntityBuilder::makeVisiblePrototype(
+			SpriteInstruction{
+				spriteStorage.get(L"credits7")->sprite,
+				config::playerDepth
+			}
+		).heapClone());
+		add("credits8", EntityBuilder::makeVisiblePrototype(
+			SpriteInstruction{
+				spriteStorage.get(L"credits8")->sprite,
+				config::playerDepth
+			}
+		).heapClone());
 	}
 }

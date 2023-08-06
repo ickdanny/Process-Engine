@@ -1,0 +1,9 @@
+let symmetry = diff(8, 12, 16, 20);
+let speed = 0.386;
+
+let position = entityPosition();
+func spawnBullet(velocity){
+    spawn("smallLRed", position, velocity);
+}
+
+ring(makePolar(speed, angleToPlayer()), symmetry, spawnBullet);

@@ -6,55 +6,18 @@ showDialogue("5_1");
 stallUntil(isDialogueOver);
 setCollidable();
 
-#timer(120 - trapLifetime);
-#
-#addSpawn("b5_1_attack"); # pentagram sharps
-#stallUntil(isBossDead);
-#clearSpawns();
-#stall();
-#setVelocity(zeroPolar);
-#clearBullets();
-#
-#gotoDecelerating(bossMidpoint, 0.8);
-#timer(50);
-#addSpawn("b5_2_attack"); # homing coals
-#stallUntil(isBossDead);
-#clearSpawns();
-#stall();
-#setVelocity(zeroPolar);
-#clearBullets();
-#addSpawn("largePower");
-#
-#gotoDecelerating(bossMidpoint, 0.8);
-#timer(50);
-#addSpawn("b5_3_attack"); # twin pentagrams + orange columns
-#stallUntil(isBossDead);
-#clearSpawns();
-#stall();
-#setVelocity(zeroPolar);
-#clearBullets();
-#
-#timer(20);
-#addSpawn("b5_4_attack"); # triangle trail
-#stallUntil(isBossDead);
-#clearSpawns();
-#stall();
-#setVelocity(zeroPolar);
-#clearBullets();
-#addSpawn("largePower");
-#
-#gotoDecelerating(bossMidpoint, 0.8);
-#timer(50);
-#addSpawn("b5_5_attack"); # moving traps -> rings
-#stallUntil(isBossDead);
-#clearSpawns();
-#stall();
-#setVelocity(zeroPolar);
-#clearBullets();
-#
-#gotoDecelerating(bossMidpoint, 0.8);
-#timer(50);
-addSpawn("b5_6_attack"); # counter spirals into columns static
+timer(120 - trapLifetime);
+
+addSpawn("b5_1_attack"); # pentagram sharps
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+
+gotoDecelerating(bossMidpoint, 0.8);
+timer(50);
+addSpawn("b5_2_attack"); # homing coals
 stallUntil(isBossDead);
 clearSpawns();
 stall();
@@ -64,24 +27,67 @@ addSpawn("largePower");
 
 gotoDecelerating(bossMidpoint, 0.8);
 timer(50);
-addSpawn("b4_7_attack"); # embed -> walls
+addSpawn("b5_3_attack"); # twin pentagrams + orange columns
 stallUntil(isBossDead);
 clearSpawns();
 stall();
 setVelocity(zeroPolar);
 clearBullets();
 
-let oppositePlayerSpawn = makePoint(gameWidth / 2.0, 25.0) + gameOffset;
-gotoDecelerating(oppositePlayerSpawn, 0.8);
-timer(50);
-addSpawn("b4_8_attack"); # shadow player
+timer(40);
+addSpawn("b5_4_attack"); # triangle trail
 stallUntil(isBossDead);
-broadcast("killShadowPlayer");
 clearSpawns();
 stall();
 setVelocity(zeroPolar);
 clearBullets();
 addSpawn("largePower");
+
+gotoDecelerating(bossMidpoint, 0.8);
+timer(50);
+addSpawn("b5_5_attack"); # moving traps -> rings
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+
+gotoDecelerating(bossMidpoint, 0.8);
+timer(50);
+addSpawn("b5_6_attack"); # counter spirals into columns static + seeking small
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+addSpawn("largePower");
+
+timer(50);
+addSpawn("b5_7_attack"); # ash-fall
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+
+gotoDecelerating(makePoint(gameWidth / 2.0, gameHeight / 3.0) + gameOffset, 0.8);
+timer(40);
+addSpawn("b5_8_attack"); # mega random pentagram
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
+addSpawn("largePower");
+
+gotoDecelerating(bossMidpoint, 0.8);
+timer(60);
+addSpawn("b5_9_attack"); # final = random + fast
+stallUntil(isBossDead);
+clearSpawns();
+stall();
+setVelocity(zeroPolar);
+clearBullets();
 
 win();
 spawn("bossExplode", entityPosition(), zeroPolar);

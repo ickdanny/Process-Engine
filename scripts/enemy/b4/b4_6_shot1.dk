@@ -1,6 +1,6 @@
 let tick = 30;
 let timeBetweenSpawns = 3;
-let numSpawns = diff(6, 8, 10, 12);
+let numSpawns = diff(5, 7, 10, 12);
 let angle1 = diff(-45.0, -40.0, -35.0, -30.0);
 let angle2 = flipY(angle1);
 let speed = 1.0;

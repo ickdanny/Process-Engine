@@ -1,0 +1,11 @@
+let timeBetweenSpawns = 290;
+let spawnX = 320.0 / 2.0;
+let spawnY = 400.0;
+let spawnPoint = makePoint(spawnX, spawnY);
+
+for(let i = 1; i <= 7; i = i + 1){
+    spawn("credits" + i, spawnPoint, zeroPolar, "creditsN");
+    timer(timeBetweenSpawns);
+}
+
+spawn("credits8", spawnPoint, zeroPolar, "credits8");

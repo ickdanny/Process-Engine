@@ -556,7 +556,7 @@ namespace process::game::systems {
 		auto& dataStorage{ scene.getDataStorage() };
 		addBackground(dataStorage, L"background_menu_music");
 
-		constexpr wasp::math::Point2 initPos{ center.x, 50.0f };
+		constexpr wasp::math::Point2 initPos{ center.x, 52.0f };
 		constexpr wasp::math::Vector2 offset{ 0.0f, 14.0f };
 		constexpr wasp::math::Vector2 selOffset{ 0.0f, 0.0f };
 
@@ -1061,6 +1061,17 @@ namespace process::game::systems {
 	void InitSystem::initCredits(Scene& scene) const {
 		auto& dataStorage{ scene.getDataStorage() };
 		addBackground(dataStorage, L"background_credits");
+		
+		//adding the text spawner thing
+		ScriptList::value_type scriptContainer = {
+			scriptStoragePointer->get(L"credits"), "credits"
+		};
+		
+		dataStorage.addEntity(
+			EntityBuilder::makeEntity(
+				ScriptList{ scriptContainer }
+			).package()
+		);
 	}
 
 	void InitSystem::addBackground(

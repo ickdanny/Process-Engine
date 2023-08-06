@@ -1,4 +1,4 @@
-let health = 1650 * bossHealthMulti;
+let health = 1550 * bossHealthMulti;
 let initWaitTime = 35;
 let waitTime1 = 142;
 let waitTime2 = 121;

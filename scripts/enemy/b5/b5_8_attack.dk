@@ -1,0 +1,6 @@
+let health = 5300 * bossHealthMulti;
+
+setHealth(health);
+addSpawn("b5_8_shot1"); # pentagram
+timer(trapLifetime);
+addSpawn("b5_8_shot2"); # alternating turn rings

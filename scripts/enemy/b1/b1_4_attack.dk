@@ -1,4 +1,4 @@
-let health = 2800 * bossHealthMulti;
+let health = 2600 * bossHealthMulti;
 let initWaitTime = 42;
 let timeBetweenSpawns = 99;
 let baseAngle = angleToPlayer();

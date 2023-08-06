@@ -1,0 +1,16 @@
+let waitTime = 65;
+let speedTime = 50;
+let finalSpeed = entitySpeed();
+let angleRand = 5.0;
+let yBound = getY(gameOffset) + gameHeight;
+
+setSpecialCollisionTarget();
+stall();
+stallUntil(specialCollision);
+
+if(entityY() < yBound){
+    setVelocity(makePolar(0.0, angleToPlayer() + random(-angleRand, angleRand)));
+    setSprite("sharpLRed");
+    timer(waitTime);
+    shiftSpeedPeriod(finalSpeed, speedTime);
+}

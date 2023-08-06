@@ -1,6 +1,6 @@
 let maxTime = 200;
 let tick = 40;
-let symmetry = diff(6, 8, 10, 12);
+let symmetry = diff(5, 8, 10, 12);
 let speed = 0.513;
 let angleIncrement = 5.0 * phi;
 let bulletScriptID = "4_2_bullet2";

@@ -1,4 +1,4 @@
-let tick = diff(45, 35, 25, 20);
+let tick = diff(50, 40, 30, 21);
 let symmetry = 3;
 let offsetDist = 5.0;
 let initWaitTime = 30;

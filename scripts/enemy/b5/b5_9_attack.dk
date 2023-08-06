@@ -1,0 +1,46 @@
+let health = 10000 * bossHealthMulti;
+let timeBeforeMove = 200;
+let timeAfterMove = 20;
+let rLow = 15.0;
+let rHigh = 20.0;
+let maxSpeed = 0.3;
+let xBound = 25.0;
+let xLow = bossXLow + xBound;
+let xHigh = bossXHigh - xBound;
+let yHigh = bossYHigh - 15.0;
+
+setHealth(health);
+
+func onArrive(){
+    addSpawn("b5_9_shot2"); # orange whip columns
+}
+
+func goto(){
+    timer(timeBeforeMove);
+    boundGotoDecelerating(xLow, xHigh, bossYLow, bossYHigh - 15.0, rLow, rHigh, maxSpeed);
+    onArrive();
+    timer(timeAfterMove);
+}
+
+# introduce random sharps
+addSpawn("b5_9_shot1"); # random
+
+#introduce orange columns
+goto();
+
+goto();
+
+#introduce fast large spiral
+goto();
+timer(20);
+addSpawn("b5_9_shot3");
+
+goto();
+
+#introduce triangle spiral
+goto();
+addSpawn("b5_9_shot4"); # triangle spiral
+
+while(true){
+    goto();
+}

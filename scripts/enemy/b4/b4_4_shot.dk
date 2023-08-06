@@ -1,4 +1,4 @@
-let tick = 50;
+let tick = diff(65, 65, 55, 55);
 let symmetry = diff(3, 4, 5, 6);
 let initSpeed = 2.9;
 let angle = randomAngle();

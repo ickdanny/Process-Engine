@@ -1,0 +1,7 @@
+let slowTime = 50;
+let finalSpeed = 2.0;
+
+setSpecialCollisionSource();
+
+shiftSpeedPeriod(0.0, slowTime);
+setVelocity(makePolar(finalSpeed, angleToPlayer()));

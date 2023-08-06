@@ -11,4 +11,5 @@ addSpawn("b5_2_shot2");
 timer(timeAfterShot);
 
 setAngle(angleToPlayer());
+setSprite("largeLRed");
 shiftSpeedPeriod(finalSpeed, speedTime);

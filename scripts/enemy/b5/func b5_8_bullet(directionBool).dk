@@ -1,0 +1,12 @@
+# func b5_8_bullet(directionBool)
+
+let waitTime = 30;
+let turnAngle = diff(0.0, 10.0, 20.0, 30.0);
+let turnTime = 30;
+
+if(directionBool){
+    turnAngle = -turnAngle;
+}
+
+timer(waitTime);
+shiftAnglePeriod(entityAngle() + turnAngle, turnTime);

@@ -1,0 +1,30 @@
+let tick = 1;
+let numSpawnsPerTick = diff(2, 3, 3, 3);
+let chanceForExtraSpawn = diff(0.0, 0.0, 0.35, 0.7);
+let speedLow = 0.5;
+let speedHigh = speedLow + 0.01;
+let speedHighMax = 2.0;
+let speedHighIncrement = 0.05;
+
+func spawnBullet(velocity){
+    spawn("sharpLRed", entityPosition(), velocity);
+}
+
+let i;
+while(speedHigh < speedHighMax){
+    for(i = 0; i < numSpawnsPerTick; i = i + 1){
+        spawnBullet(makePolar(random(speedLow, speedHigh), randomAngle()));
+    }
+    if(chance(chanceForExtraSpawn)){
+        spawnBullet(makePolar(random(speedLow, speedHigh), randomAngle()));
+    }
+    speedHigh = speedHigh + speedHighIncrement;
+    timer(tick);
+}
+speedHigh = speedHighMax;
+while(true){
+    for(i = 0; i < numSpawnsPerTick; i = i + 1){
+        spawnBullet(makePolar(random(speedLow, speedHigh), randomAngle()));
+    }
+    timer(tick);
+}

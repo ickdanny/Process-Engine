@@ -1,0 +1,4 @@
+let midPoint = makePoint(320.0 / 2.0, 240.0 / 2.0);
+let gotoSpeed = 1.5;
+
+gotoDecelerating(midPoint, gotoSpeed);

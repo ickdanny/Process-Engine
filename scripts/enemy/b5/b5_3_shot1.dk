@@ -1,4 +1,4 @@
-let tick = diff(25, 20, 20, 15);
+let tick = diff(23, 20, 20, 17);
 let masterSymmetry = 5;
 let offsetDist = 34.8;
 let offsetAngle1 = 90.0;
