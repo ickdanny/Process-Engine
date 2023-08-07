@@ -1,3 +1,5 @@
+#Zephres Amonson
+
 gotoDecelerating(bossMidpoint, 1.4);
 clearBullets();
 isBossDead(); #use the side effect to clear the boss deaths channel just in case

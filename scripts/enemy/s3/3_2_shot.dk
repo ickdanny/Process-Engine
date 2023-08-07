@@ -1,7 +1,7 @@
 let maxTime = 36;
 let tick = diff(4, 3, 2, 1);
 let speedRand = 0.2;
-let speedHigh = 3.0;
+let speedHigh = diff(1.9, 2.3, 2.7, 3.0);
 let speedLow = 0.2;
 let angleRand = 5.0;
 

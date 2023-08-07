@@ -7,7 +7,7 @@ let arcIncrement = 35.8;
 let arcDist = 9.3;
 let superArcSymmetry = 3;
 let superArcIncrement = 90.0;
-let speed = diff(0.7, 0.8, 0.9, 1.0);
+let speed = diff(0.7, 0.8, 0.8, 0.9);
 let baseAngleRand = 1.0;
 func baseAngleFunc(){
     return entityAngle() + random(-baseAngleRand, baseAngleRand);
